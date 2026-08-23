@@ -7,6 +7,7 @@
 | | |
 |---|---|
 | [margelet.apk](https://github.com/narezany/margelet/raw/apk/margelet.apk) | всегда самая свежая сборка |
+| [margelet-0.1.3.apk](https://github.com/narezany/margelet/raw/apk/margelet-0.1.3.apk) | правая половина кнопки нажимается, строка канала на свежей установке |
 | [margelet-0.1.2.apk](https://github.com/narezany/margelet/raw/apk/margelet-0.1.2.apk) | канал в списке больше не двоится, кнопка снова открывается |
 | [margelet-0.1.1.apk](https://github.com/narezany/margelet/raw/apk/margelet-0.1.1.apk) | кнопки, канал сверху, страница пожертвований, значки без примерки |
 
