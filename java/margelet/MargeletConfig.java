@@ -210,6 +210,17 @@ public class MargeletConfig {
     }
 
     /**
+     * Скрывать ли вкладку «Все чаты» в списке папок.
+     */
+    public static boolean hideAllChats() {
+        return prefs().getBoolean("hide_all_chats", false);
+    }
+
+    public static void setHideAllChats(boolean hide) {
+        prefs().edit().putBoolean("hide_all_chats", hide).apply();
+    }
+
+    /**
      * Дописывать ли строку со ссылкой на форк в свои оформленные сообщения.
      * По умолчанию да: форк живёт тем, что о нём узнают.
      */

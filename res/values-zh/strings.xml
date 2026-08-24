@@ -197,4 +197,6 @@
     <string name="MargeletDonatePageAbout">在浏览器里打开：那边是现成的表单，不用手动粘贴数字。</string>
     <string name="MargeletChannelOnTop">分支频道置顶</string>
     <string name="MargeletChannelOnTopAbout">聊天列表的第一行，即使你没有订阅。</string>
+    <string name="MargeletHideAllChats">隐藏“所有聊天”标签页</string>
+    <string name="MargeletHideAllChatsAbout">如果创建了自定义文件夹，则不再显示包含所有聊天的首个标签页。</string>
 </resources>

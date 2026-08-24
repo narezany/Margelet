@@ -950,6 +950,17 @@ index 00000000..fc57492a
 +    }
 +
 +    /**
++     * Скрывать ли вкладку «Все чаты» в списке папок.
++     */
++    public static boolean hideAllChats() {
++        return prefs().getBoolean("hide_all_chats", false);
++    }
++
++    public static void setHideAllChats(boolean hide) {
++        prefs().edit().putBoolean("hide_all_chats", hide).apply();
++    }
++
++    /**
 +     * Дописывать ли строку со ссылкой на форк в свои оформленные сообщения.
 +     * По умолчанию да: форк живёт тем, что о нём узнают.
 +     */
@@ -7170,6 +7181,32 @@ index b04f149f..c2d63df5 100644
              if (initialDialogsType != DIALOGS_TYPE_WIDGET) {
                  hideFloatingButton(false);
              }
+@@ -6880,7 +6883,9 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
+                 filterTabsView.removeTabs();
+                 for (int a = 0, N = filters.size(); a < N; a++) {
+                     if (filters.get(a).isDefault()) {
++                        if (!org.telegram.margelet.MargeletConfig.hideAllChats()) {
+                         filterTabsView.addTab(a, 0, LocaleController.getString(R.string.FilterAllChats), null, false, true, filters.get(a).locked);
++                        }
+                     } else {
+                         final MessagesController.DialogFilter filter = filters.get(a);
+                         filterTabsView.addTab(a, filter.localId, filter.name, filter.entities, filter.title_noanimate, false, filters.get(a).locked);
+@@ -6895,7 +6900,10 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
+                             if (id < 0) {
+                                 id = 0;
+                             }
+                         }
+                     }
+-                    if (filterTabsView.getStableId(viewPages[0].selectedType) != stableId) {
++                    if (filterTabsView.getStableId(viewPages[0].selectedType) != stableId || !filterTabsView.hasTab(viewPages[0].selectedType)) {
+                         updateCurrentTab = true;
+-                        viewPages[0].selectedType = id;
++                        viewPages[0].selectedType = filterTabsView.hasTab(id) ? id : filterTabsView.getFirstTabId();
+                     }
++                } else if (!filterTabsView.hasTab(viewPages[0].selectedType)) {
++                    updateCurrentTab = true;
++                    viewPages[0].selectedType = filterTabsView.getFirstTabId();
+                 }
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/IntroActivity.java b/TMessagesProj/src/main/java/org/telegram/ui/IntroActivity.java
 index 4153ceb2..d1557801 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/IntroActivity.java
@@ -7446,7 +7483,9 @@ index 00000000..93e14280
 +import org.telegram.margelet.MargeletConfig;
 +import org.telegram.margelet.MargeletSeizure;
 +import org.telegram.messenger.LocaleController;
++import org.telegram.messenger.NotificationCenter;
 +import org.telegram.messenger.R;
++import org.telegram.messenger.UserConfig;
 +import org.telegram.ui.ActionBar.AlertDialog;
 +import org.telegram.ui.Components.UItem;
 +import org.telegram.ui.Components.UniversalAdapter;
@@ -7466,6 +7505,7 @@ index 00000000..93e14280
 +    private static final int ID_TRACKS = 2;
 +    private static final int ID_SEIZURE = 3;
 +    private static final int ID_FONTS = 4;
++    private static final int ID_HIDE_ALL_CHATS = 5;
 +
 +    @Override
 +    protected CharSequence getTitle() {
@@ -7485,6 +7525,9 @@ index 00000000..93e14280
 +        items.add(UItem.asCheck(ID_CHANNEL_TOP, LocaleController.getString(R.string.MargeletChannelOnTop))
 +                .setChecked(MargeletConfig.channelOnTop()));
 +        items.add(UItem.asShadow(LocaleController.getString(R.string.MargeletChannelOnTopAbout)));
++        items.add(UItem.asCheck(ID_HIDE_ALL_CHATS, LocaleController.getString(R.string.MargeletHideAllChats))
++                .setChecked(MargeletConfig.hideAllChats()));
++        items.add(UItem.asShadow(LocaleController.getString(R.string.MargeletHideAllChatsAbout)));
 +        items.add(UItem.asCheck(ID_TRACKS, LocaleController.getString(R.string.MargeletTracksEnabled))
 +                .setChecked(MargeletConfig.tagsEnabled()));
 +        items.add(UItem.asShadow(LocaleController.getString(R.string.MargeletTracksEnabledAbout)));
@@ -7501,6 +7544,10 @@ index 00000000..93e14280
 +        if (item.id == ID_CHANNEL_TOP) {
 +            MargeletConfig.setChannelOnTop(!MargeletConfig.channelOnTop());
 +            listView.adapter.update(true);
++        } else if (item.id == ID_HIDE_ALL_CHATS) {
++            MargeletConfig.setHideAllChats(!MargeletConfig.hideAllChats());
++            listView.adapter.update(true);
++            NotificationCenter.getInstance(UserConfig.selectedAccount).postNotificationName(NotificationCenter.dialogFiltersUpdated);
 +        } else if (item.id == ID_TRACKS) {
 +            MargeletConfig.setTagsEnabled(!MargeletConfig.tagsEnabled());
 +            listView.adapter.update(true);
@@ -19291,6 +19338,8 @@ index 24c56292..5fece35b 100644
 +    <string name="MargeletDonatePageAbout">Откроется в браузере: там готовая форма, вставлять цифры руками не нужно.</string>
 +    <string name="MargeletChannelOnTop">Канал форка сверху</string>
 +    <string name="MargeletChannelOnTopAbout">Первая строка в списке чатов, даже если вы не подписаны.</string>
++    <string name="MargeletHideAllChats">Скрыть вкладку «Все чаты»</string>
++    <string name="MargeletHideAllChatsAbout">Если созданы свои папки, первая вкладка со всеми диалогами больше не показывается.</string>
  </resources>
 \ No newline at end of file
 diff --git a/TMessagesProj/src/main/res/values-uk/strings.xml b/TMessagesProj/src/main/res/values-uk/strings.xml
@@ -19512,6 +19561,8 @@ index 00000000..c40463b9
 +    <string name="MargeletDonatePageAbout">在浏览器里打开：那边是现成的表单，不用手动粘贴数字。</string>
 +    <string name="MargeletChannelOnTop">分支频道置顶</string>
 +    <string name="MargeletChannelOnTopAbout">聊天列表的第一行，即使你没有订阅。</string>
++    <string name="MargeletHideAllChats">隐藏“所有聊天”标签页</string>
++    <string name="MargeletHideAllChatsAbout">如果创建了自定义文件夹，则不再显示包含所有聊天的首个标签页。</string>
 +</resources>
 diff --git a/TMessagesProj/src/main/res/values/ids.xml b/TMessagesProj/src/main/res/values/ids.xml
 index cc49d135..a8a51c3a 100644
@@ -19744,6 +19795,8 @@ index ffa4d566..37342d60 100644
 +    <string name="MargeletDonatePageAbout">Opens in the browser: the form is already there, nothing to paste by hand.</string>
 +    <string name="MargeletChannelOnTop">Fork channel on top</string>
 +    <string name="MargeletChannelOnTopAbout">The first row in the chat list, even if you are not subscribed.</string>
++    <string name="MargeletHideAllChats">Hide \"All Chats\" tab</string>
++    <string name="MargeletHideAllChatsAbout">If custom folders exist, the first tab with all chats is hidden.</string>
  </resources>
 diff --git a/TMessagesProj_App/build.gradle b/TMessagesProj_App/build.gradle
 index 2aa197cb..8fd9c9ec 100644

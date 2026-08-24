@@ -5,7 +5,9 @@ import android.view.View;
 import org.telegram.margelet.MargeletConfig;
 import org.telegram.margelet.MargeletSeizure;
 import org.telegram.messenger.LocaleController;
+import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
+import org.telegram.messenger.UserConfig;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.Components.UItem;
 import org.telegram.ui.Components.UniversalAdapter;
@@ -25,6 +27,7 @@ public class MargeletConveniencesActivity extends UniversalFragment {
     private static final int ID_TRACKS = 2;
     private static final int ID_SEIZURE = 3;
     private static final int ID_FONTS = 4;
+    private static final int ID_HIDE_ALL_CHATS = 5;
 
     @Override
     protected CharSequence getTitle() {
@@ -44,6 +47,9 @@ public class MargeletConveniencesActivity extends UniversalFragment {
         items.add(UItem.asCheck(ID_CHANNEL_TOP, LocaleController.getString(R.string.MargeletChannelOnTop))
                 .setChecked(MargeletConfig.channelOnTop()));
         items.add(UItem.asShadow(LocaleController.getString(R.string.MargeletChannelOnTopAbout)));
+        items.add(UItem.asCheck(ID_HIDE_ALL_CHATS, LocaleController.getString(R.string.MargeletHideAllChats))
+                .setChecked(MargeletConfig.hideAllChats()));
+        items.add(UItem.asShadow(LocaleController.getString(R.string.MargeletHideAllChatsAbout)));
         items.add(UItem.asCheck(ID_TRACKS, LocaleController.getString(R.string.MargeletTracksEnabled))
                 .setChecked(MargeletConfig.tagsEnabled()));
         items.add(UItem.asShadow(LocaleController.getString(R.string.MargeletTracksEnabledAbout)));
@@ -60,6 +66,10 @@ public class MargeletConveniencesActivity extends UniversalFragment {
         if (item.id == ID_CHANNEL_TOP) {
             MargeletConfig.setChannelOnTop(!MargeletConfig.channelOnTop());
             listView.adapter.update(true);
+        } else if (item.id == ID_HIDE_ALL_CHATS) {
+            MargeletConfig.setHideAllChats(!MargeletConfig.hideAllChats());
+            listView.adapter.update(true);
+            NotificationCenter.getInstance(UserConfig.selectedAccount).postNotificationName(NotificationCenter.dialogFiltersUpdated);
         } else if (item.id == ID_TRACKS) {
             MargeletConfig.setTagsEnabled(!MargeletConfig.tagsEnabled());
             listView.adapter.update(true);
