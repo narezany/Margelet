@@ -7,6 +7,7 @@
 | | |
 |---|---|
 | [margelet.apk](https://github.com/narezany/margelet/raw/apk/margelet.apk) | всегда самая свежая сборка |
+| [margelet-0.2.4.apk](https://github.com/narezany/margelet/raw/apk/margelet-0.2.4.apk) | плагины: события и память, окно установки со значком, один плагин больше не запускается дважды |
 | [margelet-0.2.3.apk](https://github.com/narezany/margelet/raw/apk/margelet-0.2.3.apk) | обводка без лишнего кольца внутри букв, шрифт применяется по всему приложению |
 | [margelet-0.2.2.apk](https://github.com/narezany/margelet/raw/apk/margelet-0.2.2.apk) | обводка текста, свой шрифт на всё приложение, версия телеграма в разделе обновлений |
 | [margelet-0.2.1.apk](https://github.com/narezany/margelet/raw/apk/margelet-0.2.1.apk) | обновления проверяются по расписанию, интервал в настройках, плюс кнопка «проверить сейчас» |
