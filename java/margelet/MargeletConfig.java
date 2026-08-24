@@ -210,6 +210,18 @@ public class MargeletConfig {
     }
 
     /**
+     * Обводка стекла у размытых панелей (поле ввода, шапка и др.).
+     * По умолчанию включена.
+     */
+    public static boolean glassStroke() {
+        return prefs().getBoolean("glass_stroke", true);
+    }
+
+    public static void setGlassStroke(boolean on) {
+        prefs().edit().putBoolean("glass_stroke", on).apply();
+    }
+
+    /**
      * Дописывать ли строку со ссылкой на форк в свои оформленные сообщения.
      * По умолчанию да: форк живёт тем, что о нём узнают.
      */

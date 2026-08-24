@@ -950,6 +950,18 @@ index 00000000..fc57492a
 +    }
 +
 +    /**
++     * Обводка стекла у размытых панелей (поле ввода, шапка и др.).
++     * По умолчанию включена.
++     */
++    public static boolean glassStroke() {
++        return prefs().getBoolean("glass_stroke", true);
++    }
++
++    public static void setGlassStroke(boolean on) {
++        prefs().edit().putBoolean("glass_stroke", on).apply();
++    }
++
++    /**
 +     * Дописывать ли строку со ссылкой на форк в свои оформленные сообщения.
 +     * По умолчанию да: форк живёт тем, что о нём узнают.
 +     */
@@ -7137,6 +7149,39 @@ index 78c3b9e1..b820c3eb 100644
  
          tmpRect.set(
              Math.round(inputBubbleOffsetLeft),
+diff --git a/TMessagesProj/src/main/java/org/telegram/ui/Components/blur3/drawable/BlurredBackgroundDrawable.java b/TMessagesProj/src/main/java/org/telegram/ui/Components/blur3/drawable/BlurredBackgroundDrawable.java
+index 00000000..00000001 100644
+--- a/TMessagesProj/src/main/java/org/telegram/ui/Components/blur3/drawable/BlurredBackgroundDrawable.java
++++ b/TMessagesProj/src/main/java/org/telegram/ui/Components/blur3/drawable/BlurredBackgroundDrawable.java
+@@ -386,6 +386,9 @@ public class BlurredBackgroundDrawable extends Drawable {
+         float[] radii, float strokeWidth, boolean isTop,
+         Paint paint
+     ) {
++        if (!org.telegram.margelet.MargeletConfig.glassStroke()) {
++            return;
++        }
+ 
+         final boolean radiiAreSame = isTop ?
+             radii[0] == radii[1] && radii[1] == radii[2] && radii[2] == radii[3]:
+@@ -488,6 +491,9 @@ public class BlurredBackgroundDrawable extends Drawable {
+     public static void drawStroke(Canvas canvas, float left, float top, float right, float bottom,
+                                      float radii, float strokeWidth, boolean isTop, Paint paint) {
++        if (!org.telegram.margelet.MargeletConfig.glassStroke()) {
++            return;
++        }
+         final float strokeHalf = strokeWidth / 2f;
+         canvas.save();
+         if (isTop) {
+@@ -696,6 +702,9 @@ public class BlurredBackgroundDrawable extends Drawable {
+     }
+ 
+     private void drawStrokeInternalIfNeeded(Canvas canvas) {
++        if (!org.telegram.margelet.MargeletConfig.glassStroke()) {
++            return;
++        }
+         final int strokeColorTop = Theme.multAlpha(this.strokeColorTop, alpha / 255f);
+         final int strokeColorBottom = Theme.multAlpha(this.strokeColorBottom, alpha / 255f);
+ 
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/DialogsActivity.java b/TMessagesProj/src/main/java/org/telegram/ui/DialogsActivity.java
 index b04f149f..c2d63df5 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/DialogsActivity.java
@@ -7466,6 +7511,7 @@ index 00000000..93e14280
 +    private static final int ID_TRACKS = 2;
 +    private static final int ID_SEIZURE = 3;
 +    private static final int ID_FONTS = 4;
++    private static final int ID_GLASS_STROKE = 5;
 +
 +    @Override
 +    protected CharSequence getTitle() {
@@ -7485,6 +7531,9 @@ index 00000000..93e14280
 +        items.add(UItem.asCheck(ID_CHANNEL_TOP, LocaleController.getString(R.string.MargeletChannelOnTop))
 +                .setChecked(MargeletConfig.channelOnTop()));
 +        items.add(UItem.asShadow(LocaleController.getString(R.string.MargeletChannelOnTopAbout)));
++        items.add(UItem.asCheck(ID_GLASS_STROKE, LocaleController.getString(R.string.MargeletGlassStroke))
++                .setChecked(MargeletConfig.glassStroke()));
++        items.add(UItem.asShadow(LocaleController.getString(R.string.MargeletGlassStrokeAbout)));
 +        items.add(UItem.asCheck(ID_TRACKS, LocaleController.getString(R.string.MargeletTracksEnabled))
 +                .setChecked(MargeletConfig.tagsEnabled()));
 +        items.add(UItem.asShadow(LocaleController.getString(R.string.MargeletTracksEnabledAbout)));
@@ -7500,6 +7549,9 @@ index 00000000..93e14280
 +    protected void onClick(UItem item, View view, int position, float x, float y) {
 +        if (item.id == ID_CHANNEL_TOP) {
 +            MargeletConfig.setChannelOnTop(!MargeletConfig.channelOnTop());
++            listView.adapter.update(true);
++        } else if (item.id == ID_GLASS_STROKE) {
++            MargeletConfig.setGlassStroke(!MargeletConfig.glassStroke());
 +            listView.adapter.update(true);
 +        } else if (item.id == ID_TRACKS) {
 +            MargeletConfig.setTagsEnabled(!MargeletConfig.tagsEnabled());
@@ -19291,6 +19343,8 @@ index 24c56292..5fece35b 100644
 +    <string name="MargeletDonatePageAbout">Откроется в браузере: там готовая форма, вставлять цифры руками не нужно.</string>
 +    <string name="MargeletChannelOnTop">Канал форка сверху</string>
 +    <string name="MargeletChannelOnTopAbout">Первая строка в списке чатов, даже если вы не подписаны.</string>
++    <string name="MargeletGlassStroke">Обводка стекла</string>
++    <string name="MargeletGlassStrokeAbout">Светлый контур по краям размытых панелей: поле ввода в чате, шапка и меню.</string>
  </resources>
 \ No newline at end of file
 diff --git a/TMessagesProj/src/main/res/values-uk/strings.xml b/TMessagesProj/src/main/res/values-uk/strings.xml
@@ -19512,6 +19566,8 @@ index 00000000..c40463b9
 +    <string name="MargeletDonatePageAbout">在浏览器里打开：那边是现成的表单，不用手动粘贴数字。</string>
 +    <string name="MargeletChannelOnTop">分支频道置顶</string>
 +    <string name="MargeletChannelOnTopAbout">聊天列表的第一行，即使你没有订阅。</string>
++    <string name="MargeletGlassStroke">毛玻璃边框</string>
++    <string name="MargeletGlassStrokeAbout">模糊面板边缘的高亮边框：聊天输入框、顶栏和菜单。</string>
 +</resources>
 diff --git a/TMessagesProj/src/main/res/values/ids.xml b/TMessagesProj/src/main/res/values/ids.xml
 index cc49d135..a8a51c3a 100644
@@ -19744,6 +19800,8 @@ index ffa4d566..37342d60 100644
 +    <string name="MargeletDonatePageAbout">Opens in the browser: the form is already there, nothing to paste by hand.</string>
 +    <string name="MargeletChannelOnTop">Fork channel on top</string>
 +    <string name="MargeletChannelOnTopAbout">The first row in the chat list, even if you are not subscribed.</string>
++    <string name="MargeletGlassStroke">Glass outline</string>
++    <string name="MargeletGlassStrokeAbout">Light stroke along the edges of blurred panels: chat input, header, and menus.</string>
  </resources>
 diff --git a/TMessagesProj_App/build.gradle b/TMessagesProj_App/build.gradle
 index 2aa197cb..8fd9c9ec 100644
