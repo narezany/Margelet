@@ -7,6 +7,7 @@
 | | |
 |---|---|
 | [margelet.apk](https://github.com/narezany/margelet/raw/apk/margelet.apk) | всегда самая свежая сборка |
+| [margelet-0.1.6.apk](https://github.com/narezany/margelet/raw/apk/margelet-0.1.6.apk) | значки читаются из badges.json: список правится в репозитории без пересборки, цвет значка задаётся строкой |
 | [margelet-0.1.5.apk](https://github.com/narezany/margelet/raw/apk/margelet-0.1.5.apk) | водяной знак выключен по умолчанию, «Удобности» одной веткой, канал не мешает архиву прятаться |
 | [margelet-0.1.4.apk](https://github.com/narezany/margelet/raw/apk/margelet-0.1.4.apk) | кнопка нажимается целиком, а не левой половиной |
 | [margelet-0.1.3.apk](https://github.com/narezany/margelet/raw/apk/margelet-0.1.3.apk) | правая половина кнопки нажимается, строка канала на свежей установке |
