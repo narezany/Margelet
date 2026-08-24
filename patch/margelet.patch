@@ -7150,10 +7150,10 @@ index 78c3b9e1..b820c3eb 100644
          tmpRect.set(
              Math.round(inputBubbleOffsetLeft),
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/Components/blur3/drawable/BlurredBackgroundDrawable.java b/TMessagesProj/src/main/java/org/telegram/ui/Components/blur3/drawable/BlurredBackgroundDrawable.java
-index 00000000..00000001 100644
+index 8459b5c10..28a5859aa 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/Components/blur3/drawable/BlurredBackgroundDrawable.java
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/Components/blur3/drawable/BlurredBackgroundDrawable.java
-@@ -386,6 +386,9 @@ public class BlurredBackgroundDrawable extends Drawable {
+@@ -395,6 +395,9 @@ public abstract class BlurredBackgroundDrawable extends Drawable {
          float[] radii, float strokeWidth, boolean isTop,
          Paint paint
      ) {
@@ -7163,7 +7163,8 @@ index 00000000..00000001 100644
  
          final boolean radiiAreSame = isTop ?
              radii[0] == radii[1] && radii[1] == radii[2] && radii[2] == radii[3]:
-@@ -488,6 +491,9 @@ public class BlurredBackgroundDrawable extends Drawable {
+@@ -496,6 +499,9 @@ public abstract class BlurredBackgroundDrawable extends Drawable {
+ 
      public static void drawStroke(Canvas canvas, float left, float top, float right, float bottom,
                                       float radii, float strokeWidth, boolean isTop, Paint paint) {
 +        if (!org.telegram.margelet.MargeletConfig.glassStroke()) {
@@ -7172,7 +7173,7 @@ index 00000000..00000001 100644
          final float strokeHalf = strokeWidth / 2f;
          canvas.save();
          if (isTop) {
-@@ -696,6 +702,9 @@ public class BlurredBackgroundDrawable extends Drawable {
+@@ -704,6 +710,9 @@ public abstract class BlurredBackgroundDrawable extends Drawable {
      }
  
      private void drawStrokeInternalIfNeeded(Canvas canvas) {
@@ -19142,7 +19143,7 @@ index 24c56292..5fece35b 100644
      <string name="LanguageName">Русский</string>
      <string name="English">Английский</string>
      <string name="LanguageNameInEnglish">Russian</string>
-@@ -263,4 +263,201 @@
+@@ -263,4 +263,203 @@
      <string name="RemindTodayAt">\'Отправить сегодня в\' HH:mm</string>
      <string name="RemindDayAt">\'Отправить\' d MMM \'в\' HH:mm</string>
      <string name="RemindDayYearAt">\'Напомнить\' d MMM yyyy \'в\' HH:mm</string>
@@ -19366,7 +19367,7 @@ new file mode 100644
 index 00000000..c40463b9
 --- /dev/null
 +++ b/TMessagesProj/src/main/res/values-zh/strings.xml
-@@ -0,0 +1,200 @@
+@@ -0,0 +1,202 @@
 +<?xml version="1.0" encoding="utf-8"?>
 +<resources>
 +    <string name="MargeletSettings">分支设置</string>
@@ -19599,7 +19600,7 @@ index ffa4d566..37342d60 100644
      <string name="LanguageName">English</string>
      <string name="English">English</string>
      <string name="LanguageNameInEnglish">English</string>
-@@ -11221,4 +11221,201 @@
+@@ -11221,4 +11221,203 @@
      <string name="UnsupportedMessageTitle">Unsupported Message</string>
      <string name="UnsupportedMessageMessage">Update Telegram to view this message</string>
      <string name="UnsupportedUpdate">Update</string>
