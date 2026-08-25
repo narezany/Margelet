@@ -5,3 +5,5 @@ build/
 .gradle/
 extragam_src/
 saved_deleted.marp
+
+__pycache__/

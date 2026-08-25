@@ -25,6 +25,21 @@ _Android = jclass("org.telegram.messenger.AndroidUtilities")
 _MargeletHook = jclass("org.telegram.margelet.hook.MargeletHook")
 _IHookCallback = jclass("org.telegram.margelet.hook.IHookCallback")
 
+# Движок хуков пока ни к одному методу приложения не подключён: хук
+# сохраняется, но точек, где приложение его спросило бы, в коде нет. Один
+# раз говорим об этом вслух, чтобы автор плагина не ждал перехвата.
+_hook_warning_shown = False
+
+
+def _warn_hooks_once(name):
+    global _hook_warning_shown
+    if not _hook_warning_shown:
+        _hook_warning_shown = True
+        _Host.log("margelet",
+                  "движок хуков сохраняет хуки, но ещё не вызывает их: "
+                  "в приложении нет ни одной точки вызова. Перехват заработает не сейчас",
+                  True)
+
 # Ответ, по которому приложение понимает «не отправляй это сообщение».
 # Такой же строки нет в MargeletHooks.CANCEL по случайности: она там же и
 # записана, и обычным текстом её не набрать.
@@ -281,6 +296,7 @@ class Margelet:
         :param after: callback(param) после выполнения метода
         """
         name = self.name
+        _warn_hooks_once(name)
         plugin_id = self.id
 
         if isinstance(target_class, str):

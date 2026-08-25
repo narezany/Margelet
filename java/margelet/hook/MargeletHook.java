@@ -87,6 +87,34 @@ public class MargeletHook {
         }
     }
 
+    /**
+     * Снять один хук. Возвращает true, если колбэк действительно стоял.
+     */
+    public static boolean unhookMethod(Member method, IHookCallback callback) {
+        if (method == null || callback == null) return false;
+        CopyOnWriteArrayList<IHookCallback> callbacks = hookedMethods.get(method);
+        if (callbacks == null) return false;
+        final boolean removed = callbacks.remove(callback);
+        if (callbacks.isEmpty()) {
+            hookedMethods.remove(method);
+        }
+        return removed;
+    }
+
+    private static int priorityOf(IHookCallback callback) {
+        return callback instanceof HookCallback ? ((HookCallback) callback).priority : 50;
+    }
+
+    /**
+     * Колбэки в порядке приоритета: выше — раньше. Без этого поле priority
+     * было бы записью, на которую никто не смотрит.
+     */
+    private static List<IHookCallback> ordered(CopyOnWriteArrayList<IHookCallback> callbacks) {
+        final ArrayList<IHookCallback> copy = new ArrayList<>(callbacks);
+        Collections.sort(copy, (a, b) -> priorityOf(b) - priorityOf(a));
+        return copy;
+    }
+
     public static boolean hasHooks(Member method) {
         CopyOnWriteArrayList<IHookCallback> callbacks = hookedMethods.get(method);
         return callbacks != null && !callbacks.isEmpty();
@@ -96,8 +124,8 @@ public class MargeletHook {
      * Точка входа вызова хуков перед оригинальным методом.
      */
     public static MethodHookParam callBefore(Member method, Object thisObject, Object[] args) {
-        CopyOnWriteArrayList<IHookCallback> callbacks = hookedMethods.get(method);
-        if (callbacks == null || callbacks.isEmpty()) {
+        CopyOnWriteArrayList<IHookCallback> registered = hookedMethods.get(method);
+        if (registered == null || registered.isEmpty()) {
             return null;
         }
 
@@ -106,7 +134,7 @@ public class MargeletHook {
         param.thisObject = thisObject;
         param.args = args != null ? args : new Object[0];
 
-        for (IHookCallback callback : callbacks) {
+        for (IHookCallback callback : ordered(registered)) {
             try {
                 callback.beforeHookedMethod(param);
             } catch (Throwable t) {
@@ -134,12 +162,12 @@ public class MargeletHook {
             }
         }
 
-        CopyOnWriteArrayList<IHookCallback> callbacks = hookedMethods.get(param.method);
-        if (callbacks == null || callbacks.isEmpty()) {
+        CopyOnWriteArrayList<IHookCallback> registered = hookedMethods.get(param.method);
+        if (registered == null || registered.isEmpty()) {
             return;
         }
 
-        for (IHookCallback callback : callbacks) {
+        for (IHookCallback callback : ordered(registered)) {
             try {
                 callback.afterHookedMethod(param);
             } catch (Throwable t) {

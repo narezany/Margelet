@@ -33,7 +33,7 @@ diff --git a/TMessagesProj/proguard-rules.pro b/TMessagesProj/proguard-rules.pro
 index aeab02b29..1443e2a47 100644
 --- a/TMessagesProj/proguard-rules.pro
 +++ b/TMessagesProj/proguard-rules.pro
-@@ -111,6 +111,25 @@
+@@ -111,6 +111,26 @@
  -keep class ru.noties.jlatexmath.** { *; }
  -dontwarn org.scilab.forge.jlatexmath.**
  
@@ -46,6 +46,7 @@ index aeab02b29..1443e2a47 100644
 +# переименовал бы их, а узнали бы мы об этом только в собранной сборке.
 +-keep class org.telegram.margelet.MargeletHooks { *; }
 +-keep class org.telegram.margelet.MargeletHooks$Button { *; }
++-keep class org.telegram.margelet.MargeletHooks$FetchCallback { *; }
 +# Плагин реализует этот интерфейс из питона, то есть по имени. В этой сборке
 +# он уцелел и без правила — проверено в собранном APK, — но держаться на
 +# везении такие вещи не должны.
@@ -516,7 +517,7 @@ diff --git a/TMessagesProj/src/main/java/org/telegram/ui/ActionBar/Theme.java b/
 index c3616f58f..e1bbeefaf 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/ActionBar/Theme.java
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/ActionBar/Theme.java
-@@ -8161,17 +8161,37 @@ public class Theme {
+@@ -8161,17 +8161,48 @@ public class Theme {
                              break;
                          } else {
                              if ((idx = line.indexOf('=')) != -1) {
@@ -550,6 +551,16 @@ index c3616f58f..e1bbeefaf 100644
 +                                        }
 +                                    } catch (Exception ignore) {}
 +                                }
++                                if (!parsed && (param.length() == 6 || param.length() == 8)) {
++                                    try {
++                                        long v = Long.parseLong(param, 16);
++                                        if (param.length() == 6) {
++                                            v |= 0xFF000000L;
++                                        }
++                                        value = (int) v;
++                                        parsed = true;
++                                    } catch (Exception ignore) {}
++                                }
 +                                if (!parsed) {
 +                                    try {
 +                                        value = (int) Long.parseLong(param);
@@ -562,7 +573,7 @@ index c3616f58f..e1bbeefaf 100644
                                  }
                                  int keyFromString = ThemeColors.stringKeyToInt(key);
                                  if (keyFromString >= 0) {
-@@ -9542,6 +9573,13 @@ public class Theme {
+@@ -9542,6 +9583,13 @@ public class Theme {
  
      public static int getColor(int key, ResourcesProvider provider) {
          if (provider != null) {
@@ -576,7 +587,7 @@ index c3616f58f..e1bbeefaf 100644
              return provider.getColor(key);
          }
          return getColor(key);
-@@ -9556,6 +9594,13 @@ public class Theme {
+@@ -9556,6 +9604,13 @@ public class Theme {
      }
  
      public static int getColor(int key, boolean[] isDefault, boolean ignoreAnimation) {

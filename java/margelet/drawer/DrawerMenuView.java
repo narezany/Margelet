@@ -16,6 +16,7 @@ import org.telegram.ui.CallLogActivity;
 import org.telegram.ui.ChatActivity;
 import org.telegram.ui.ContactsActivity;
 import org.telegram.ui.GroupCreateActivity;
+import org.telegram.ui.LaunchActivity;
 import org.telegram.ui.MargeletSettingsActivity;
 import org.telegram.ui.MargeletPluginsActivity;
 import org.telegram.ui.SettingsActivity;
@@ -39,7 +40,17 @@ public class DrawerMenuView extends ScrollView {
 
     public void rebuildMenu(int currentAccount, BaseFragment fragment) {
         container.removeAllViews();
-        if (fragment == null) return;
+        if (fragment == null) {
+            // Экран ещё не готов (запуск, поворот) — показывать пустое меню
+            // не надо: лучше спрятать список и собрать его при открытии.
+            final LaunchActivity activity = LaunchActivity.instance;
+            fragment = activity != null ? activity.getLastFragment() : null;
+        }
+        if (fragment == null) {
+            setVisibility(GONE);
+            return;
+        }
+        setVisibility(VISIBLE);
 
         addItem(R.drawable.msg_groups, LocaleController.getString(R.string.NewGroup), () -> {
             fragment.presentFragment(new GroupCreateActivity(new android.os.Bundle()));

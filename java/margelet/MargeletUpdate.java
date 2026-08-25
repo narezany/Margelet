@@ -41,6 +41,15 @@ public class MargeletUpdate {
     private static final String PREFS = "margelet_update";
     /** Версия, под которую скачан apk. Пусто — скачанного нет. */
     private static final String KEY_READY_VERSION = "ready_version";
+    /**
+     * Версия, чьё скачивание сервер ответил отказом (битая ссылка в
+     * version.json, релиз не выложен). Такая ошибка сама не пройдёт: если
+     * продолжать предлагать ту же версию, полоска обновления зациклится.
+     */
+    private static final String KEY_FAILED = "failed_version";
+    private static final String KEY_FAILED_AT = "failed_at";
+    /** Через сколько часов забыть отказ и предложить версию снова. */
+    private static final long FAILURE_FORGET_MS = 12L * 60 * 60 * 1000;
 
     private static volatile boolean downloading;
     private static volatile float progress;
@@ -80,6 +89,9 @@ public class MargeletUpdate {
      * «посмотри, не появилось ли нового».
      */
     public static void checkAll(Runnable done) {
+        // Ручная проверка — это «проверь честно, даже если недавно было
+        // отказано»: человек нажал кнопку, значит хочет повторить сам.
+        clearFailure();
         MargeletBadge.refresh();
         check(done);
     }
@@ -91,6 +103,23 @@ public class MargeletUpdate {
                 done.run();
             }
         });
+    }
+
+    private static String failedKey(Info info) {
+        return info.version + "|" + info.apk;
+    }
+
+    /** Отказ ещё свеж и совпадает с этой версией — предлагать её не надо. */
+    private static boolean recentlyFailed(Info info) {
+        if (!failedKey(info).equals(prefs().getString(KEY_FAILED, null))) {
+            return false;
+        }
+        final long at = prefs().getLong(KEY_FAILED_AT, 0);
+        return at > 0 && System.currentTimeMillis() - at < FAILURE_FORGET_MS;
+    }
+
+    private static void clearFailure() {
+        prefs().edit().remove(KEY_FAILED).remove(KEY_FAILED_AT).apply();
     }
 
     /** Когда в последний раз спрашивали, за этот запуск приложения. */
@@ -158,7 +187,11 @@ public class MargeletUpdate {
             if (version == null || apk == null || version.isEmpty() || apk.isEmpty()) {
                 return null;
             }
-            return newer(version, MargeletConfig.APP_VERSION) ? new Info(version, apk, json) : null;
+            if (!newer(version, MargeletConfig.APP_VERSION)) {
+                return null;
+            }
+            final Info info = new Info(version, apk, json);
+            return recentlyFailed(info) ? null : info;
         } catch (Exception ignored) {
             return null;
         }
@@ -240,6 +273,7 @@ public class MargeletUpdate {
         progress = 0f;
         final Thread worker = new Thread(() -> {
             boolean ok = false;
+            int code = -1;
             HttpURLConnection connection = null;
             final File target = file();
             try {
@@ -248,7 +282,8 @@ public class MargeletUpdate {
                 connection.setReadTimeout(20000);
                 connection.setInstanceFollowRedirects(true);
                 connection.setRequestProperty("User-Agent", MargeletConfig.APP_NAME);
-                if (connection.getResponseCode() == 200) {
+                code = connection.getResponseCode();
+                if (code == 200) {
                     final long total = connection.getContentLength();
                     try (InputStream in = connection.getInputStream();
                          OutputStream out = new FileOutputStream(target)) {
@@ -282,9 +317,24 @@ public class MargeletUpdate {
             // готовность только целиком скачанной версией.
             if (ok) {
                 prefs().edit().putString(KEY_READY_VERSION, info.version).apply();
+                clearFailure();
             } else {
                 prefs().edit().remove(KEY_READY_VERSION).apply();
                 target.delete();
+                if (!cancelled && code != 200 && code != -1) {
+                    // Сервер ответил отказом — например, релиз ещё не выложен,
+                    // а version.json уже его объявил. Это ошибка выпуска, а не
+                    // сети: запоминаем, чтобы полоска не предлагала одно и то
+                    // же каждые три минуты, и говорим вслух, в чём дело.
+                    prefs().edit()
+                            .putString(KEY_FAILED, failedKey(info))
+                            .putLong(KEY_FAILED_AT, System.currentTimeMillis())
+                            .apply();
+                    MargeletPluginHost.log("margelet",
+                            "обновление " + info.version + " не скачалось: сервер ответил " + code
+                                    + ". Скорее всего, apk по ссылке из version.json ещё не выложен",
+                            true);
+                }
             }
             downloading = false;
             progress = 0f;

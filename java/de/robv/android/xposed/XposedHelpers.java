@@ -17,13 +17,23 @@ public class XposedHelpers {
     }
 
     public static Method findMethodExact(Class<?> clazz, String methodName, Object... parameterTypes) {
+        if (clazz == null) {
+            return null;
+        }
         Class<?>[] paramClasses = getParameterClasses(clazz.getClassLoader(), parameterTypes);
         return MargeletHook.findMethod(clazz, methodName, paramClasses);
     }
 
     public static Method findMethodExact(String className, ClassLoader classLoader, String methodName, Object... parameterTypes) {
         Class<?> clazz = findClass(className, classLoader);
-        return findMethodExact(clazz, methodName, parameterTypes);
+        if (clazz == null) {
+            throw new NoSuchMethodError("class not found: " + className);
+        }
+        Method method = findMethodExact(clazz, methodName, parameterTypes);
+        if (method == null) {
+            throw new NoSuchMethodError(clazz.getName() + "#" + methodName);
+        }
+        return method;
     }
 
     public static XC_MethodHook.Unhook findAndHookMethod(Class<?> clazz, String methodName, Object... parameterTypesAndCallback) {
@@ -39,7 +49,11 @@ public class XposedHelpers {
     }
 
     public static XC_MethodHook.Unhook findAndHookMethod(String className, ClassLoader classLoader, String methodName, Object... parameterTypesAndCallback) {
-        return findAndHookMethod(findClass(className, classLoader), methodName, parameterTypesAndCallback);
+        final Class<?> clazz = findClass(className, classLoader);
+        if (clazz == null) {
+            throw new NoSuchMethodError("class not found: " + className);
+        }
+        return findAndHookMethod(clazz, methodName, parameterTypesAndCallback);
     }
 
     public static Object getObjectField(Object obj, String fieldName) {

@@ -15,6 +15,6 @@ public class XposedBridge {
     }
 
     public static void unhookMethod(Member hookMethod, XC_MethodHook callback) {
-        // Callback list in MargeletHook removes on unhook call
+        MargeletHook.unhookMethod(hookMethod, callback);
     }
 }

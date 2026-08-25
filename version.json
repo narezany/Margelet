@@ -1,7 +1,7 @@
 {
-  "version": "0.4",
-  "apk": "https://github.com/narezany/Margelet/releases/download/0.4/margelet.apk",
-  "about": "Outlined text now wraps and stays inside the bubble; badges are checked on the same schedule as updates; the check button now downloads and installs; plugins can go to the network without freezing the screen.",
-  "about_ru": "Обводка теперь переносится по словам и не вылезает за пузырь; значки проверяются тем же расписанием, что и версия; кнопка проверки теперь качает и ставит; плагины умеют ходить в сеть, не морозя экран.",
-  "about_zh": "描边文字现在会换行，不再溢出气泡；徽章与版本同一套计划检查；检查按钮现在会下载并安装；插件可以访问网络而不冻结界面。"
+  "version": "0.3.4",
+  "apk": "https://github.com/narezany/Margelet/releases/download/0.3.5/margelet.apk",
+  "about": "Latest published build is 0.3.5. The update banner no longer loops: it was advertising builds whose apk was never uploaded.",
+  "about_ru": "Последняя выложенная сборка — 0.3.5. Полоска обновления больше не зацикливается: она обещала сборки, чьего apk никогда не существовало.",
+  "about_zh": "最新已发布的版本是 0.3.5。更新横幅不再循环：它之前承诺的是从未上传过安装包的版本。"
 }
