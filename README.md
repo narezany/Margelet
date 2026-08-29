@@ -7,6 +7,7 @@
 | | |
 |---|---|
 | [margelet.apk](https://github.com/narezany/margelet/raw/apk/margelet.apk) | всегда самая свежая сборка |
+| [margelet-0.99.7.apk](https://github.com/narezany/margelet/raw/apk/margelet-0.99.7.apk) | «Пререлиз 1.0.7»: разметка на стене не съезжает, значки в переписке, стена у ботов и каналов |
 | [margelet-0.99.6.apk](https://github.com/narezany/margelet/raw/apk/margelet-0.99.6.apk) | «Пререлиз 1.0.6»: магазин снова ставит плагины, на стене нет полоски закреплённого |
 | [margelet-0.99.5.apk](https://github.com/narezany/margelet/raw/apk/margelet-0.99.5.apk) | «Пререлиз 1.0.5»: хуки из плагинов наконец выполняются, стена — изменённый стандартный чат |
 | [margelet-0.99.4.apk](https://github.com/narezany/margelet/raw/apk/margelet-0.99.4.apk) | «Пререлиз 1.0.4»: стена показывается готовым режимом телеграма, служебные метки не видно |
