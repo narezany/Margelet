@@ -7,6 +7,7 @@
 | | |
 |---|---|
 | [margelet.apk](https://github.com/narezany/margelet/raw/apk/margelet.apk) | всегда самая свежая сборка |
+| [margelet-0.99.13.apk](https://github.com/narezany/margelet/raw/apk/margelet-0.99.13.apk) | «Пререлиз 1.0.13»: подпись под котом принадлежит тому коту, что на снимке |
 | [margelet-0.99.12.apk](https://github.com/narezany/margelet/raw/apk/margelet-0.99.12.apk) | «Пререлиз 1.0.12»: коты приезжают из репозитория, нажатие на сообщение открывает стену, ссылки `margy://` |
 | [margelet-0.99.11.apk](https://github.com/narezany/margelet/raw/apk/margelet-0.99.11.apk) | «Пререлиз 1.0.11»: чинит вылет при запуске из снятой 1.0.10 |
 | [margelet-0.99.9.apk](https://github.com/narezany/margelet/raw/apk/margelet-0.99.9.apk) | «Пререлиз 1.0.9»: стена снова показывает сообщения, шапка стены больше не спорит с группой |
