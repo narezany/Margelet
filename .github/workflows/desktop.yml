@@ -105,8 +105,11 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.CCACHE_DIR }}
-          key: ${{ runner.OS }}-tdesktop-${{ github.run_id }}
-          restore-keys: ${{ runner.OS }}-tdesktop-
+          # В ключе есть вид сборки: у Debug и Release разные объекты, и без
+          # этого прогон восстанавливал чужой кэш и пересобирал всё заново —
+          # восемь минут превращались в полтора часа.
+          key: ${{ runner.OS }}-tdesktop-${{ env.CONFIG }}-${{ github.run_id }}
+          restore-keys: ${{ runner.OS }}-tdesktop-${{ env.CONFIG }}-
 
       - name: Собрать.
         working-directory: tdesktop
