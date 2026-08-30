@@ -1,0 +1,195 @@
+diff --git a/Telegram/CMakeLists.txt b/Telegram/CMakeLists.txt
+index 1c76dfa..508740e 100644
+--- a/Telegram/CMakeLists.txt
++++ b/Telegram/CMakeLists.txt
+@@ -157,6 +157,8 @@ PRIVATE
+     api/api_invite_links.h
+     api/api_media.cpp
+     api/api_media.h
++    margy/margy_gradients.cpp
++    margy/margy_gradients.h
+     api/api_messages_search.cpp
+     api/api_messages_search.h
+     api/api_messages_search_merged.cpp
+diff --git a/Telegram/SourceFiles/margy/margy_gradients.cpp b/Telegram/SourceFiles/margy/margy_gradients.cpp
+new file mode 100644
+index 0000000..7ce42ad
+--- /dev/null
++++ b/Telegram/SourceFiles/margy/margy_gradients.cpp
+@@ -0,0 +1,113 @@
++/*
++Часть Margy — форка Telegram Desktop.
++*/
++#include "margy/margy_gradients.h"
++
++#include "api/api_messages_search.h"
++#include "base/flat_map.h"
++#include "data/data_peer.h"
++#include "data/data_session.h"
++#include "history/history.h"
++#include "history/history_item.h"
++#include "main/main_session.h"
++
++#include <QtCore/QRegularExpression>
++
++namespace Margy {
++namespace {
++
++// Группа, в которой всё это лежит. Та же, что у андроидной Margy.
++const auto kGroup = u"margy_underground"_q;
++const auto kTag = u"#margy_gradient"_q;
++
++struct Store {
++	base::flat_map<PeerId, Gradient> colors;
++	std::unique_ptr<Api::MessagesSearch> search;
++	rpl::lifetime lifetime;
++	bool asked = false;
++};
++
++base::flat_map<not_null<Main::Session*>, std::unique_ptr<Store>> Stores;
++
++// Что мы согласны считать градиентом: ровно два цвета. Один — это заливка,
++// а больше двух шапка профиля всё равно не нарисует.
++[[nodiscard]] std::optional<Gradient> Parse(const QString &text) {
++	static const auto expression = QRegularExpression(
++		u"#margy_gradient\\s+([0-9A-Fa-f]{6})-([0-9A-Fa-f]{6})"_q);
++	const auto match = expression.match(text);
++	if (!match.hasMatch()) {
++		return {};
++	}
++	return Gradient{
++		QColor(u"#"_q + match.captured(1)),
++		QColor(u"#"_q + match.captured(2)),
++	};
++}
++
++[[nodiscard]] Store &StoreFor(not_null<Main::Session*> session) {
++	const auto i = Stores.find(session);
++	if (i != end(Stores)) {
++		return *i->second;
++	}
++	auto store = std::make_unique<Store>();
++	const auto raw = store.get();
++	Stores.emplace(session, std::move(store));
++	// Сессия уходит вместе с выходом из аккаунта, а наша память должна уйти
++	// с ней: иначе указатель останется висеть, и на следующем входе мы
++	// покрасим чужой профиль остатками прошлого.
++	session->lifetime().add([=] {
++		Stores.remove(session);
++	});
++	return *raw;
++}
++
++void Ensure(not_null<Main::Session*> session) {
++	auto &store = StoreFor(session);
++	if (store.asked) {
++		return;
++	}
++	store.asked = true;
++	// Группу не разыскиваем: если человек в ней не состоит и мы про неё
++	// ничего не знаем, то и градиентов ему взять неоткуда. Лезть в сеть
++	// ради этого при каждом открытии профиля — плохая цена за украшение.
++	const auto group = session->data().peerByUsername(kGroup);
++	if (!group) {
++		return;
++	}
++	const auto history = session->data().history(group);
++	store.search = std::make_unique<Api::MessagesSearch>(history);
++	store.search->messagesFounds(
++	) | rpl::start_with_next([=](const Api::FoundMessages &found) {
++		auto &store = StoreFor(session);
++		for (const auto &itemId : found.messages) {
++			const auto item = session->data().message(itemId);
++			if (!item) {
++				continue;
++			}
++			const auto from = item->from()->id;
++			// Поиск отдаёт от новых к старым, поэтому первое найденное для
++			// человека — самое свежее, и менять его на старое не нужно.
++			if (store.colors.contains(from)) {
++				continue;
++			}
++			if (const auto gradient = Parse(item->originalText().text)) {
++				store.colors.emplace(from, *gradient);
++			}
++		}
++	}, store.lifetime);
++	store.search->searchMessages({ .query = kTag });
++}
++
++} // namespace
++
++std::optional<Gradient> GradientFor(not_null<PeerData*> peer) {
++	const auto session = &peer->session();
++	Ensure(session);
++	auto &store = StoreFor(session);
++	const auto i = store.colors.find(peer->id);
++	return (i != end(store.colors))
++		? std::make_optional(i->second)
++		: std::nullopt;
++}
++
++} // namespace Margy
+diff --git a/Telegram/SourceFiles/margy/margy_gradients.h b/Telegram/SourceFiles/margy/margy_gradients.h
+new file mode 100644
+index 0000000..170ef55
+--- /dev/null
++++ b/Telegram/SourceFiles/margy/margy_gradients.h
+@@ -0,0 +1,28 @@
++/*
++Часть Margy — форка Telegram Desktop.
++
++Градиент профиля: два своих цвета вместо тех, что выбирает телеграм.
++
++Живёт он не в приложении, а в общей группе: обычным сообщением с меткой
++«#margy_gradient AABBCC-DDEEFF». Чей это градиент, видно по автору сообщения,
++и подделать это нельзя — подпись под каждым сообщением ставит телеграм.
++Ровно так же устроена андроидная Margy, поэтому оба клиента читают одно и то
++же и договариваться им не о чем.
++*/
++#pragma once
++
++class PeerData;
++
++namespace Margy {
++
++struct Gradient {
++	QColor top;
++	QColor bottom;
++};
++
++// Пара цветов этого человека, если она уже прочитана. Заодно, при первом
++// спросе, запускает чтение — но никого не ждёт: пока не прочитано, профиль
++// рисуется как обычно, а перечитывать нечего.
++[[nodiscard]] std::optional<Gradient> GradientFor(not_null<PeerData*> peer);
++
++} // namespace Margy
+diff --git a/Telegram/SourceFiles/ui/top_background_gradient.cpp b/Telegram/SourceFiles/ui/top_background_gradient.cpp
+index 7325d18..d1b7a98 100644
+--- a/Telegram/SourceFiles/ui/top_background_gradient.cpp
++++ b/Telegram/SourceFiles/ui/top_background_gradient.cpp
+@@ -12,6 +12,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+ #include "data/data_emoji_statuses.h"
+ #include "data/data_credits.h"
+ #include "data/data_peer.h"
++#include "margy/margy_gradients.h"
+ #include "data/data_star_gift.h"
+ #include "data/stickers/data_custom_emoji.h"
+ #include "main/main_session.h"
+@@ -108,6 +109,16 @@ QImage CreateTopBgGradient(
+ 		QSize size,
+ 		not_null<PeerData*> peer,
+ 		QPoint offset) {
++	// Свой градиент идёт первым: человек выбрал его сам, и он должен
++	// перебивать и подарочный, и телеграмовский.
++	if (const auto margy = Margy::GradientFor(peer)) {
++		return CreateTopBgGradient(
++			size,
++			margy->top,
++			margy->bottom,
++			false,
++			offset);
++	}
+ 	if (const auto collectible = peer->emojiStatusId().collectible) {
+ 		return CreateTopBgGradient(
+ 			size,
