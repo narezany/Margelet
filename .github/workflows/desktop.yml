@@ -72,6 +72,10 @@ jobs:
             echo "== $p"
             git -C tdesktop apply --verbose "$GITHUB_WORKSPACE/$p"
           done
+          # Показываем, что дерево и правда изменилось. Шаг, который молча
+          # ничего не наложил, выглядит в отчёте точно так же, как успешный.
+          echo "-- что стало другим:"
+          git -C tdesktop diff --stat
 
       - name: Поставить ccache.
         run: |
@@ -132,9 +136,17 @@ jobs:
         working-directory: tdesktop
         run: |
           out="out/Debug/Telegram"
-          if [ -f "$out" ]; then
-            echo "Собралось: $(stat -c %s "$out") байт"
-          else
+          if [ ! -f "$out" ]; then
             echo "Сборка не дала файла"
+            exit 1
+          fi
+          echo "Собралось: $(stat -c %s "$out") байт"
+          # Имя внутри самого файла. Размер тут не показатель: он совпал с
+          # несобранным-непропатченным до байта, потому что строка короче,
+          # а выравнивание съедает разницу. Значит смотрим не на размер.
+          if strings -a "$out" | grep -qx "Margy"; then
+            echo "Внутри файла есть Margy — заплатка доехала до двоичного кода"
+          else
+            echo "Заплатка не доехала: в файле нет строки Margy"
             exit 1
           fi
