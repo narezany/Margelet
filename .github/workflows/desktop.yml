@@ -1,13 +1,22 @@
 # Сборка десктопной Margy.
 #
-# Рецепт не выдуман: он списан с .github/workflows/linux.yml самого
-# telegramdesktop, потому что официальный способ собрать их проект на линуксе
-# — только через их же docker-образ, который собирает все зависимости, включая
-# свою сборку Qt. На обычной машине это не выполнить, а на раннере — можно.
+# Официальный способ собрать tdesktop на линуксе — только внутри их образа со
+# всеми зависимостями, включая свою сборку Qt (docs/building-linux.md). На
+# обычной машине это не выполнить, а на раннере — можно.
+#
+# Образ не собираем, а скачиваем готовый: телеграм публикует его сам, их же
+# рабочим процессом docker.yml. Проверено — ghcr.io отдаёт манифест без
+# всяких ключей, пятьдесят слоёв, гигабайт в сжатом виде. Своя сборка этого
+# образа занимала часы и была первым кандидатом упереться в предел раннера.
+#
+# Если однажды окажется, что образ не подходит к записанному коммиту
+# tdesktop (у них поменялось окружение, а мы стоим на старом), собрать его
+# самим можно так, как это делают они: Telegram/build/docker/centos_env,
+# poetry install, poetry run gen_dockerfile, docker build.
 #
 # Ключи никому не нужны: у них есть TDESKTOP_API_TEST с испытательными. Свои
-# api_id и api_hash понадобятся только для сборки, которой будут пользоваться
-# люди, и они лягут в секреты репозитория, а не в этот файл.
+# api_id и api_hash понадобятся только для сборки, которой будут
+# пользоваться люди, и лягут в секреты репозитория, а не в этот файл.
 
 name: Десктоп
 
@@ -18,19 +27,18 @@ on:
       - 'desktop/**'
       - '.github/workflows/desktop.yml'
   workflow_dispatch:
-    inputs:
-      only_cache:
-        description: 'Только собрать зависимости и сложить в кэш, без самой программы'
-        type: boolean
-        default: false
+
+# Новый прогон отменяет предыдущий: держать два одинаковых смысла нет.
+concurrency:
+  group: desktop-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   linux:
     name: Linux, отладочная
     runs-on: ubuntu-latest
     env:
-      IMAGE_TAG: tdesktop:centos_env
-      ONLY_CACHE: ${{ inputs.only_cache && 'true' || 'false' }}
+      IMAGE: ghcr.io/telegramdesktop/tdesktop/centos_env:latest
 
     steps:
       - name: Забрать эту ветку.
@@ -39,7 +47,7 @@ jobs:
       - name: Забрать tdesktop на записанном коммите.
         run: |
           # Имена переменных латиницей: bash кириллицу в именах не принимает
-          # и молча падает с «command not found». Уже проверено на себе.
+          # и падает с «command not found». Уже проверено на себе.
           pin=$(tr -d '[:space:]' < desktop/tdesktop.pin)
           echo "Собираем поверх tdesktop $pin"
           git clone https://github.com/telegramdesktop/tdesktop.git tdesktop
@@ -62,62 +70,24 @@ jobs:
             git -C tdesktop apply --verbose "$GITHUB_WORKSPACE/$p"
           done
 
-      - name: Поставить poetry и ccache, собрать Dockerfile.
+      - name: Поставить ccache.
         run: |
-          curl -sSL https://install.python-poetry.org | python3 -
           curl -sSL https://github.com/ccache/ccache/releases/download/v4.13.6/ccache-4.13.6-linux-x86_64-glibc.tar.xz \
             | sudo tar xJ -C /usr/local/bin --strip-components=1 ccache-4.13.6-linux-x86_64-glibc/ccache
           echo "CCACHE_DIR=$RUNNER_TEMP/.tdesktop-cache" >> $GITHUB_ENV
-          cd tdesktop/Telegram/build/docker/centos_env
-          poetry install
-          DOCKERFILE=$(DEBUG= LTO= poetry run gen_dockerfile)
-          echo "$DOCKERFILE" > Dockerfile
-          rm -rf __pycache__
 
       - name: Освободить место.
         uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
         with:
           tool-cache: true
 
-      - name: Docker Buildx.
-        id: setup-buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Кэш зависимостей.
-        id: cache-libs
-        uses: actions/cache@v4
-        with:
-          path: |
-            ${{ runner.temp }}/.buildx-cache
-            ${{ runner.temp }}/.mount-cache
-          key: ${{ runner.OS }}-libs-${{ hashFiles('desktop/tdesktop.pin') }}
-          restore-keys: ${{ runner.OS }}-libs-
-
-      - name: Вернуть кэш сборки образа.
-        uses: reproducible-containers/buildkit-cache-dance@5422eac04292c961a382e0f584ea0f03ad9da723
-        with:
-          builder: ${{ steps.setup-buildx.outputs.name }}
-          cache-dir: ${{ runner.temp }}/.mount-cache
-          dockerfile: tdesktop/Telegram/build/docker/centos_env/Dockerfile
-          skip-extraction: ${{ steps.cache-libs.outputs.cache-hit }}
-
-      - name: Зависимости.
-        uses: docker/build-push-action@v6
-        with:
-          context: tdesktop/Telegram/build/docker/centos_env
-          load: ${{ env.ONLY_CACHE == 'false' }}
-          tags: ${{ env.IMAGE_TAG }}
-          cache-from: type=local,src=${{ runner.temp }}/.buildx-cache
-          cache-to: type=local,dest=${{ runner.temp }}/.buildx-cache-new,mode=max
-
-      - name: Переложить кэш.
+      - name: Скачать сборочный образ.
         run: |
-          rm -rf ${{ runner.temp }}/.buildx-cache
-          mv ${{ runner.temp }}/.buildx-cache{-new,}
+          docker pull "$IMAGE"
+          docker image inspect "$IMAGE" --format 'образ: {{.Id}}, размер {{.Size}} байт'
 
       - name: Вернуть кэш компилятора.
         id: cache-tdesktop
-        if: env.ONLY_CACHE == 'false'
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.CCACHE_DIR }}
@@ -125,7 +95,6 @@ jobs:
           restore-keys: ${{ runner.OS }}-tdesktop-
 
       - name: Собрать.
-        if: env.ONLY_CACHE == 'false'
         working-directory: tdesktop
         run: |
           ccache -z
@@ -135,7 +104,7 @@ jobs:
             -v ${{ env.CCACHE_DIR }}:/var/cache/ccache \
             -e CONFIG=Debug \
             -e CCACHE_SLOPPINESS=pch_defines,time_macros \
-            $IMAGE_TAG \
+            "$IMAGE" \
             env -u CCACHE_DISABLE /usr/src/tdesktop/Telegram/build/docker/centos_env/build.sh \
             -D CMAKE_CONFIGURATION_TYPES=Debug \
             -D CMAKE_C_FLAGS_DEBUG="-O0 -fpch-preprocess" \
@@ -143,6 +112,11 @@ jobs:
             -D TDESKTOP_API_TEST=ON \
             -D DESKTOP_APP_DISABLE_AUTOUPDATE=ON \
             -D DESKTOP_APP_DISABLE_CRASH_REPORTS=ON
+
+      - name: Сколько компилятор сделал заново.
+        if: always()
+        run: |
+          ccache --print-stats | grep -E '^cache_(miss|hit_direct|hit_preprocessed)' || true
 
       - name: Сохранить кэш компилятора.
         if: always() && steps.cache-tdesktop.outputs.cache-primary-key != ''
@@ -152,7 +126,6 @@ jobs:
           key: ${{ steps.cache-tdesktop.outputs.cache-primary-key }}
 
       - name: Проверить, что вышло.
-        if: env.ONLY_CACHE == 'false'
         working-directory: tdesktop
         run: |
           out="out/Debug/Telegram"
