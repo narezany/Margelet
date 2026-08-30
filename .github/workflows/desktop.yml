@@ -110,14 +110,20 @@ jobs:
 
       - name: Собрать.
         working-directory: tdesktop
+        # Имена секретов — те, что завёл владелец; TDESKTOP_* оставлены
+        # запасными. Значения идут через окружение, а не подставляются прямо
+        # в команду: так они не попадут ни в разбор строки, ни в эхо шага.
+        env:
+          API_ID: ${{ secrets.API_ID || secrets.TDESKTOP_API_ID }}
+          API_HASH: ${{ secrets.API_HASH || secrets.TDESKTOP_API_HASH }}
         run: |
           ccache -z
           # Ключи. Без своих api_id и api_hash телеграм пускает только в
           # испытательный контур: войти настоящим аккаунтом нельзя. Поэтому
           # для Debug берём их испытательные, а для Release — секреты
           # репозитория, если они там есть.
-          if [ "$CONFIG" = "Release" ] && [ -n "${{ secrets.TDESKTOP_API_ID }}" ]; then
-            KEYS='-D TDESKTOP_API_ID=${{ secrets.TDESKTOP_API_ID }} -D TDESKTOP_API_HASH=${{ secrets.TDESKTOP_API_HASH }}'
+          if [ "$CONFIG" = "Release" ] && [ -n "$API_ID" ]; then
+            KEYS="-D TDESKTOP_API_ID=$API_ID -D TDESKTOP_API_HASH=$API_HASH"
             echo "Собираем со своими ключами"
           else
             KEYS='-D TDESKTOP_API_TEST=ON'
