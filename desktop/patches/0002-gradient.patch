@@ -13,7 +13,7 @@ index 1c76dfa..508740e 100644
      api/api_messages_search_merged.cpp
 diff --git a/Telegram/SourceFiles/margy/margy_gradients.cpp b/Telegram/SourceFiles/margy/margy_gradients.cpp
 new file mode 100644
-index 0000000..7ce42ad
+index 0000000..ed6c56f
 --- /dev/null
 +++ b/Telegram/SourceFiles/margy/margy_gradients.cpp
 @@ -0,0 +1,113 @@
@@ -96,7 +96,7 @@ index 0000000..7ce42ad
 +	const auto history = session->data().history(group);
 +	store.search = std::make_unique<Api::MessagesSearch>(history);
 +	store.search->messagesFounds(
-+	) | rpl::start_with_next([=](const Api::FoundMessages &found) {
++	) | rpl::on_next([=](const Api::FoundMessages &found) {
 +		auto &store = StoreFor(session);
 +		for (const auto &itemId : found.messages) {
 +			const auto item = session->data().message(itemId);

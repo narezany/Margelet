@@ -109,7 +109,12 @@ jobs:
           # этого прогон восстанавливал чужой кэш и пересобирал всё заново —
           # восемь минут превращались в полтора часа.
           key: ${{ runner.OS }}-tdesktop-${{ env.CONFIG }}-${{ github.run_id }}
-          restore-keys: ${{ runner.OS }}-tdesktop-${{ env.CONFIG }}-
+          # Второй строкой — старый вид ключа, без вида сборки. Иначе первый
+          # прогон после этой правки не нашёл бы ничего и пересобирал бы всё
+          # с нуля, хотя подходящий кэш лежит рядом.
+          restore-keys: |
+            ${{ runner.OS }}-tdesktop-${{ env.CONFIG }}-
+            ${{ runner.OS }}-tdesktop-
 
       - name: Собрать.
         working-directory: tdesktop
