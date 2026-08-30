@@ -34,30 +34,32 @@ jobs:
 
     steps:
       - name: Забрать эту ветку.
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Забрать tdesktop на записанном коммите.
         run: |
-          КОММИТ=$(cat desktop/tdesktop.pin | tr -d '[:space:]')
-          echo "Собираем поверх tdesktop $КОММИТ"
+          # Имена переменных латиницей: bash кириллицу в именах не принимает
+          # и молча падает с «command not found». Уже проверено на себе.
+          pin=$(tr -d '[:space:]' < desktop/tdesktop.pin)
+          echo "Собираем поверх tdesktop $pin"
           git clone https://github.com/telegramdesktop/tdesktop.git tdesktop
           cd tdesktop
-          git checkout "$КОММИТ"
+          git checkout "$pin"
           git submodule update --init --recursive --depth 1
 
       - name: Наложить заплатки.
         run: |
           shopt -s nullglob
-          ЗАПЛАТКИ=(desktop/patches/*.patch)
-          if [ ${#ЗАПЛАТКИ[@]} -eq 0 ]; then
+          patches=(desktop/patches/*.patch)
+          if [ ${#patches[@]} -eq 0 ]; then
             echo "Заплаток нет — собираем нетронутый tdesktop. Так и задумано:"
             echo "пока конвейер не собрал чистое дерево, любая поломка"
             echo "неотличима от «наша правка сломала»."
             exit 0
           fi
-          for з in "${ЗАПЛАТКИ[@]}"; do
-            echo "== $з"
-            git -C tdesktop apply --verbose "$GITHUB_WORKSPACE/$з"
+          for p in "${patches[@]}"; do
+            echo "== $p"
+            git -C tdesktop apply --verbose "$GITHUB_WORKSPACE/$p"
           done
 
       - name: Поставить poetry и ccache, собрать Dockerfile.
@@ -143,7 +145,7 @@ jobs:
             -D DESKTOP_APP_DISABLE_CRASH_REPORTS=ON
 
       - name: Сохранить кэш компилятора.
-        if: always() && env.ONLY_CACHE == 'false'
+        if: always() && steps.cache-tdesktop.outputs.cache-primary-key != ''
         uses: actions/cache/save@v4
         with:
           path: ${{ env.CCACHE_DIR }}
@@ -153,9 +155,9 @@ jobs:
         if: env.ONLY_CACHE == 'false'
         working-directory: tdesktop
         run: |
-          файл="out/Debug/Telegram"
-          if [ -f "$файл" ]; then
-            echo "Собралось: $(stat -c %s "$файл") байт"
+          out="out/Debug/Telegram"
+          if [ -f "$out" ]; then
+            echo "Собралось: $(stat -c %s "$out") байт"
           else
             echo "Сборка не дала файла"
             exit 1
