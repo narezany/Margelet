@@ -24,7 +24,10 @@ on:
   push:
     branches: [desktop]
     paths:
-      - 'desktop/**'
+      # Не 'desktop/**': правка плана не должна отменять идущую сборку и
+      # занимать раннер. Запускаем от того, что на сборку влияет.
+      - 'desktop/patches/**'
+      - 'desktop/tdesktop.pin'
       - '.github/workflows/desktop.yml'
   workflow_dispatch:
 
