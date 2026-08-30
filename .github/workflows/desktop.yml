@@ -30,6 +30,12 @@ on:
       - 'desktop/tdesktop.pin'
       - '.github/workflows/desktop.yml'
   workflow_dispatch:
+    inputs:
+      config:
+        description: 'Debug — быстрая проверка сборки; Release — то, что можно запускать'
+        type: choice
+        options: [Debug, Release]
+        default: Debug
 
 # Новый прогон отменяет предыдущий: держать два одинаковых смысла нет.
 concurrency:
@@ -42,6 +48,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       IMAGE: ghcr.io/telegramdesktop/tdesktop/centos_env:latest
+      CONFIG: ${{ inputs.config || 'Debug' }}
 
     steps:
       - name: Забрать эту ветку.
@@ -105,18 +112,33 @@ jobs:
         working-directory: tdesktop
         run: |
           ccache -z
+          # Ключи. Без своих api_id и api_hash телеграм пускает только в
+          # испытательный контур: войти настоящим аккаунтом нельзя. Поэтому
+          # для Debug берём их испытательные, а для Release — секреты
+          # репозитория, если они там есть.
+          if [ "$CONFIG" = "Release" ] && [ -n "${{ secrets.TDESKTOP_API_ID }}" ]; then
+            KEYS='-D TDESKTOP_API_ID=${{ secrets.TDESKTOP_API_ID }} -D TDESKTOP_API_HASH=${{ secrets.TDESKTOP_API_HASH }}'
+            echo "Собираем со своими ключами"
+          else
+            KEYS='-D TDESKTOP_API_TEST=ON'
+            echo "Собираем с испытательными ключами: настоящим аккаунтом войти будет нельзя"
+          fi
+          # Отладочную собираем без оптимизации — так быстрее, а смотреть на
+          # неё всё равно только компилятору. Для Release это было бы вредно.
+          FLAGS=""
+          if [ "$CONFIG" = "Debug" ]; then
+            FLAGS='-D CMAKE_C_FLAGS_DEBUG=-O0 -D CMAKE_CXX_FLAGS_DEBUG=-O0'
+          fi
           docker run --rm \
             -u $(id -u) \
             -v $PWD:/usr/src/tdesktop \
             -v ${{ env.CCACHE_DIR }}:/var/cache/ccache \
-            -e CONFIG=Debug \
+            -e CONFIG="$CONFIG" \
             -e CCACHE_SLOPPINESS=pch_defines,time_macros \
             "$IMAGE" \
             env -u CCACHE_DISABLE /usr/src/tdesktop/Telegram/build/docker/centos_env/build.sh \
-            -D CMAKE_CONFIGURATION_TYPES=Debug \
-            -D CMAKE_C_FLAGS_DEBUG="-O0 -fpch-preprocess" \
-            -D CMAKE_CXX_FLAGS_DEBUG="-O0 -fpch-preprocess" \
-            -D TDESKTOP_API_TEST=ON \
+            -D CMAKE_CONFIGURATION_TYPES="$CONFIG" \
+            $KEYS $FLAGS \
             -D DESKTOP_APP_DISABLE_AUTOUPDATE=ON \
             -D DESKTOP_APP_DISABLE_CRASH_REPORTS=ON
 
@@ -135,7 +157,7 @@ jobs:
       - name: Проверить, что вышло.
         working-directory: tdesktop
         run: |
-          out="out/Debug/Telegram"
+          out="out/$CONFIG/Telegram"
           if [ ! -f "$out" ]; then
             echo "Сборка не дала файла"
             exit 1
@@ -150,3 +172,11 @@ jobs:
             echo "Заплатка не доехала: в файле нет строки Margy"
             exit 1
           fi
+
+      - name: Отдать готовое.
+        if: env.CONFIG == 'Release'
+        uses: actions/upload-artifact@v4
+        with:
+          name: margy-linux
+          path: tdesktop/out/Release/Telegram
+          if-no-files-found: error
