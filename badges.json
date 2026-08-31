@@ -144,5 +144,15 @@
     "about_ru": "Galaxy S25",
     "about_zh": "Galaxy S25",
     "color": "8AB6E0"
+  },
+  {
+    "peer": 7241514685,
+    "title": "Helper",
+    "title_ru": "Помощник",
+    "title_zh": "助理",
+    "about": "Helped with Margy in the hard time.",
+    "about_ru": "Помог проекту в трудное время.",
+    "about_zh": "Helped with Margy in the hard time.",
+    "color": "32A6A8"
   }
 ]
