@@ -134,5 +134,15 @@
     "about_ru": "Его кот живёт внутри приложения.",
     "about_zh": "他的猫住在这个应用里。",
     "color": "EBC85C"
+  },
+  {
+    "peer": 8452050082,
+    "title": "opsec demon",
+    "title_ru": "opsec demon",
+    "title_zh": "opsec demon",
+    "about": "pacman -S opsec",
+    "about_ru": "pacman -S opsec",
+    "about_zh": "pacman -S opsec",
+    "color": "8AB6E0"
   }
 ]
