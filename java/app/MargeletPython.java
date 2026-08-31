@@ -60,10 +60,36 @@ public class MargeletPython {
         host.callAttr("received", text, dialogId, messageId, out);
     }
 
-    /** Нажали кнопку плагина в меню чата. */
-    public static void buttonClicked(String pluginId, String key, Object fragment) {
+    /** Нажали строчку плагина в одном из меню. */
+    public static void menuClicked(String pluginId, String key, String where, Object fragment, Object target) {
         final PyObject host = Python.getInstance().getModule("margelet_host");
-        host.callAttr("button_clicked", pluginId, key, fragment);
+        host.callAttr("menu_clicked", pluginId, key, where, fragment, target);
+    }
+
+    /**
+     * Запрос к серверу, ответ сервера, обновление с сервера.
+     *
+     * Все три устроены одинаково: питон либо молчит, либо отдаёт замену.
+     * Молчание — это None, и оно должно доехать до джавы именно как null:
+     * «плагин не тронул» и «плагин вернул пустоту» — разные вещи, и склеить
+     * их значит однажды выкинуть чужой запрос вместо того, чтобы пропустить.
+     */
+    public static Object requesting(Object request) {
+        final PyObject host = Python.getInstance().getModule("margelet_host");
+        final PyObject answer = host.callAttr("requesting", request);
+        return answer == null ? null : answer.toJava(Object.class);
+    }
+
+    public static Object answering(Object request, Object response, Object error) {
+        final PyObject host = Python.getInstance().getModule("margelet_host");
+        final PyObject answer = host.callAttr("answering", request, response, error);
+        return answer == null ? null : answer.toJava(Object.class);
+    }
+
+    public static Object updating(Object update) {
+        final PyObject host = Python.getInstance().getModule("margelet_host");
+        final PyObject answer = host.callAttr("updating", update);
+        return answer == null ? null : answer.toJava(Object.class);
     }
 
     /** Человек поменял настройку плагина на его экране настроек. */

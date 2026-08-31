@@ -108,7 +108,11 @@ def on_start():
 | `margelet.on_message(调用)` | 来了一条消息 |
 | `margelet.on_deleted(调用)` | 消息被删除 |
 | `margelet.on_pin(调用)` | 会话被置顶或取消置顶；可以取消 |
+| `margelet.on_request(调用)` | 发往服务器的请求，在发出之前；可以取消或替换 |
+| `margelet.on_answer(调用)` | 服务器的回应，在应用看到它之前 |
+| `margelet.on_update(调用)` | 服务器发来的更新，在被处理之前 |
 | `margelet.button(标题, 调用)` | 在聊天菜单（三个点）里加自己的一行 |
+| `margelet.menu(位置, 标题, 调用)` | 在聊天、资料页、消息或侧边菜单里加自己的一行 |
 | `margelet.on_settings(调用)` | 有人改了本插件的某项设置 |
 | `margelet.pick_file(调用, types=)` | 让人选一个文件 |
 
@@ -250,6 +254,81 @@ def count(chat):
 拿到自己的堆栈。
 
 `print()` 也会进控制台——它被接管了。
+
+### 在其余菜单里的一行
+
+`margelet.button` 是聊天菜单的简写。位置一共四个，通往它们的门只有一扇：
+
+```python
+def on_start():
+    margelet.menu("chat", "数一数", count)
+    margelet.menu("profile", "这是谁的资料页", whose)
+    margelet.menu("message", "这是什么消息", what)
+    margelet.menu("drawer", "数一数", count)
+
+def count(界面):
+    margelet.toast("在聊天里或侧边菜单里按了")
+
+def whose(界面, 号码):
+    margelet.toast("这是 " + str(号码))
+
+def what(界面, 消息):
+    margelet.toast("消息 " + str(消息.getId()))
+```
+
+| 位置 | 是什么 | 回调会收到什么 |
+|---|---|---|
+| `"chat"` | 会话顶部的三个点 | 界面 |
+| `"profile"` | 人、群或频道页面上的三个点 | 界面，以及这是谁的资料页 |
+| `"message"` | 长按一条消息 | 界面，以及这条消息本身 |
+| `"drawer"` | 从左边滑出来的侧边菜单 | 界面 |
+
+回调的参数有多少，取决于有多少意义：资料页有对象，侧边菜单没有。回调要按
+自己的位置来写，但也因此不必每次都去接一个空。
+
+这四个地方，插件的行都排在最后，在所有常规条目之后。
+
+### 和服务器说话
+
+三扇门，通向应用与服务器之间来往的东西。这是这里最锋利的一处，所以先说代价。
+
+```python
+def on_start():
+    margelet.on_request(went)
+    margelet.on_answer(came)
+    margelet.on_update(happened)
+
+def went(请求):
+    margelet.log("请求", 请求.getClass().getSimpleName())
+
+def came(请求, 回应, 错误):
+    margelet.log("回应", 回应.getClass().getSimpleName())
+
+def happened(更新):
+    margelet.log("更新", 更新.getClass().getSimpleName())
+```
+
+三扇门的返回值读法相同：
+
+| 返回什么 | 会怎样 |
+|---|---|
+| 什么都不返回 | 原样放行 |
+| `False` | 完全不放行 |
+| 一个对象 | 放行这个对象 |
+
+**回调是在网络线程上想事情的。** 不是画界面的那条线程——但它想的时候，应用
+对服务器是沉默的。客户端对服务器说的一切都走 `on_request`，服务器对客户端说
+的一切都走 `on_update`：新消息、编辑、已读、谁在打字。安静的会话里每分钟几十
+条，热闹的会话里几百条。
+
+因此工作的顺序是：先看这是不是你要的东西，然后再动手。耗时的活儿挪到
+`margelet.background` 里。回调想事情超过五十毫秒，引擎会自己在控制台里说出
+来——自己的延迟从里面是感觉不到的，但人是能察觉的。
+
+被取消的请求不会无声消失：发出它的那一方会拿到 `MARGELET_PLUGIN_CANCELLED`
+错误。否则，等回应的界面就会一直等下去。
+
+在这些回调里发自己的请求是可以的——它会绕过插件，而不会绕回你这里。
 
 ### 消息被删除
 

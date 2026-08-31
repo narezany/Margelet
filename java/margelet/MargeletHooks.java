@@ -44,23 +44,45 @@ public class MargeletHooks {
      */
     public static final String CANCEL = "\u0000margelet-cancel";
 
-    /** Кнопка плагина в меню чата. */
+    /** Строчка плагина в одном из меню приложения. */
     public static final class Button {
         public final String pluginId;
         public final String key;
         public final String title;
+        /** В каком меню стоит: {@link #CHAT}, {@link #PROFILE}, {@link #MESSAGE}, {@link #DRAWER}. */
+        public final String where;
 
-        Button(String pluginId, String key, String title) {
+        Button(String pluginId, String key, String title, String where) {
             this.pluginId = pluginId;
             this.key = key;
             this.title = title;
+            this.where = where;
         }
     }
+
+    /** Три точки в шапке переписки. */
+    public static final String CHAT = "chat";
+    /** Три точки на экране человека, группы или канала. */
+    public static final String PROFILE = "profile";
+    /** Долгое нажатие на сообщение. */
+    public static final String MESSAGE = "message";
+    /** Боковое меню, которое выезжает слева. */
+    public static final String DRAWER = "drawer";
 
     private static volatile boolean wantsSend;
     private static volatile boolean wantsMedia;
     private static volatile boolean wantsMessage;
-    private static final List<Button> buttons = new ArrayList<>();
+    private static volatile boolean wantsRequest;
+    private static volatile boolean wantsAnswer;
+    private static volatile boolean wantsUpdate;
+    /**
+     * Строчки плагинов по местам. Раньше здесь был один список — только меню
+     * чата, — и место было не нужно. Теперь мест четыре, а список остаётся
+     * один на место: нажатие приходит номером строчки, и номера у разных
+     * меню свои.
+     */
+    private static final java.util.LinkedHashMap<String, List<Button>> menus =
+            new java.util.LinkedHashMap<>();
     private static boolean watching;
 
     // --- подписка со стороны питона ---
@@ -86,39 +108,96 @@ public class MargeletHooks {
         return wantsMedia;
     }
 
+    public static void wantRequest() {
+        wantsRequest = true;
+    }
+
+    public static void wantAnswer() {
+        wantsAnswer = true;
+    }
+
+    public static void wantUpdate() {
+        wantsUpdate = true;
+    }
+
+    public static boolean hasRequest() {
+        return wantsRequest;
+    }
+
+    public static boolean hasAnswer() {
+        return wantsAnswer;
+    }
+
+    public static boolean hasUpdate() {
+        return wantsUpdate;
+    }
+
     /**
-     * Кнопка плагина в меню чата. Плагин зовёт это при запуске; при
+     * Строчка плагина в меню чата. Плагин зовёт это при запуске; при
      * перезапуске приложения список собирается заново, поэтому одинаковую
      * запись заменяем, а не копим.
      */
     public static synchronized void addButton(String pluginId, String key, String title) {
-        for (int i = buttons.size() - 1; i >= 0; i--) {
-            if (buttons.get(i).pluginId.equals(pluginId) && buttons.get(i).key.equals(key)) {
-                buttons.remove(i);
+        addMenuItem(pluginId, key, title, CHAT);
+    }
+
+    /** То же самое, но в любое из четырёх меню. */
+    public static synchronized void addMenuItem(String pluginId, String key, String title, String where) {
+        List<Button> list = menus.get(where);
+        if (list == null) {
+            list = new ArrayList<>();
+            menus.put(where, list);
+        }
+        for (int i = list.size() - 1; i >= 0; i--) {
+            if (list.get(i).pluginId.equals(pluginId) && list.get(i).key.equals(key)) {
+                list.remove(i);
             }
         }
-        buttons.add(new Button(pluginId, key, title));
+        list.add(new Button(pluginId, key, title, where));
     }
 
-    public static synchronized List<Button> buttons() {
-        return new ArrayList<>(buttons);
+    /** Строчки плагинов для одного меню. Пусто — значит рисовать нечего. */
+    public static synchronized List<Button> menu(String where) {
+        final List<Button> list = menus.get(where);
+        return list == null ? new ArrayList<>() : new ArrayList<>(list);
     }
 
-    public static synchronized Button button(int index) {
-        return index >= 0 && index < buttons.size() ? buttons.get(index) : null;
+    public static synchronized Button menuItem(String where, int index) {
+        final List<Button> list = menus.get(where);
+        return list != null && index >= 0 && index < list.size() ? list.get(index) : null;
     }
 
-    /** Нажали кнопку плагина. Экран чата уходит плагину как есть. */
+    public static List<Button> buttons() {
+        return menu(CHAT);
+    }
+
+    public static Button button(int index) {
+        return menuItem(CHAT, index);
+    }
+
+    /** Нажали строчку плагина в меню чата. Экран уходит плагину как есть. */
     public static void buttonClicked(int index, Object fragment) {
-        final Button button = button(index);
+        menuClicked(CHAT, index, fragment, null);
+    }
+
+    /**
+     * Нажали строчку плагина в любом меню.
+     *
+     * Кроме экрана плагин получает то, на чём меню открыли: в профиле — номер
+     * человека или чата, на сообщении — само сообщение. В меню чата и в
+     * боковом меню такого предмета нет, туда уходит null.
+     */
+    public static void menuClicked(String where, int index, Object fragment, Object target) {
+        final Button button = menuItem(where, index);
         if (button == null) {
             return;
         }
         MargeletPluginHost.post(() -> {
             try {
-                MargeletPluginHost.python("buttonClicked",
-                        new Class<?>[]{String.class, String.class, Object.class},
-                        button.pluginId, button.key, fragment);
+                MargeletPluginHost.python("menuClicked",
+                        new Class<?>[]{String.class, String.class, String.class,
+                                Object.class, Object.class},
+                        button.pluginId, button.key, button.where, fragment, target);
             } catch (Throwable t) {
                 FileLog.e(t);
                 MargeletPluginHost.log(button.title, String.valueOf(t), true);
@@ -252,6 +331,102 @@ public class MargeletHooks {
             MargeletPluginHost.log("margelet", String.valueOf(t), true);
             return text;
         }
+    }
+
+    // --- разговор с сервером ---
+
+    /**
+     * Плагин уже внутри одной из дверей этого раздела.
+     *
+     * Нужно вот зачем: плагин, разглядывая чужой запрос, вполне может послать
+     * свой — например, спросить у сервера, кто этот человек. Этот его запрос
+     * снова придёт сюда, оттуда снова в питон, и так до упора стека. Пока мы
+     * внутри — чужие запросы проходят мимо плагина, как будто он не подписан.
+     */
+    private static final ThreadLocal<Boolean> inside = new ThreadLocal<>();
+
+    private static boolean busy() {
+        return Boolean.TRUE.equals(inside.get());
+    }
+
+    /**
+     * Общий разговор с питоном для трёх дверей ниже.
+     *
+     * Ответ питона читается так: ничего не вернул — оставить как было, вернул
+     * ложь — не пропускать, вернул предмет — отправить его вместо. Три исхода
+     * нарочно разные: «не тронул» и «замени на пустоту» — не одно и то же, и
+     * на этом различии в форке уже один раз погорели.
+     */
+    private static Object ask(String method, String about, Class<?>[] types, Object[] args, Object original) {
+        if (busy()) {
+            return original;
+        }
+        inside.set(Boolean.TRUE);
+        final long started = System.currentTimeMillis();
+        try {
+            final Object answer = MargeletPluginHost.pythonValue(method, types, args);
+            if (answer == null) {
+                return original;
+            }
+            if (Boolean.FALSE.equals(answer)) {
+                return null;
+            }
+            return answer;
+        } catch (Throwable t) {
+            FileLog.e(t);
+            MargeletPluginHost.log("margelet", String.valueOf(t), true);
+            return original;
+        } finally {
+            inside.set(Boolean.FALSE);
+            final long spent = System.currentTimeMillis() - started;
+            // Здесь питон думает прямо на потоке сети. Своей задержки он не
+            // видит, поэтому говорим о ней вслух — иначе автор плагина узнает
+            // о ней от людей, у которых «телеграм тормозит».
+            if (spent > 50) {
+                MargeletPluginHost.log("margelet",
+                        about + " думал " + spent + " мс на потоке сети", true);
+            }
+        }
+    }
+
+    /**
+     * Запрос к серверу, пока он ещё не ушёл.
+     *
+     * @return что отправлять вместо него, или null — не отправлять вовсе.
+     */
+    public static Object requesting(Object request) {
+        if (!wantsRequest || request == null) {
+            return request;
+        }
+        return ask("requesting", "обработчик запроса",
+                new Class<?>[]{Object.class}, new Object[]{request}, request);
+    }
+
+    /**
+     * Ответ сервера, пока его ещё не увидело приложение.
+     *
+     * @return что подсунуть вместо ответа, или null — считать, что ответа нет.
+     */
+    public static Object answering(Object request, Object response, Object error) {
+        if (!wantsAnswer || response == null) {
+            return response;
+        }
+        return ask("answering", "обработчик ответа",
+                new Class<?>[]{Object.class, Object.class, Object.class},
+                new Object[]{request, response, error}, response);
+    }
+
+    /**
+     * Обновление с сервера, пока его ещё не разобрало приложение.
+     *
+     * @return что разбирать вместо него, или null — пропустить совсем.
+     */
+    public static Object updating(Object update) {
+        if (!wantsUpdate || update == null) {
+            return update;
+        }
+        return ask("updating", "обработчик обновления",
+                new Class<?>[]{Object.class}, new Object[]{update}, update);
     }
 
     // --- приход сообщений ---

@@ -1,5 +1,5 @@
 diff --git a/TMessagesProj/build.gradle b/TMessagesProj/build.gradle
-index 7cc3a8e3..90805001 100644
+index 7cc3a8e35..908050014 100644
 --- a/TMessagesProj/build.gradle
 +++ b/TMessagesProj/build.gradle
 @@ -62,6 +62,14 @@ dependencies {
@@ -45,7 +45,7 @@ index 7cc3a8e3..90805001 100644
              buildConfigField "String", "APP_CENTER_HASH", "\"\""
              buildConfigField "String", "BETA_URL", "\"" + getProps("BETA_PRIVATE_URL") + "\""
 diff --git a/TMessagesProj/proguard-rules.pro b/TMessagesProj/proguard-rules.pro
-index aeab02b2..3591f9c3 100644
+index aeab02b29..3591f9c35 100644
 --- a/TMessagesProj/proguard-rules.pro
 +++ b/TMessagesProj/proguard-rules.pro
 @@ -111,6 +111,37 @@
@@ -89,7 +89,7 @@ index aeab02b2..3591f9c3 100644
 \ No newline at end of file
 diff --git a/TMessagesProj/src/main/java/de/robv/android/xposed/XC_MethodHook.java b/TMessagesProj/src/main/java/de/robv/android/xposed/XC_MethodHook.java
 new file mode 100644
-index 00000000..65d3c943
+index 000000000..65d3c9432
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/de/robv/android/xposed/XC_MethodHook.java
 @@ -0,0 +1,107 @@
@@ -202,7 +202,7 @@ index 00000000..65d3c943
 +}
 diff --git a/TMessagesProj/src/main/java/de/robv/android/xposed/XposedBridge.java b/TMessagesProj/src/main/java/de/robv/android/xposed/XposedBridge.java
 new file mode 100644
-index 00000000..0acb2913
+index 000000000..0acb29136
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/de/robv/android/xposed/XposedBridge.java
 @@ -0,0 +1,96 @@
@@ -304,7 +304,7 @@ index 00000000..0acb2913
 +}
 diff --git a/TMessagesProj/src/main/java/de/robv/android/xposed/XposedHelpers.java b/TMessagesProj/src/main/java/de/robv/android/xposed/XposedHelpers.java
 new file mode 100644
-index 00000000..d896440b
+index 000000000..d896440b5
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/de/robv/android/xposed/XposedHelpers.java
 @@ -0,0 +1,223 @@
@@ -533,7 +533,7 @@ index 00000000..d896440b
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/margelet/MargeletBadge.java b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletBadge.java
 new file mode 100644
-index 00000000..d0eb7b3c
+index 000000000..d0eb7b3c6
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletBadge.java
 @@ -0,0 +1,387 @@
@@ -926,7 +926,7 @@ index 00000000..d0eb7b3c
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/margelet/MargeletBanner.java b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletBanner.java
 new file mode 100644
-index 00000000..95f47011
+index 000000000..95f47011a
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletBanner.java
 @@ -0,0 +1,342 @@
@@ -1274,7 +1274,7 @@ index 00000000..95f47011
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/margelet/MargeletBubbles.java b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletBubbles.java
 new file mode 100644
-index 00000000..53cabbf3
+index 000000000..53cabbf3e
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletBubbles.java
 @@ -0,0 +1,76 @@
@@ -1356,7 +1356,7 @@ index 00000000..53cabbf3
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/margelet/MargeletCats.java b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletCats.java
 new file mode 100644
-index 00000000..a6f9b07d
+index 000000000..a6f9b07d2
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletCats.java
 @@ -0,0 +1,285 @@
@@ -1647,7 +1647,7 @@ index 00000000..a6f9b07d
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/margelet/MargeletConfig.java b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletConfig.java
 new file mode 100644
-index 00000000..7b032f5e
+index 000000000..7b032f5ed
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletConfig.java
 @@ -0,0 +1,465 @@
@@ -2118,7 +2118,7 @@ index 00000000..7b032f5e
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/margelet/MargeletCopy.java b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletCopy.java
 new file mode 100644
-index 00000000..49188575
+index 000000000..491885753
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletCopy.java
 @@ -0,0 +1,288 @@
@@ -2412,7 +2412,7 @@ index 00000000..49188575
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/margelet/MargeletFiles.java b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletFiles.java
 new file mode 100644
-index 00000000..cc3051d3
+index 000000000..cc3051d38
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletFiles.java
 @@ -0,0 +1,159 @@
@@ -2577,7 +2577,7 @@ index 00000000..cc3051d3
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/margelet/MargeletFonts.java b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletFonts.java
 new file mode 100644
-index 00000000..dc944cfe
+index 000000000..dc944cfe1
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletFonts.java
 @@ -0,0 +1,365 @@
@@ -2948,7 +2948,7 @@ index 00000000..dc944cfe
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/margelet/MargeletGifts.java b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletGifts.java
 new file mode 100644
-index 00000000..33ff716b
+index 000000000..33ff716bd
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletGifts.java
 @@ -0,0 +1,189 @@
@@ -3143,7 +3143,7 @@ index 00000000..33ff716b
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/margelet/MargeletGradient.java b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletGradient.java
 new file mode 100644
-index 00000000..0a0f1c38
+index 000000000..0a0f1c388
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletGradient.java
 @@ -0,0 +1,565 @@
@@ -3714,7 +3714,7 @@ index 00000000..0a0f1c38
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/margelet/MargeletGroup.java b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletGroup.java
 new file mode 100644
-index 00000000..bf90c7ab
+index 000000000..bf90c7ab5
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletGroup.java
 @@ -0,0 +1,730 @@
@@ -4450,7 +4450,7 @@ index 00000000..bf90c7ab
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/margelet/MargeletHookCall.java b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletHookCall.java
 new file mode 100644
-index 00000000..3a37575e
+index 000000000..3a37575eb
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletHookCall.java
 @@ -0,0 +1,27 @@
@@ -4483,7 +4483,7 @@ index 00000000..3a37575e
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/margelet/MargeletHookEngine.java b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletHookEngine.java
 new file mode 100644
-index 00000000..0b8ac254
+index 000000000..0b8ac254b
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletHookEngine.java
 @@ -0,0 +1,173 @@
@@ -4662,10 +4662,10 @@ index 00000000..0b8ac254
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/margelet/MargeletHooks.java b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletHooks.java
 new file mode 100644
-index 00000000..3a78caf7
+index 000000000..e45b31a19
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletHooks.java
-@@ -0,0 +1,628 @@
+@@ -0,0 +1,803 @@
 +package org.telegram.margelet;
 +
 +import org.telegram.messenger.AndroidUtilities;
@@ -4712,23 +4712,45 @@ index 00000000..3a78caf7
 +     */
 +    public static final String CANCEL = "\u0000margelet-cancel";
 +
-+    /** Кнопка плагина в меню чата. */
++    /** Строчка плагина в одном из меню приложения. */
 +    public static final class Button {
 +        public final String pluginId;
 +        public final String key;
 +        public final String title;
++        /** В каком меню стоит: {@link #CHAT}, {@link #PROFILE}, {@link #MESSAGE}, {@link #DRAWER}. */
++        public final String where;
 +
-+        Button(String pluginId, String key, String title) {
++        Button(String pluginId, String key, String title, String where) {
 +            this.pluginId = pluginId;
 +            this.key = key;
 +            this.title = title;
++            this.where = where;
 +        }
 +    }
++
++    /** Три точки в шапке переписки. */
++    public static final String CHAT = "chat";
++    /** Три точки на экране человека, группы или канала. */
++    public static final String PROFILE = "profile";
++    /** Долгое нажатие на сообщение. */
++    public static final String MESSAGE = "message";
++    /** Боковое меню, которое выезжает слева. */
++    public static final String DRAWER = "drawer";
 +
 +    private static volatile boolean wantsSend;
 +    private static volatile boolean wantsMedia;
 +    private static volatile boolean wantsMessage;
-+    private static final List<Button> buttons = new ArrayList<>();
++    private static volatile boolean wantsRequest;
++    private static volatile boolean wantsAnswer;
++    private static volatile boolean wantsUpdate;
++    /**
++     * Строчки плагинов по местам. Раньше здесь был один список — только меню
++     * чата, — и место было не нужно. Теперь мест четыре, а список остаётся
++     * один на место: нажатие приходит номером строчки, и номера у разных
++     * меню свои.
++     */
++    private static final java.util.LinkedHashMap<String, List<Button>> menus =
++            new java.util.LinkedHashMap<>();
 +    private static boolean watching;
 +
 +    // --- подписка со стороны питона ---
@@ -4754,39 +4776,96 @@ index 00000000..3a78caf7
 +        return wantsMedia;
 +    }
 +
++    public static void wantRequest() {
++        wantsRequest = true;
++    }
++
++    public static void wantAnswer() {
++        wantsAnswer = true;
++    }
++
++    public static void wantUpdate() {
++        wantsUpdate = true;
++    }
++
++    public static boolean hasRequest() {
++        return wantsRequest;
++    }
++
++    public static boolean hasAnswer() {
++        return wantsAnswer;
++    }
++
++    public static boolean hasUpdate() {
++        return wantsUpdate;
++    }
++
 +    /**
-+     * Кнопка плагина в меню чата. Плагин зовёт это при запуске; при
++     * Строчка плагина в меню чата. Плагин зовёт это при запуске; при
 +     * перезапуске приложения список собирается заново, поэтому одинаковую
 +     * запись заменяем, а не копим.
 +     */
 +    public static synchronized void addButton(String pluginId, String key, String title) {
-+        for (int i = buttons.size() - 1; i >= 0; i--) {
-+            if (buttons.get(i).pluginId.equals(pluginId) && buttons.get(i).key.equals(key)) {
-+                buttons.remove(i);
++        addMenuItem(pluginId, key, title, CHAT);
++    }
++
++    /** То же самое, но в любое из четырёх меню. */
++    public static synchronized void addMenuItem(String pluginId, String key, String title, String where) {
++        List<Button> list = menus.get(where);
++        if (list == null) {
++            list = new ArrayList<>();
++            menus.put(where, list);
++        }
++        for (int i = list.size() - 1; i >= 0; i--) {
++            if (list.get(i).pluginId.equals(pluginId) && list.get(i).key.equals(key)) {
++                list.remove(i);
 +            }
 +        }
-+        buttons.add(new Button(pluginId, key, title));
++        list.add(new Button(pluginId, key, title, where));
 +    }
 +
-+    public static synchronized List<Button> buttons() {
-+        return new ArrayList<>(buttons);
++    /** Строчки плагинов для одного меню. Пусто — значит рисовать нечего. */
++    public static synchronized List<Button> menu(String where) {
++        final List<Button> list = menus.get(where);
++        return list == null ? new ArrayList<>() : new ArrayList<>(list);
 +    }
 +
-+    public static synchronized Button button(int index) {
-+        return index >= 0 && index < buttons.size() ? buttons.get(index) : null;
++    public static synchronized Button menuItem(String where, int index) {
++        final List<Button> list = menus.get(where);
++        return list != null && index >= 0 && index < list.size() ? list.get(index) : null;
 +    }
 +
-+    /** Нажали кнопку плагина. Экран чата уходит плагину как есть. */
++    public static List<Button> buttons() {
++        return menu(CHAT);
++    }
++
++    public static Button button(int index) {
++        return menuItem(CHAT, index);
++    }
++
++    /** Нажали строчку плагина в меню чата. Экран уходит плагину как есть. */
 +    public static void buttonClicked(int index, Object fragment) {
-+        final Button button = button(index);
++        menuClicked(CHAT, index, fragment, null);
++    }
++
++    /**
++     * Нажали строчку плагина в любом меню.
++     *
++     * Кроме экрана плагин получает то, на чём меню открыли: в профиле — номер
++     * человека или чата, на сообщении — само сообщение. В меню чата и в
++     * боковом меню такого предмета нет, туда уходит null.
++     */
++    public static void menuClicked(String where, int index, Object fragment, Object target) {
++        final Button button = menuItem(where, index);
 +        if (button == null) {
 +            return;
 +        }
 +        MargeletPluginHost.post(() -> {
 +            try {
-+                MargeletPluginHost.python("buttonClicked",
-+                        new Class<?>[]{String.class, String.class, Object.class},
-+                        button.pluginId, button.key, fragment);
++                MargeletPluginHost.python("menuClicked",
++                        new Class<?>[]{String.class, String.class, String.class,
++                                Object.class, Object.class},
++                        button.pluginId, button.key, button.where, fragment, target);
 +            } catch (Throwable t) {
 +                FileLog.e(t);
 +                MargeletPluginHost.log(button.title, String.valueOf(t), true);
@@ -4920,6 +4999,102 @@ index 00000000..3a78caf7
 +            MargeletPluginHost.log("margelet", String.valueOf(t), true);
 +            return text;
 +        }
++    }
++
++    // --- разговор с сервером ---
++
++    /**
++     * Плагин уже внутри одной из дверей этого раздела.
++     *
++     * Нужно вот зачем: плагин, разглядывая чужой запрос, вполне может послать
++     * свой — например, спросить у сервера, кто этот человек. Этот его запрос
++     * снова придёт сюда, оттуда снова в питон, и так до упора стека. Пока мы
++     * внутри — чужие запросы проходят мимо плагина, как будто он не подписан.
++     */
++    private static final ThreadLocal<Boolean> inside = new ThreadLocal<>();
++
++    private static boolean busy() {
++        return Boolean.TRUE.equals(inside.get());
++    }
++
++    /**
++     * Общий разговор с питоном для трёх дверей ниже.
++     *
++     * Ответ питона читается так: ничего не вернул — оставить как было, вернул
++     * ложь — не пропускать, вернул предмет — отправить его вместо. Три исхода
++     * нарочно разные: «не тронул» и «замени на пустоту» — не одно и то же, и
++     * на этом различии в форке уже один раз погорели.
++     */
++    private static Object ask(String method, String about, Class<?>[] types, Object[] args, Object original) {
++        if (busy()) {
++            return original;
++        }
++        inside.set(Boolean.TRUE);
++        final long started = System.currentTimeMillis();
++        try {
++            final Object answer = MargeletPluginHost.pythonValue(method, types, args);
++            if (answer == null) {
++                return original;
++            }
++            if (Boolean.FALSE.equals(answer)) {
++                return null;
++            }
++            return answer;
++        } catch (Throwable t) {
++            FileLog.e(t);
++            MargeletPluginHost.log("margelet", String.valueOf(t), true);
++            return original;
++        } finally {
++            inside.set(Boolean.FALSE);
++            final long spent = System.currentTimeMillis() - started;
++            // Здесь питон думает прямо на потоке сети. Своей задержки он не
++            // видит, поэтому говорим о ней вслух — иначе автор плагина узнает
++            // о ней от людей, у которых «телеграм тормозит».
++            if (spent > 50) {
++                MargeletPluginHost.log("margelet",
++                        about + " думал " + spent + " мс на потоке сети", true);
++            }
++        }
++    }
++
++    /**
++     * Запрос к серверу, пока он ещё не ушёл.
++     *
++     * @return что отправлять вместо него, или null — не отправлять вовсе.
++     */
++    public static Object requesting(Object request) {
++        if (!wantsRequest || request == null) {
++            return request;
++        }
++        return ask("requesting", "обработчик запроса",
++                new Class<?>[]{Object.class}, new Object[]{request}, request);
++    }
++
++    /**
++     * Ответ сервера, пока его ещё не увидело приложение.
++     *
++     * @return что подсунуть вместо ответа, или null — считать, что ответа нет.
++     */
++    public static Object answering(Object request, Object response, Object error) {
++        if (!wantsAnswer || response == null) {
++            return response;
++        }
++        return ask("answering", "обработчик ответа",
++                new Class<?>[]{Object.class, Object.class, Object.class},
++                new Object[]{request, response, error}, response);
++    }
++
++    /**
++     * Обновление с сервера, пока его ещё не разобрало приложение.
++     *
++     * @return что разбирать вместо него, или null — пропустить совсем.
++     */
++    public static Object updating(Object update) {
++        if (!wantsUpdate || update == null) {
++            return update;
++        }
++        return ask("updating", "обработчик обновления",
++                new Class<?>[]{Object.class}, new Object[]{update}, update);
 +    }
 +
 +    // --- приход сообщений ---
@@ -5296,7 +5471,7 @@ index 00000000..3a78caf7
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/margelet/MargeletLinks.java b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletLinks.java
 new file mode 100644
-index 00000000..43524f9a
+index 000000000..43524f9a0
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletLinks.java
 @@ -0,0 +1,180 @@
@@ -5482,7 +5657,7 @@ index 00000000..43524f9a
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/margelet/MargeletMarkup.java b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletMarkup.java
 new file mode 100644
-index 00000000..c6516692
+index 000000000..c65166924
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletMarkup.java
 @@ -0,0 +1,565 @@
@@ -6053,7 +6228,7 @@ index 00000000..c6516692
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/margelet/MargeletMeow.java b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletMeow.java
 new file mode 100644
-index 00000000..f3d81a4d
+index 000000000..f3d81a4d7
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletMeow.java
 @@ -0,0 +1,115 @@
@@ -6174,7 +6349,7 @@ index 00000000..f3d81a4d
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/margelet/MargeletPlane3D.java b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletPlane3D.java
 new file mode 100644
-index 00000000..545fca3f
+index 000000000..545fca3f8
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletPlane3D.java
 @@ -0,0 +1,330 @@
@@ -6510,7 +6685,7 @@ index 00000000..545fca3f
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/margelet/MargeletPluginHost.java b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletPluginHost.java
 new file mode 100644
-index 00000000..2c4620e9
+index 000000000..2c4620e9e
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletPluginHost.java
 @@ -0,0 +1,266 @@
@@ -6782,7 +6957,7 @@ index 00000000..2c4620e9
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/margelet/MargeletPlugins.java b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletPlugins.java
 new file mode 100644
-index 00000000..d428d7e4
+index 000000000..d428d7e4f
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletPlugins.java
 @@ -0,0 +1,748 @@
@@ -7536,7 +7711,7 @@ index 00000000..d428d7e4
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/margelet/MargeletPrivacy.java b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletPrivacy.java
 new file mode 100644
-index 00000000..09f68164
+index 000000000..09f681649
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletPrivacy.java
 @@ -0,0 +1,63 @@
@@ -7605,7 +7780,7 @@ index 00000000..09f68164
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/margelet/MargeletRemote.java b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletRemote.java
 new file mode 100644
-index 00000000..865d80f7
+index 000000000..865d80f77
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletRemote.java
 @@ -0,0 +1,243 @@
@@ -7854,7 +8029,7 @@ index 00000000..865d80f7
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/margelet/MargeletScheme.java b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletScheme.java
 new file mode 100644
-index 00000000..b0df9ecd
+index 000000000..b0df9ecdb
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletScheme.java
 @@ -0,0 +1,360 @@
@@ -8220,7 +8395,7 @@ index 00000000..b0df9ecd
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/margelet/MargeletSeizure.java b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletSeizure.java
 new file mode 100644
-index 00000000..8a3b8ef8
+index 000000000..8a3b8ef81
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletSeizure.java
 @@ -0,0 +1,238 @@
@@ -8464,7 +8639,7 @@ index 00000000..8a3b8ef8
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/margelet/MargeletSpans.java b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletSpans.java
 new file mode 100644
-index 00000000..c1817153
+index 000000000..c18171538
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletSpans.java
 @@ -0,0 +1,479 @@
@@ -8949,7 +9124,7 @@ index 00000000..c1817153
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/margelet/MargeletStore.java b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletStore.java
 new file mode 100644
-index 00000000..464b688f
+index 000000000..464b688f6
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletStore.java
 @@ -0,0 +1,233 @@
@@ -9188,7 +9363,7 @@ index 00000000..464b688f
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/margelet/MargeletStrings.java b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletStrings.java
 new file mode 100644
-index 00000000..bf34eff4
+index 000000000..bf34eff45
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletStrings.java
 @@ -0,0 +1,72 @@
@@ -9266,7 +9441,7 @@ index 00000000..bf34eff4
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/margelet/MargeletTags.java b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletTags.java
 new file mode 100644
-index 00000000..bbaa84f3
+index 000000000..bbaa84f39
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletTags.java
 @@ -0,0 +1,152 @@
@@ -9424,7 +9599,7 @@ index 00000000..bbaa84f3
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/margelet/MargeletTheme.java b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletTheme.java
 new file mode 100644
-index 00000000..dd5e0a34
+index 000000000..dd5e0a34f
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletTheme.java
 @@ -0,0 +1,38 @@
@@ -9468,7 +9643,7 @@ index 00000000..dd5e0a34
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/margelet/MargeletUpdate.java b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletUpdate.java
 new file mode 100644
-index 00000000..54c5f70e
+index 000000000..54c5f70e7
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletUpdate.java
 @@ -0,0 +1,404 @@
@@ -9878,7 +10053,7 @@ index 00000000..54c5f70e
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/margelet/MargeletWordmark.java b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletWordmark.java
 new file mode 100644
-index 00000000..c77ddf9b
+index 000000000..c77ddf9b0
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletWordmark.java
 @@ -0,0 +1,84 @@
@@ -9967,7 +10142,7 @@ index 00000000..c77ddf9b
 +    }
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/messenger/AndroidUtilities.java b/TMessagesProj/src/main/java/org/telegram/messenger/AndroidUtilities.java
-index b8239d97..02133992 100644
+index b8239d972..02133992e 100644
 --- a/TMessagesProj/src/main/java/org/telegram/messenger/AndroidUtilities.java
 +++ b/TMessagesProj/src/main/java/org/telegram/messenger/AndroidUtilities.java
 @@ -261,6 +261,12 @@ public class AndroidUtilities {
@@ -10025,7 +10200,7 @@ index b8239d97..02133992 100644
              Intent intent = new Intent(Intent.ACTION_VIEW);
              intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 diff --git a/TMessagesProj/src/main/java/org/telegram/messenger/ApplicationLoader.java b/TMessagesProj/src/main/java/org/telegram/messenger/ApplicationLoader.java
-index fc43c648..89c03349 100644
+index fc43c648c..89c033499 100644
 --- a/TMessagesProj/src/main/java/org/telegram/messenger/ApplicationLoader.java
 +++ b/TMessagesProj/src/main/java/org/telegram/messenger/ApplicationLoader.java
 @@ -289,6 +289,13 @@ public class ApplicationLoader extends Application {
@@ -10043,7 +10218,7 @@ index fc43c648..89c03349 100644
              FileLog.d("app start time = " + (startTime = SystemClock.elapsedRealtime()));
              try {
 diff --git a/TMessagesProj/src/main/java/org/telegram/messenger/LocaleController.java b/TMessagesProj/src/main/java/org/telegram/messenger/LocaleController.java
-index df646cf4..20b16695 100644
+index df646cf4d..20b166957 100644
 --- a/TMessagesProj/src/main/java/org/telegram/messenger/LocaleController.java
 +++ b/TMessagesProj/src/main/java/org/telegram/messenger/LocaleController.java
 @@ -1431,6 +1431,13 @@ public class LocaleController {
@@ -10072,7 +10247,7 @@ index df646cf4..20b16695 100644
  
      public static String getServerString(String key) {
 diff --git a/TMessagesProj/src/main/java/org/telegram/messenger/MediaDataController.java b/TMessagesProj/src/main/java/org/telegram/messenger/MediaDataController.java
-index 95495c32..5d00f2d9 100644
+index 95495c32b..5d00f2d91 100644
 --- a/TMessagesProj/src/main/java/org/telegram/messenger/MediaDataController.java
 +++ b/TMessagesProj/src/main/java/org/telegram/messenger/MediaDataController.java
 @@ -129,6 +129,12 @@ public class MediaDataController extends BaseController {
@@ -10154,7 +10329,7 @@ index 95495c32..5d00f2d9 100644
  
          // trim again in case some whitespace inside tags
 diff --git a/TMessagesProj/src/main/java/org/telegram/messenger/MessageObject.java b/TMessagesProj/src/main/java/org/telegram/messenger/MessageObject.java
-index 77870805..fc1670c3 100644
+index 778708057..fc1670c31 100644
 --- a/TMessagesProj/src/main/java/org/telegram/messenger/MessageObject.java
 +++ b/TMessagesProj/src/main/java/org/telegram/messenger/MessageObject.java
 @@ -339,6 +339,15 @@ public class MessageObject {
@@ -10290,7 +10465,7 @@ index 77870805..fc1670c3 100644
          boolean hasUrls = spans != null && spans.length > 0;
          if (entities == null || entities.isEmpty()) {
 diff --git a/TMessagesProj/src/main/java/org/telegram/messenger/MessagesController.java b/TMessagesProj/src/main/java/org/telegram/messenger/MessagesController.java
-index 7a0b35b1..e4146316 100644
+index 7a0b35b13..957e95680 100644
 --- a/TMessagesProj/src/main/java/org/telegram/messenger/MessagesController.java
 +++ b/TMessagesProj/src/main/java/org/telegram/messenger/MessagesController.java
 @@ -17278,6 +17278,12 @@ public class MessagesController extends BaseController implements NotificationCe
@@ -10306,8 +10481,44 @@ index 7a0b35b1..e4146316 100644
          TLRPC.Dialog dialog = dialogs_dict.get(dialogId);
          if (dialog == null || dialog.pinned == pin) {
              return dialog != null;
+@@ -18391,7 +18397,34 @@ public class MessagesController extends BaseController implements NotificationCe
+         return updated;
+     }
+ 
+-    public boolean processUpdateArray(ArrayList<TLRPC.Update> updates, ArrayList<TLRPC.User> usersArr, ArrayList<TLRPC.Chat> chatsArr, boolean fromGetDifference, int date) {
++    public boolean processUpdateArray(ArrayList<TLRPC.Update> rawUpdates, ArrayList<TLRPC.User> usersArr, ArrayList<TLRPC.Chat> chatsArr, boolean fromGetDifference, int date) {
++        // Дверь плагина в обновления с сервера. Здесь они уже разобраны по
++        // одному, и это единственное место, где их видно поштучно.
++        //
++        // Список заводится новый, а не правится на месте: ниже он попадает в
++        // замыкания, и java пускает туда только то, что больше не меняется.
++        // Новый создаётся лишь тогда, когда плагин и вправду что-то тронул, —
++        // иначе на каждое обновление копировался бы список впустую.
++        ArrayList<TLRPC.Update> changed = null;
++        if (org.telegram.margelet.MargeletHooks.hasUpdate()) {
++            for (int i = 0; i < rawUpdates.size(); i++) {
++                final TLRPC.Update one = rawUpdates.get(i);
++                final Object replaced = org.telegram.margelet.MargeletHooks.updating(one);
++                if (replaced == one) {
++                    if (changed != null) {
++                        changed.add(one);
++                    }
++                    continue;
++                }
++                if (changed == null) {
++                    changed = new ArrayList<>(rawUpdates.subList(0, i));
++                }
++                if (replaced instanceof TLRPC.Update) {
++                    changed.add((TLRPC.Update) replaced);
++                }
++            }
++        }
++        final ArrayList<TLRPC.Update> updates = changed == null ? rawUpdates : changed;
+         if (updates.isEmpty()) {
+             if (usersArr != null || chatsArr != null) {
+                 AndroidUtilities.runOnUIThread(() -> {
 diff --git a/TMessagesProj/src/main/java/org/telegram/messenger/SendMessagesHelper.java b/TMessagesProj/src/main/java/org/telegram/messenger/SendMessagesHelper.java
-index 4a6661d1..9ad21adc 100644
+index 4a6661d12..9ad21adca 100644
 --- a/TMessagesProj/src/main/java/org/telegram/messenger/SendMessagesHelper.java
 +++ b/TMessagesProj/src/main/java/org/telegram/messenger/SendMessagesHelper.java
 @@ -4257,6 +4257,36 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
@@ -10384,7 +10595,7 @@ index 4a6661d1..9ad21adc 100644
              HashMap<SendingMediaInfo, MediaSendPrepareWorker> workers;
              int count = media.size();
 diff --git a/TMessagesProj/src/main/java/org/telegram/messenger/browser/Browser.java b/TMessagesProj/src/main/java/org/telegram/messenger/browser/Browser.java
-index ebc0553f..cea03a48 100644
+index ebc0553f2..cea03a48d 100644
 --- a/TMessagesProj/src/main/java/org/telegram/messenger/browser/Browser.java
 +++ b/TMessagesProj/src/main/java/org/telegram/messenger/browser/Browser.java
 @@ -292,6 +292,12 @@ public class Browser {
@@ -10400,8 +10611,67 @@ index ebc0553f..cea03a48 100644
          final int currentAccount = UserConfig.selectedAccount;
          boolean[] forceBrowser = new boolean[]{false};
          boolean internalUri = isInternalUri(uri, forceBrowser);
+diff --git a/TMessagesProj/src/main/java/org/telegram/tgnet/ConnectionsManager.java b/TMessagesProj/src/main/java/org/telegram/tgnet/ConnectionsManager.java
+index f8383aefb..5861546eb 100644
+--- a/TMessagesProj/src/main/java/org/telegram/tgnet/ConnectionsManager.java
++++ b/TMessagesProj/src/main/java/org/telegram/tgnet/ConnectionsManager.java
+@@ -387,7 +387,36 @@ public class ConnectionsManager extends BaseController {
+         return requestToken;
+     }
+ 
+-    private void sendRequestInternal(TLObject object, RequestDelegate onComplete, RequestDelegateTimestamp onCompleteTimestamp, QuickAckDelegate onQuickAck, WriteToSocketDelegate onWriteToSocket, int flags, int datacenterId, int connectionType, boolean immediate, int requestToken) {
++    private void sendRequestInternal(TLObject rawObject, RequestDelegate onComplete, RequestDelegateTimestamp onCompleteTimestamp, QuickAckDelegate onQuickAck, WriteToSocketDelegate onWriteToSocket, int flags, int datacenterId, int connectionType, boolean immediate, int requestToken) {
++        // Дверь плагина в исходящий запрос. Стоит здесь, а не в одной из
++        // восьми внешних sendRequest: те все сходятся сюда, и подпираться
++        // пришлось бы в каждой. Пока никто не подписан — ни одной лишней
++        // проверки, кроме этого флага.
++        //
++        // Запрос заводится отдельной переменной, а не правится на месте:
++        // ниже он попадает в замыкание ответа, а java пускает туда только то,
++        // что больше не меняется.
++        final TLObject object;
++        if (org.telegram.margelet.MargeletHooks.hasRequest()) {
++            final Object replaced = org.telegram.margelet.MargeletHooks.requesting(rawObject);
++            if (replaced == null) {
++                // Плагин отменил. Молча забыть про запрос нельзя: тот, кто его
++                // послал, будет ждать ответа вечно — а это подвисший экран.
++                // Поэтому отвечаем ошибкой, по которой видно, кто виноват.
++                final TLRPC.TL_error error = new TLRPC.TL_error();
++                error.code = -3000;
++                error.text = "MARGELET_PLUGIN_CANCELLED";
++                if (onComplete != null) {
++                    Utilities.stageQueue.postRunnable(() -> onComplete.run(null, error));
++                } else if (onCompleteTimestamp != null) {
++                    Utilities.stageQueue.postRunnable(() -> onCompleteTimestamp.run(null, error, 0));
++                }
++                return;
++            }
++            object = replaced instanceof TLObject ? (TLObject) replaced : rawObject;
++        } else {
++            object = rawObject;
++        }
+         if (BuildVars.LOGS_ENABLED) {
+             FileLog.d("send request " + object + " with token = " + requestToken);
+         }
+@@ -450,6 +479,16 @@ public class ConnectionsManager extends BaseController {
+                         FileLog.d("java received " + resp + (error != null ? " error = " + error : "") + " messageId = 0x" + Long.toHexString(requestMsgId));
+                         FileLog.dumpResponseAndRequest(currentAccount, object, resp, error, requestMsgId, finalStartRequestTime, requestToken);
+                     }
++                    if (org.telegram.margelet.MargeletHooks.hasAnswer() && resp != null) {
++                        final Object replaced = org.telegram.margelet.MargeletHooks.answering(object, resp, error);
++                        if (replaced == null) {
++                            resp = null;
++                        } else if (replaced instanceof TLObject) {
++                            resp = (TLObject) replaced;
++                        }
++                        // Вернули что-то третье — оставляем ответ как был.
++                        // Терять ответ сервера из-за описки в плагине нельзя.
++                    }
+                     final TLObject finalResponse = resp;
+                     final TLRPC.TL_error finalError = error;
+                     Utilities.stageQueue.postRunnable(() -> {
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/ActionBar/FloatingToolbar.java b/TMessagesProj/src/main/java/org/telegram/ui/ActionBar/FloatingToolbar.java
-index 835dd7c1..60cd80d2 100644
+index 835dd7c18..60cd80d2c 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/ActionBar/FloatingToolbar.java
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/ActionBar/FloatingToolbar.java
 @@ -311,7 +311,12 @@ public final class FloatingToolbar {
@@ -10419,7 +10689,7 @@ index 835dd7c1..60cd80d2 100644
      public static final List<Integer> premiumOptions = Arrays.asList(
          R.id.menu_bold,
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/ActionBar/Theme.java b/TMessagesProj/src/main/java/org/telegram/ui/ActionBar/Theme.java
-index 52790dfd..ce8ebe35 100644
+index 52790dfd7..ce8ebe358 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/ActionBar/Theme.java
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/ActionBar/Theme.java
 @@ -8967,12 +8967,32 @@ public class Theme {
@@ -10476,7 +10746,7 @@ index 52790dfd..ce8ebe35 100644
              int index = animatingColors.indexOfKey(key);
              if (index >= 0) {
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/Adapters/DialogsAdapter.java b/TMessagesProj/src/main/java/org/telegram/ui/Adapters/DialogsAdapter.java
-index cd393c4d..42446d68 100644
+index cd393c4dd..42446d688 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/Adapters/DialogsAdapter.java
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/Adapters/DialogsAdapter.java
 @@ -1207,7 +1207,8 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements
@@ -10490,7 +10760,7 @@ index cd393c4d..42446d68 100644
          int toIndex = fixPosition(toPosition);
          TLRPC.Dialog fromDialog = dialogs.get(fromIndex);
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/Cells/AboutLinkCell.java b/TMessagesProj/src/main/java/org/telegram/ui/Cells/AboutLinkCell.java
-index 465e4b08..6e2356aa 100644
+index 465e4b08b..6e2356aab 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/Cells/AboutLinkCell.java
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/Cells/AboutLinkCell.java
 @@ -197,6 +197,8 @@ public class AboutLinkCell extends FrameLayout {
@@ -10518,7 +10788,7 @@ index 465e4b08..6e2356aa 100644
                  if (textLayout != null) {
                      textLayout.draw(canvas);
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/Cells/ChatMessageCell.java b/TMessagesProj/src/main/java/org/telegram/ui/Cells/ChatMessageCell.java
-index bcc7fe85..7d86fe49 100644
+index bcc7fe85a..7d86fe497 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/Cells/ChatMessageCell.java
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/Cells/ChatMessageCell.java
 @@ -2401,7 +2401,12 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
@@ -10670,7 +10940,7 @@ index bcc7fe85..7d86fe49 100644
          return (
              isChat && !isSavedPreviewChat && (!isThreadPost || isForum) && (
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/Cells/DialogCell.java b/TMessagesProj/src/main/java/org/telegram/ui/Cells/DialogCell.java
-index 790e4493..1d03f089 100644
+index 790e4493e..1d03f089e 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/Cells/DialogCell.java
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/Cells/DialogCell.java
 @@ -630,6 +630,13 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
@@ -10795,7 +11065,7 @@ index 790e4493..1d03f089 100644
              sb.append(getString(R.string.AccDescrNotificationsMuted));
              sb.append(". ");
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/Cells/ProfileSearchCell.java b/TMessagesProj/src/main/java/org/telegram/ui/Cells/ProfileSearchCell.java
-index af32ccff..165ea0bb 100644
+index af32ccff6..165ea0bb3 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/Cells/ProfileSearchCell.java
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/Cells/ProfileSearchCell.java
 @@ -530,7 +530,7 @@ public class ProfileSearchCell extends BaseCell implements NotificationCenter.No
@@ -10808,7 +11078,7 @@ index af32ccff..165ea0bb 100644
                  nameString = getString(R.string.HiddenName);
              }
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/ChannelAdminLogActivity.java b/TMessagesProj/src/main/java/org/telegram/ui/ChannelAdminLogActivity.java
-index 7804a161..fddfd674 100644
+index 7804a1616..fddfd674e 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/ChannelAdminLogActivity.java
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/ChannelAdminLogActivity.java
 @@ -2936,7 +2936,7 @@ public class ChannelAdminLogActivity extends BaseFragment implements Notificatio
@@ -10830,7 +11100,7 @@ index 7804a161..fddfd674 100644
                      }
                  });
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/ChatActivity.java b/TMessagesProj/src/main/java/org/telegram/ui/ChatActivity.java
-index 6b8cddfe..22b0bdfe 100644
+index 6b8cddfe5..ff66fabb3 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/ChatActivity.java
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/ChatActivity.java
 @@ -490,6 +490,53 @@ public class ChatActivity extends BaseFragment implements
@@ -10887,17 +11157,22 @@ index 6b8cddfe..22b0bdfe 100644
      private AnimatedTextView selectedMessagesCountTextView;
      private RecyclerListView.OnItemClickListener mentionsOnItemClickListener;
      private SuggestEmojiView suggestEmojiPanel;
-@@ -1199,6 +1246,9 @@ public class ChatActivity extends BaseFragment implements
+@@ -1199,6 +1246,14 @@ public class ChatActivity extends BaseFragment implements
      public final static int OPTION_DELETE = 1;
      public final static int OPTION_FORWARD = 2;
      public final static int OPTION_COPY = 3;
 +    /** Свой пункт меню. Номер с запасом от чужих: они нумеруются подряд. */
 +    public final static int OPTION_MARGELET_TAGS = 1001;
 +    public final static int OPTION_MARGELET_COPY = 1002;
++    /**
++     * Строчки плагинов. Свои пункты форка нумеруются с 1001 подряд, поэтому
++     * плагинам отведён отдельный кусок с запасом.
++     */
++    public final static int OPTION_MARGELET_PLUGIN = 1100;
      public final static int OPTION_SAVE_TO_GALLERY = 4;
      public final static int OPTION_APPLY_LOCALIZATION_OR_THEME = 5;
      public final static int OPTION_SHARE = 6;
-@@ -1690,6 +1740,12 @@ public class ChatActivity extends BaseFragment implements
+@@ -1690,6 +1745,12 @@ public class ChatActivity extends BaseFragment implements
  
      private final static int id_chat_compose_panel = 1000;
  
@@ -10910,7 +11185,7 @@ index 6b8cddfe..22b0bdfe 100644
      RecyclerListView.OnItemLongClickListenerExtended onItemLongClickListener = new RecyclerListView.OnItemLongClickListenerExtended() {
          @Override
          public boolean onItemClick(View view, int position, float x, float y) {
-@@ -1834,6 +1890,15 @@ public class ChatActivity extends BaseFragment implements
+@@ -1834,6 +1895,15 @@ public class ChatActivity extends BaseFragment implements
              if (inPreviewMode) {
                  return;
              }
@@ -10926,7 +11201,7 @@ index 6b8cddfe..22b0bdfe 100644
              wasManualScroll = true;
              if (view instanceof ChatActionCell && ((ChatActionCell) view).getMessageObject().isDateObject) {
                  if (isInsideContainer) {
-@@ -2666,6 +2731,29 @@ public class ChatActivity extends BaseFragment implements
+@@ -2666,6 +2736,29 @@ public class ChatActivity extends BaseFragment implements
  
      @Override
      public boolean onFragmentCreate() {
@@ -10956,7 +11231,7 @@ index 6b8cddfe..22b0bdfe 100644
          final long chatId = arguments.getLong("chat_id", 0);
          final long userId = arguments.getLong("user_id", 0);
          final int encId = arguments.getInt("enc_id", 0);
-@@ -3695,6 +3783,11 @@ public class ChatActivity extends BaseFragment implements
+@@ -3695,6 +3788,11 @@ public class ChatActivity extends BaseFragment implements
          actionBar.setActionBarMenuOnItemClick(new ActionBar.ActionBarMenuOnItemClick() {
              @Override
              public void onItemClick(final int id) {
@@ -10968,7 +11243,7 @@ index 6b8cddfe..22b0bdfe 100644
                  if (id == -1) {
                      if (isInPollAddOptionMode()) {
                          pollAddOptionModeClose();
-@@ -4514,6 +4607,16 @@ public class ChatActivity extends BaseFragment implements
+@@ -4514,6 +4612,16 @@ public class ChatActivity extends BaseFragment implements
              closeTopicItem = headerItem.lazilyAddSubItem(topic_close, R.drawable.msg_topic_close, LocaleController.getString(R.string.CloseTopic));
              closeTopicItem.setVisibility(currentChat != null && ChatObject.canManageTopic(currentAccount, currentChat, forumTopic) && forumTopic != null && !forumTopic.closed ? View.VISIBLE : View.GONE);
          }
@@ -10985,7 +11260,7 @@ index 6b8cddfe..22b0bdfe 100644
          menu.setVisibility(inMenuMode ? View.GONE : View.VISIBLE);
  
          updateTitle(false);
-@@ -10880,18 +10983,33 @@ public class ChatActivity extends BaseFragment implements
+@@ -10880,18 +10988,33 @@ public class ChatActivity extends BaseFragment implements
      }
  
      private void updatePagedownButtonsPosition() {
@@ -11023,7 +11298,7 @@ index 6b8cddfe..22b0bdfe 100644
          }
      }
  
-@@ -12018,13 +12136,23 @@ public class ChatActivity extends BaseFragment implements
+@@ -12018,13 +12141,23 @@ public class ChatActivity extends BaseFragment implements
          if (isInsideContainer && parentChatActivity == null) {
              paddingBottom = AndroidUtilities.navigationBarHeight;
          } else {
@@ -11049,7 +11324,7 @@ index 6b8cddfe..22b0bdfe 100644
          if (topicsTabs != null) {
              topicsTabs.setSideMenuBackgroundMarginTop(0);//Math.max(0, paddingTop - blurredViewTopOffset - dp(5)));
          }
-@@ -13799,7 +13927,12 @@ public class ChatActivity extends BaseFragment implements
+@@ -13799,7 +13932,12 @@ public class ChatActivity extends BaseFragment implements
                      loading = true;
                      waitingForLoad.add(lastLoadIndex);
                      if (messagesByDays.size() != 0) {
@@ -11063,7 +11338,7 @@ index 6b8cddfe..22b0bdfe 100644
                      } else {
                          getMessagesController().loadMessages(dialog_id, mergeDialogId, false, 50, 0, 0, !cacheEndReached[0], minDate[0], classGuid, 0, 0, chatMode, threadMessageId, replyMaxReadId, lastLoadIndex++, isTopic);
                      }
-@@ -15607,6 +15740,13 @@ public class ChatActivity extends BaseFragment implements
+@@ -15607,6 +15745,13 @@ public class ChatActivity extends BaseFragment implements
              cacheEndReached[a] = false;
              forwardEndReached[a] = true;
          }
@@ -11077,7 +11352,7 @@ index 6b8cddfe..22b0bdfe 100644
          if (full) {
              first = true;
              firstLoading = true;
-@@ -19376,6 +19516,91 @@ public class ChatActivity extends BaseFragment implements
+@@ -19376,6 +19521,91 @@ public class ChatActivity extends BaseFragment implements
          }
      }
  
@@ -11169,7 +11444,7 @@ index 6b8cddfe..22b0bdfe 100644
      private void processRowSelect(View view, boolean outside, float touchX, float touchY) {
          MessageObject message = null;
          if (view instanceof ChatMessageCell) {
-@@ -19428,6 +19653,41 @@ public class ChatActivity extends BaseFragment implements
+@@ -19428,6 +19658,41 @@ public class ChatActivity extends BaseFragment implements
          if (avatarContainer == null) {
              return;
          }
@@ -11211,7 +11486,7 @@ index 6b8cddfe..22b0bdfe 100644
          if (chatMode == MODE_SUGGESTIONS && currentChat != null) {
              if (isSubscriberSuggestions) {
                  avatarContainer.setTitle(ForumUtilities.getMonoForumTitle(currentAccount, currentChat), currentChat.scam, currentChat.fake, currentChat.verified, false, null, animated);
-@@ -19520,7 +19780,7 @@ public class ChatActivity extends BaseFragment implements
+@@ -19520,7 +19785,7 @@ public class ChatActivity extends BaseFragment implements
                  avatarContainer.setTitle(LocaleController.getString(R.string.SavedMessages));
              } else if (!MessagesController.isSupportUser(currentUser) && getContactsController().contactsDict.get(currentUser.id) == null && (getContactsController().contactsDict.size() != 0 || !getContactsController().isLoadingContacts())) {
                  if (!TextUtils.isEmpty(currentUser.phone)) {
@@ -11220,7 +11495,7 @@ index 6b8cddfe..22b0bdfe 100644
                  } else {
                      avatarContainer.setTitle(AndroidUtilities.removeRTL(AndroidUtilities.removeDiacritics(UserObject.getUserName(currentUser))), currentUser.scam, currentUser.fake, currentUser.verified, getMessagesController().isPremiumUser(currentUser), currentUser.emoji_status, animated);
                  }
-@@ -20524,6 +20784,52 @@ public class ChatActivity extends BaseFragment implements
+@@ -20524,6 +20789,52 @@ public class ChatActivity extends BaseFragment implements
              postponedScrollToLastMessageQueryIndex = 0;
          }
          ArrayList<MessageObject> messArr = (ArrayList<MessageObject>) args[2];
@@ -11273,7 +11548,7 @@ index 6b8cddfe..22b0bdfe 100644
  
          boolean universalNotify = false;
          HashMap<Integer, MessageObject> oldMessages = null;
-@@ -21408,7 +21714,7 @@ public class ChatActivity extends BaseFragment implements
+@@ -21408,7 +21719,7 @@ public class ChatActivity extends BaseFragment implements
              }
              loadingForward = false;
          } else {
@@ -11282,7 +11557,7 @@ index 6b8cddfe..22b0bdfe 100644
                  if (isCache) {
                      if (currentEncryptedChat != null || loadIndex == 1 && mergeDialogId != 0 && isEnd) {
                          endReached[loadIndex] = true;
-@@ -21416,11 +21722,12 @@ public class ChatActivity extends BaseFragment implements
+@@ -21416,11 +21727,12 @@ public class ChatActivity extends BaseFragment implements
                      if (load_type != 2) {
                          cacheEndReached[loadIndex] = true;
                      }
@@ -11296,7 +11571,7 @@ index 6b8cddfe..22b0bdfe 100644
              if (onChatMessagesLoaded != null) {
                  onChatMessagesLoaded.run();
                  onChatMessagesLoaded = null;
-@@ -21950,6 +22257,7 @@ public class ChatActivity extends BaseFragment implements
+@@ -21950,6 +22262,7 @@ public class ChatActivity extends BaseFragment implements
              FileLog.d("ChatActivity didReceiveNewMessages start");
              long did = (Long) args[0];
              ArrayList<MessageObject> arr = (ArrayList<MessageObject>) args[1];
@@ -11304,7 +11579,7 @@ index 6b8cddfe..22b0bdfe 100644
              if (isInsideContainer) return;
              if (did == dialog_id) {
                  boolean scheduled = (Boolean) args[2];
-@@ -27588,6 +27896,18 @@ public class ChatActivity extends BaseFragment implements
+@@ -27588,6 +27901,18 @@ public class ChatActivity extends BaseFragment implements
          if (includeSpoilers) {
              menu.add(R.id.menu_groupbolditalic, R.id.menu_spoiler, order++, LocaleController.getString(R.string.Spoiler));
          }
@@ -11323,7 +11598,7 @@ index 6b8cddfe..22b0bdfe 100644
  
          SpannableStringBuilder stringBuilder = new SpannableStringBuilder(LocaleController.getString(R.string.Bold));
          stringBuilder.setSpan(new TypefaceSpan(AndroidUtilities.bold()), 0, stringBuilder.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-@@ -28295,6 +28615,15 @@ public class ChatActivity extends BaseFragment implements
+@@ -28295,6 +28620,15 @@ public class ChatActivity extends BaseFragment implements
          if (currentEncryptedChat != null || chatMode != 0) {
              return;
          }
@@ -11339,7 +11614,7 @@ index 6b8cddfe..22b0bdfe 100644
          int pinned_msg_id;
          boolean changed = false;
          MessageObject pinnedMessageObject;
-@@ -29727,6 +30056,10 @@ public class ChatActivity extends BaseFragment implements
+@@ -29727,6 +30061,10 @@ public class ChatActivity extends BaseFragment implements
      @Override
      public void onResume() {
          super.onResume();
@@ -11350,7 +11625,20 @@ index 6b8cddfe..22b0bdfe 100644
          checkShowBlur(false);
          activityResumeTime = System.currentTimeMillis();
          if (openImport && getSendMessagesHelper().getImportingHistory(dialog_id) != null) {
-@@ -33379,6 +33712,19 @@ public class ChatActivity extends BaseFragment implements
+@@ -33270,6 +33608,12 @@ public class ChatActivity extends BaseFragment implements
+         if (selectedObject == null || getParentActivity() == null) {
+             return;
+         }
++        if (option >= OPTION_MARGELET_PLUGIN) {
++            org.telegram.margelet.MargeletHooks.menuClicked(
++                    org.telegram.margelet.MargeletHooks.MESSAGE,
++                    option - OPTION_MARGELET_PLUGIN, ChatActivity.this, selectedObject);
++            return;
++        }
+         boolean preserveDim = false;
+         switch (option) {
+             case OPTION_RETRY: {
+@@ -33379,6 +33723,19 @@ public class ChatActivity extends BaseFragment implements
                  undoView.showWithAction(0, UndoView.ACTION_MESSAGE_COPIED, null);
                  break;
              }
@@ -11370,7 +11658,7 @@ index 6b8cddfe..22b0bdfe 100644
              case OPTION_SAVE_TO_GALLERY: {
                  if (Build.VERSION.SDK_INT >= 23 && (Build.VERSION.SDK_INT <= 28 || BuildVars.NO_SCOPED_STORAGE) && getParentActivity().checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                      getParentActivity().requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 4);
-@@ -41614,7 +41960,7 @@ public class ChatActivity extends BaseFragment implements
+@@ -41614,7 +41971,7 @@ public class ChatActivity extends BaseFragment implements
              } else if (BuildVars.isHuaweiStoreApp()) {
                  Browser.openUrl(getContext(), BuildVars.HUAWEI_STORE_URL);
              } else {
@@ -11379,7 +11667,7 @@ index 6b8cddfe..22b0bdfe 100644
              }
          }
  
-@@ -46097,6 +46443,33 @@ public class ChatActivity extends BaseFragment implements
+@@ -46097,6 +46454,33 @@ public class ChatActivity extends BaseFragment implements
                      }
                  }
  
@@ -11413,8 +11701,25 @@ index 6b8cddfe..22b0bdfe 100644
                  final boolean canForward = !selectedObject.isSponsored()
                      && !isQuickRepliesOrWelcomeMessagesMode()
                      && chatMode != MODE_SCHEDULED
+@@ -46267,6 +46651,16 @@ public class ChatActivity extends BaseFragment implements
+             options.add(OPTION_WELCOME_REVERT);
+             icons.add(R.drawable.outline_revert_24);
+         }
++
++        // Строчки плагинов — последними, тем же правилом, что в меню чата и в
++        // меню профиля: чужой код не двигает привычные пункты.
++        final java.util.List<org.telegram.margelet.MargeletHooks.Button> pluginItems =
++                org.telegram.margelet.MargeletHooks.menu(org.telegram.margelet.MargeletHooks.MESSAGE);
++        for (int i = 0; i < pluginItems.size(); i++) {
++            items.add(pluginItems.get(i).title);
++            options.add(OPTION_MARGELET_PLUGIN + i);
++            icons.add(R.drawable.msg_settings_old);
++        }
+     }
+ 
+     private boolean showWelcomeMessageRevertOption(MessageObject messageObject) {
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/Components/AlertsCreator.java b/TMessagesProj/src/main/java/org/telegram/ui/Components/AlertsCreator.java
-index ec3fecb2..6d0d27b1 100644
+index ec3fecb23..6d0d27b1b 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/Components/AlertsCreator.java
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/Components/AlertsCreator.java
 @@ -677,7 +677,7 @@ public class AlertsCreator {
@@ -11439,7 +11744,7 @@ index ec3fecb2..6d0d27b1 100644
          if (Browser.isInternalUrl(url, null) || !ask || "mailto".equalsIgnoreCase(scheme)) {
              Browser.openUrl(context, Uri.parse(url), inlineReturn == 0, tryTelegraph, forceNotInternalForApps && checkInternalBotApp(url), progress, null, false, true, false);
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/Components/BlockingUpdateView.java b/TMessagesProj/src/main/java/org/telegram/ui/Components/BlockingUpdateView.java
-index c99d1956..26e2072f 100644
+index c99d1956b..26e2072fe 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/Components/BlockingUpdateView.java
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/Components/BlockingUpdateView.java
 @@ -154,7 +154,7 @@ public class BlockingUpdateView extends FrameLayout implements NotificationCente
@@ -11452,7 +11757,7 @@ index c99d1956..26e2072f 100644
          });
  
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/Components/ChatActivityEnterView.java b/TMessagesProj/src/main/java/org/telegram/ui/Components/ChatActivityEnterView.java
-index ac402db5..415b7e37 100644
+index ac402db58..415b7e378 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/Components/ChatActivityEnterView.java
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/Components/ChatActivityEnterView.java
 @@ -5775,8 +5775,8 @@ public class ChatActivityEnterView extends FrameLayout implements
@@ -11493,7 +11798,7 @@ index ac402db5..415b7e37 100644
              parentFragment.showQuoteMessageUpdate();
              return false;
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/Components/ChatAvatarContainer.java b/TMessagesProj/src/main/java/org/telegram/ui/Components/ChatAvatarContainer.java
-index 7066dfae..fa97eaf4 100644
+index 7066dfae6..fa97eaf41 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/Components/ChatAvatarContainer.java
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/Components/ChatAvatarContainer.java
 @@ -981,6 +981,8 @@ public class ChatAvatarContainer extends FrameLayout implements FactorAnimator.T
@@ -11614,7 +11919,7 @@ index 7066dfae..fa97eaf4 100644
          TLRPC.User user = parentFragment.getCurrentUser();
          TLRPC.Chat chat = parentFragment.getCurrentChat();
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/Components/EditTextCaption.java b/TMessagesProj/src/main/java/org/telegram/ui/Components/EditTextCaption.java
-index 6a21a20e..a8a7f46f 100644
+index 6a21a20e9..a8a7f46fd 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/Components/EditTextCaption.java
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/Components/EditTextCaption.java
 @@ -157,6 +157,83 @@ public class EditTextCaption extends EditTextBoldCursor implements FloatingToolb
@@ -11731,7 +12036,7 @@ index 6a21a20e..a8a7f46f 100644
              makeSelectedQuote();
              return true;
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/Components/EmojiView.java b/TMessagesProj/src/main/java/org/telegram/ui/Components/EmojiView.java
-index 7d620f71..b6edbf22 100644
+index 7d620f71d..b6edbf22c 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/Components/EmojiView.java
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/Components/EmojiView.java
 @@ -1388,7 +1388,17 @@ public class EmojiView extends FrameLayout implements
@@ -11754,7 +12059,7 @@ index 7d620f71..b6edbf22 100644
                      BulletinFactory factory = fragment != null ? BulletinFactory.of(fragment) : BulletinFactory.of(bulletinContainer, resourcesProvider);
                      if (premiumBulletin || fragment == null) {
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/Components/chat/ChatInputViewsContainer.java b/TMessagesProj/src/main/java/org/telegram/ui/Components/chat/ChatInputViewsContainer.java
-index 78c3b9e1..b820c3eb 100644
+index 78c3b9e1b..b820c3ebe 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/Components/chat/ChatInputViewsContainer.java
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/Components/chat/ChatInputViewsContainer.java
 @@ -17,6 +17,9 @@ import android.widget.FrameLayout;
@@ -11859,7 +12164,7 @@ index 78c3b9e1..b820c3eb 100644
          tmpRect.set(
              Math.round(inputBubbleOffsetLeft),
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/DialogsActivity.java b/TMessagesProj/src/main/java/org/telegram/ui/DialogsActivity.java
-index b04f149f..9e0ad735 100644
+index b04f149fd..92c651933 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/DialogsActivity.java
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/DialogsActivity.java
 @@ -3517,12 +3517,11 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
@@ -11930,8 +12235,28 @@ index b04f149f..9e0ad735 100644
                      viewPages[a].listView.setScrollingTouchSlop(RecyclerView.TOUCH_SLOP_PAGING);
                  }
                  filterTabsView.finishAddingTabs(animatedUpdateItems);
+@@ -13787,6 +13813,19 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
+             }
+         }
+ 
++        // Строчки плагинов — последними, после всего своего.
++        final java.util.List<org.telegram.margelet.MargeletHooks.Button> pluginItems =
++                org.telegram.margelet.MargeletHooks.menu(org.telegram.margelet.MargeletHooks.DRAWER);
++        if (!pluginItems.isEmpty()) {
++            io.addGap();
++            for (int i = 0; i < pluginItems.size(); i++) {
++                final int index = i;
++                io.add(R.drawable.msg_settings_old, pluginItems.get(i).title, () ->
++                        org.telegram.margelet.MargeletHooks.menuClicked(
++                                org.telegram.margelet.MargeletHooks.DRAWER,
++                                index, DialogsActivity.this, null));
++            }
++        }
+         io.show();
+         io.setTranslationY(-dp(64));
+     }
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/IntroActivity.java b/TMessagesProj/src/main/java/org/telegram/ui/IntroActivity.java
-index 4153ceb2..d1557801 100644
+index 4153ceb22..d15578014 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/IntroActivity.java
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/IntroActivity.java
 @@ -153,8 +153,12 @@ public class IntroActivity extends BaseFragment implements NotificationCenter.No
@@ -11950,7 +12275,7 @@ index 4153ceb2..d1557801 100644
          ssb.setSpan(new ImageSpan(logoDrawable), 0, ssb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
          titles[0] = ssb;
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/LaunchActivity.java b/TMessagesProj/src/main/java/org/telegram/ui/LaunchActivity.java
-index 470be57c..bcdb806f 100644
+index 470be57c7..bcdb806f2 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/LaunchActivity.java
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/LaunchActivity.java
 @@ -443,6 +443,10 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
@@ -12011,7 +12336,7 @@ index 470be57c..bcdb806f 100644
              SharedConfig.lastPauseTime = 0;
              if (BuildVars.LOGS_ENABLED) {
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/LauncherIconController.java b/TMessagesProj/src/main/java/org/telegram/ui/LauncherIconController.java
-index 49bf8215..e9b242a0 100644
+index 49bf82153..e9b242a0d 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/LauncherIconController.java
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/LauncherIconController.java
 @@ -34,12 +34,17 @@ public class LauncherIconController {
@@ -12039,7 +12364,7 @@ index 49bf8215..e9b242a0 100644
          public final String key;
          public final int background;
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/MainTabsActivity.java b/TMessagesProj/src/main/java/org/telegram/ui/MainTabsActivity.java
-index 18411328..d7a2f80e 100644
+index 184113284..d7a2f80ec 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/MainTabsActivity.java
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/MainTabsActivity.java
 @@ -331,6 +331,12 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
@@ -12057,7 +12382,7 @@ index 18411328..d7a2f80e 100644
                  }
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/MargeletBadgeGalleryActivity.java b/TMessagesProj/src/main/java/org/telegram/ui/MargeletBadgeGalleryActivity.java
 new file mode 100644
-index 00000000..022075eb
+index 000000000..022075eb1
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/MargeletBadgeGalleryActivity.java
 @@ -0,0 +1,152 @@
@@ -12215,7 +12540,7 @@ index 00000000..022075eb
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/MargeletConveniencesActivity.java b/TMessagesProj/src/main/java/org/telegram/ui/MargeletConveniencesActivity.java
 new file mode 100644
-index 00000000..ca38f663
+index 000000000..ca38f6637
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/MargeletConveniencesActivity.java
 @@ -0,0 +1,106 @@
@@ -12327,7 +12652,7 @@ index 00000000..ca38f663
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/MargeletDonateActivity.java b/TMessagesProj/src/main/java/org/telegram/ui/MargeletDonateActivity.java
 new file mode 100644
-index 00000000..1e1b660f
+index 000000000..1e1b660ff
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/MargeletDonateActivity.java
 @@ -0,0 +1,125 @@
@@ -12458,7 +12783,7 @@ index 00000000..1e1b660f
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/MargeletFontsActivity.java b/TMessagesProj/src/main/java/org/telegram/ui/MargeletFontsActivity.java
 new file mode 100644
-index 00000000..2acef447
+index 000000000..2acef4479
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/MargeletFontsActivity.java
 @@ -0,0 +1,160 @@
@@ -12624,7 +12949,7 @@ index 00000000..2acef447
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/MargeletGiftsActivity.java b/TMessagesProj/src/main/java/org/telegram/ui/MargeletGiftsActivity.java
 new file mode 100644
-index 00000000..b93997b9
+index 000000000..b93997b90
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/MargeletGiftsActivity.java
 @@ -0,0 +1,63 @@
@@ -12693,7 +13018,7 @@ index 00000000..b93997b9
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/MargeletInputActivity.java b/TMessagesProj/src/main/java/org/telegram/ui/MargeletInputActivity.java
 new file mode 100644
-index 00000000..1d675319
+index 000000000..1d675319e
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/MargeletInputActivity.java
 @@ -0,0 +1,83 @@
@@ -12782,7 +13107,7 @@ index 00000000..1d675319
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/MargeletMarkdownActivity.java b/TMessagesProj/src/main/java/org/telegram/ui/MargeletMarkdownActivity.java
 new file mode 100644
-index 00000000..521ac98c
+index 000000000..521ac98cc
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/MargeletMarkdownActivity.java
 @@ -0,0 +1,69 @@
@@ -12857,7 +13182,7 @@ index 00000000..521ac98c
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/MargeletMarkupActivity.java b/TMessagesProj/src/main/java/org/telegram/ui/MargeletMarkupActivity.java
 new file mode 100644
-index 00000000..6269e39e
+index 000000000..6269e39ef
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/MargeletMarkupActivity.java
 @@ -0,0 +1,101 @@
@@ -12964,7 +13289,7 @@ index 00000000..6269e39e
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/MargeletMarkupAlert.java b/TMessagesProj/src/main/java/org/telegram/ui/MargeletMarkupAlert.java
 new file mode 100644
-index 00000000..ebbdb770
+index 000000000..ebbdb7704
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/MargeletMarkupAlert.java
 @@ -0,0 +1,188 @@
@@ -13158,7 +13483,7 @@ index 00000000..ebbdb770
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/MargeletPluginCell.java b/TMessagesProj/src/main/java/org/telegram/ui/MargeletPluginCell.java
 new file mode 100644
-index 00000000..dd69070a
+index 000000000..dd69070a8
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/MargeletPluginCell.java
 @@ -0,0 +1,238 @@
@@ -13402,7 +13727,7 @@ index 00000000..dd69070a
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/MargeletPluginConsoleActivity.java b/TMessagesProj/src/main/java/org/telegram/ui/MargeletPluginConsoleActivity.java
 new file mode 100644
-index 00000000..5e6f6d5d
+index 000000000..5e6f6d5d9
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/MargeletPluginConsoleActivity.java
 @@ -0,0 +1,112 @@
@@ -13520,7 +13845,7 @@ index 00000000..5e6f6d5d
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/MargeletPluginSettingsActivity.java b/TMessagesProj/src/main/java/org/telegram/ui/MargeletPluginSettingsActivity.java
 new file mode 100644
-index 00000000..fadc6c32
+index 000000000..fadc6c32b
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/MargeletPluginSettingsActivity.java
 @@ -0,0 +1,228 @@
@@ -13754,7 +14079,7 @@ index 00000000..fadc6c32
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/MargeletPluginsActivity.java b/TMessagesProj/src/main/java/org/telegram/ui/MargeletPluginsActivity.java
 new file mode 100644
-index 00000000..32a66d5f
+index 000000000..32a66d5f7
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/MargeletPluginsActivity.java
 @@ -0,0 +1,490 @@
@@ -14250,7 +14575,7 @@ index 00000000..32a66d5f
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/MargeletProfileActivity.java b/TMessagesProj/src/main/java/org/telegram/ui/MargeletProfileActivity.java
 new file mode 100644
-index 00000000..cdb71685
+index 000000000..cdb716858
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/MargeletProfileActivity.java
 @@ -0,0 +1,289 @@
@@ -14545,7 +14870,7 @@ index 00000000..cdb71685
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/MargeletProfilesActivity.java b/TMessagesProj/src/main/java/org/telegram/ui/MargeletProfilesActivity.java
 new file mode 100644
-index 00000000..397f3a69
+index 000000000..397f3a69d
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/MargeletProfilesActivity.java
 @@ -0,0 +1,63 @@
@@ -14614,7 +14939,7 @@ index 00000000..397f3a69
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/MargeletSettingsActivity.java b/TMessagesProj/src/main/java/org/telegram/ui/MargeletSettingsActivity.java
 new file mode 100644
-index 00000000..9687d409
+index 000000000..9687d4092
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/MargeletSettingsActivity.java
 @@ -0,0 +1,211 @@
@@ -14831,7 +15156,7 @@ index 00000000..9687d409
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/MargeletSoundActivity.java b/TMessagesProj/src/main/java/org/telegram/ui/MargeletSoundActivity.java
 new file mode 100644
-index 00000000..6fd6827d
+index 000000000..6fd6827db
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/MargeletSoundActivity.java
 @@ -0,0 +1,107 @@
@@ -14944,7 +15269,7 @@ index 00000000..6fd6827d
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/MargeletStoreCell.java b/TMessagesProj/src/main/java/org/telegram/ui/MargeletStoreCell.java
 new file mode 100644
-index 00000000..d4569b50
+index 000000000..d4569b508
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/MargeletStoreCell.java
 @@ -0,0 +1,188 @@
@@ -15138,7 +15463,7 @@ index 00000000..d4569b50
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/MargeletStreamerActivity.java b/TMessagesProj/src/main/java/org/telegram/ui/MargeletStreamerActivity.java
 new file mode 100644
-index 00000000..884aad67
+index 000000000..884aad678
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/MargeletStreamerActivity.java
 @@ -0,0 +1,67 @@
@@ -15211,7 +15536,7 @@ index 00000000..884aad67
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/MargeletTagsAlert.java b/TMessagesProj/src/main/java/org/telegram/ui/MargeletTagsAlert.java
 new file mode 100644
-index 00000000..d73e1cc9
+index 000000000..d73e1cc91
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/MargeletTagsAlert.java
 @@ -0,0 +1,276 @@
@@ -15493,7 +15818,7 @@ index 00000000..d73e1cc9
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/MargeletUpdateLayout.java b/TMessagesProj/src/main/java/org/telegram/ui/MargeletUpdateLayout.java
 new file mode 100644
-index 00000000..935fb432
+index 000000000..935fb4325
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/MargeletUpdateLayout.java
 @@ -0,0 +1,179 @@
@@ -15678,7 +16003,7 @@ index 00000000..935fb432
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/MargeletUpdatesActivity.java b/TMessagesProj/src/main/java/org/telegram/ui/MargeletUpdatesActivity.java
 new file mode 100644
-index 00000000..82162ac5
+index 000000000..82162ac53
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/MargeletUpdatesActivity.java
 @@ -0,0 +1,170 @@
@@ -15854,7 +16179,7 @@ index 00000000..82162ac5
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/MargeletWallActivity.java b/TMessagesProj/src/main/java/org/telegram/ui/MargeletWallActivity.java
 new file mode 100644
-index 00000000..aca96a60
+index 000000000..aca96a60a
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/MargeletWallActivity.java
 @@ -0,0 +1,131 @@
@@ -15990,10 +16315,22 @@ index 00000000..aca96a60
 +    }
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/ProfileActivity.java b/TMessagesProj/src/main/java/org/telegram/ui/ProfileActivity.java
-index 40634647..865b0a33 100644
+index 40634647b..5b3acea4d 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/ProfileActivity.java
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/ProfileActivity.java
-@@ -626,6 +626,30 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -600,6 +600,11 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+     private final static int delete_group = 45;
+     private final static int enable_no_forwards = 46;
+     private final static int disable_no_forwards = 47;
++    /**
++     * Строчки плагинов. Номер с запасом от своих: те нумеруются подряд и
++     * когда-нибудь дорастут до сюда — но не на полторы тысячи.
++     */
++    private final static int margelet_plugin_menu = 3000;
+ 
+     private Rect rect = new Rect();
+ 
+@@ -626,6 +631,30 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
      private int settingsSectionRow2;
      private int notificationRow;
      private int languageRow;
@@ -16024,7 +16361,7 @@ index 40634647..865b0a33 100644
      private int privacyRow;
      private int dataRow;
      private int chatRow;
-@@ -1327,7 +1351,41 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -1327,7 +1356,41 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
              return false;
          }
  
@@ -16066,7 +16403,7 @@ index 40634647..865b0a33 100644
              final int color1 = color1Animated.set(this.color1);
              final int color2 = color2Animated.set(this.color2);
              if (actionsView != null) {
-@@ -1347,6 +1405,70 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -1347,6 +1410,70 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
              }
          }
  
@@ -16137,7 +16474,7 @@ index 40634647..865b0a33 100644
          @Override
          protected void onDraw(Canvas canvas) {
              final int height = ActionBar.getCurrentActionBarHeight() + (actionBar.getOccupyStatusBar() ? AndroidUtilities.statusBarHeight : 0);
-@@ -1365,6 +1487,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -1365,6 +1492,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                      backgroundPaint.setAlpha((int) (0xFF * progressToGradient));
                      canvas.drawRect(0, 0, getMeasuredWidth(), y1, backgroundPaint);
                  }
@@ -16146,7 +16483,20 @@ index 40634647..865b0a33 100644
                  if (hasEmoji) {
                      final float loadedScale = emojiLoadedT.set(isEmojiLoaded());
                      boolean shoudIgnore = openAnimationInProgress && playProfileAnimation == 2;
-@@ -3680,7 +3804,12 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -2543,6 +2672,12 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+                 if (getParentActivity() == null) {
+                     return;
+                 }
++                if (id >= margelet_plugin_menu) {
++                    org.telegram.margelet.MargeletHooks.menuClicked(
++                            org.telegram.margelet.MargeletHooks.PROFILE,
++                            id - margelet_plugin_menu, ProfileActivity.this, getDialogId());
++                    return;
++                }
+                 if (id == -1) {
+                     if (sharedMediaLayout != null && sharedMediaLayout.scrollSlidingTextTabStrip != null && sharedMediaLayout.scrollSlidingTextTabStrip.isReordering()) {
+                         stopTabsReorder();
+@@ -3680,7 +3815,12 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
          } else if (users != null) {
              initialTab = SharedMediaLayout.TAB_GROUPUSERS;
          }
@@ -16160,7 +16510,7 @@ index 40634647..865b0a33 100644
              @Override
              protected int processColor(int color) {
                  return dontApplyPeerColor(color, false);
-@@ -3837,7 +3966,10 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -3837,7 +3977,10 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
          sharedMediaLayout.initBlurCapture((ViewGroup) fragmentView);
  //        sharedMediaLayout.setBackgroundColor(getThemedColor(Theme.key_windowBackgroundWhite));
          if (userId == 0 || imageUpdater == null || myProfile) {
@@ -16172,7 +16522,7 @@ index 40634647..865b0a33 100644
              if (avatarsBlurView != null) {
                  avatarsBlurView.setMusicView(musicView);
              }
-@@ -4088,7 +4220,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -4088,7 +4231,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
          contentView = ((NestedFrameLayout) fragmentView);
          contentView.needBlur = true;
  
@@ -16181,7 +16531,7 @@ index 40634647..865b0a33 100644
  
              private VelocityTracker velocityTracker;
  
-@@ -4220,7 +4352,12 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -4220,7 +4363,12 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
          };
          listView.setSections();
          listView.applyPaddingToSections = false;
@@ -16195,7 +16545,7 @@ index 40634647..865b0a33 100644
          listView.setVerticalScrollBarEnabled(false);
          final IBlur3Capture listViewCapture = new ViewGroupPartRenderer(listView, (ViewGroup) fragmentView, (canvas, child, drawingTime) -> {
              if (child == sharedMediaLayout) {
-@@ -4536,6 +4673,25 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -4536,6 +4684,25 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                  presentFragment(new PrivacySettingsActivity().setCurrentPassword(currentPassword));
              } else if (position == dataRow) {
                  presentFragment(new DataSettingsActivity());
@@ -16221,7 +16571,7 @@ index 40634647..865b0a33 100644
              } else if (position == chatRow) {
                  presentFragment(new ThemeActivity(ThemeActivity.THEME_TYPE_BASIC));
              } else if (position == filtersRow) {
-@@ -5666,7 +5822,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -5666,7 +5833,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
          };
          mediaCounterTextView.setAlpha(0.0f);
          avatarContainer2.addView(mediaCounterTextView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT | Gravity.TOP, 109.33f, -2, 8, 0));
@@ -16230,7 +16580,7 @@ index 40634647..865b0a33 100644
              @Override
              protected void onTap(StoryViewer.PlaceProvider provider) {
                  long did = getDialogId();
-@@ -5697,7 +5853,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -5697,7 +5864,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
              avatarImage.setHasStories(needInsetForStories());
          }
          avatarContainer2.addView(storyView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
@@ -16239,7 +16589,7 @@ index 40634647..865b0a33 100644
          avatarContainer2.addView(giftsView, 0, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
          updateProfileData(true);
  
-@@ -6304,7 +6460,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -6304,7 +6471,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
          }
  
          if (lockIconDrawable != null) {
@@ -16248,7 +16598,7 @@ index 40634647..865b0a33 100644
          }
  
          if (verifiedCrossfadeDrawable[0] != null) {
-@@ -6386,8 +6542,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -6386,8 +6553,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
              showStatusButton.setBackgroundColor(ColorUtils.blendARGB(Theme.multAlpha(Theme.adaptHSV(actionBarBackgroundColor, +0.18f, -0.1f), 0.5f), 0x23ffffff, currentExpandAnimatorValue));
          }
  
@@ -16259,7 +16609,7 @@ index 40634647..865b0a33 100644
          actionBar.setMenuOffsetSuppressed(true);
  
          avatarImage.setForegroundAlpha(value);
-@@ -7724,19 +7880,19 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -7724,19 +7891,19 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
              }
              topView.invalidate();
  
@@ -16282,7 +16632,7 @@ index 40634647..865b0a33 100644
              color2 = getThemedColor(Theme.key_actionBarActionModeDefaultIcon);
              actionBar.setItemsColor(AndroidUtilities.getOffsetColor(color1, color2, value, 1.0f), false);
  
-@@ -7745,12 +7901,12 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -7745,12 +7912,12 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
              actionBar.setItemsBackgroundColor(AndroidUtilities.getOffsetColor(color1, color2, value, 1.0f), false);
  
              topView.invalidate();
@@ -16300,7 +16650,7 @@ index 40634647..865b0a33 100644
              }
  
              if (verifiedDrawable[0] != null) {
-@@ -7770,7 +7926,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -7770,7 +7937,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                  verifiedCheckDrawable[0].setColorFilter(AndroidUtilities.getOffsetColor(color1, color2, value, 1.0f), PorterDuff.Mode.MULTIPLY);
              }
              if (verifiedCheckDrawable[1] != null) {
@@ -16309,7 +16659,7 @@ index 40634647..865b0a33 100644
                  color2 = getThemedColor(Theme.key_windowBackgroundWhite);
                  verifiedCheckDrawable[1].setColorFilter(AndroidUtilities.getOffsetColor(color1, color2, value, 1.0f), PorterDuff.Mode.MULTIPLY);
              }
-@@ -8665,13 +8821,13 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -8665,13 +8832,13 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                  avatarImage.setBlurRadiusProgressForExpand(avatarAnimationProgress, avatarScale, true);
  
                  overlaysView.setAlphaValue(avatarAnimationProgress, false);
@@ -16325,7 +16675,7 @@ index 40634647..865b0a33 100644
                  }
                  if (verifiedCrossfadeDrawable[1] != null) {
                      verifiedCrossfadeDrawable[1].setProgress(avatarAnimationProgress);
-@@ -9829,12 +9985,12 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -9829,12 +9996,12 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
          topView.setBackgroundColor(ColorUtils.blendARGB(actionBarColor, color, progress));
          timerDrawable.setBackgroundColor(ColorUtils.blendARGB(actionBarColor2, color, progress));
  
@@ -16341,7 +16691,7 @@ index 40634647..865b0a33 100644
          for (int i = 0; i < 2; i++) {
              if (nameTextView[i] == null || i == 1 && playProfileAnimation == 2) {
                  continue;
-@@ -10469,6 +10625,12 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -10469,6 +10636,12 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
          settingsSectionRow2 = -1;
          notificationRow = -1;
          languageRow = -1;
@@ -16354,7 +16704,7 @@ index 40634647..865b0a33 100644
          premiumRow = -1;
          starsRow = -1;
          tonRow = -1;
-@@ -10638,6 +10800,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -10638,6 +10811,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                  }
  
                  settingsSectionRow2 = rowCount++;
@@ -16362,7 +16712,7 @@ index 40634647..865b0a33 100644
                  chatRow = rowCount++;
                  privacyRow = rowCount++;
                  notificationRow = rowCount++;
-@@ -10733,9 +10896,27 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -10733,9 +10907,27 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                  if (isBot && user != null && user.bot_has_main_app) {
                      botAppRow = rowCount++;
                  }
@@ -16390,7 +16740,7 @@ index 40634647..865b0a33 100644
                  if (user != null && user.linked_community_id != 0) {
                      linkedCommunityRow = rowCount++;
                      linkedCommunityDividerRow = rowCount++;
-@@ -10885,9 +11066,22 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -10885,9 +11077,22 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                  }
                  notificationsRow = rowCount++;
              }
@@ -16413,7 +16763,7 @@ index 40634647..865b0a33 100644
  
              if (currentChat != null && currentChat.linked_community_id != 0) {
                  linkedCommunityRow = rowCount++;
-@@ -11251,6 +11445,74 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -11251,6 +11456,74 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
  
      private MessagesController.PeerColor peerColor;
  
@@ -16488,7 +16838,7 @@ index 40634647..865b0a33 100644
      private void updateProfileData(boolean reload) {
          if (avatarContainer == null || nameTextView == null || getParentActivity() == null) {
              return;
-@@ -11420,7 +11682,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -11420,7 +11693,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                      nameTextView[a].setRightDrawable2(titleTextView.getRightDrawable2());
                  } else if (a == 0 && user.id != getUserConfig().getClientUserId() && !MessagesController.isSupportUser(user) && user.phone != null && user.phone.length() != 0 && getContactsController().contactsDict.get(user.id) == null &&
                          (getContactsController().contactsDict.size() != 0 || !getContactsController().isLoadingContacts())) {
@@ -16497,7 +16847,7 @@ index 40634647..865b0a33 100644
                  } else {
                      nameTextView[a].setText(newString);
                  }
-@@ -11459,9 +11721,23 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -11459,9 +11732,23 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                      } else if (getMessagesController().isDialogMuted(dialogId != 0 ? dialogId : userId, topicId)) {
                          nameTextView[a].setRightDrawable2(getThemedDrawable(Theme.key_drawable_muteIconDrawable));
                          nameTextViewRightDrawable2ContentDescription = LocaleController.getString(R.string.NotificationsMuted);
@@ -16521,7 +16871,7 @@ index 40634647..865b0a33 100644
                      }
                      if (user != null/* && !getMessagesController().premiumFeaturesBlocked()*/ && !MessagesController.isSupportUser(user) && DialogObject.getEmojiStatusDocumentId(user.emoji_status) != 0) {
                          rightIconIsStatus = true;
-@@ -11482,8 +11758,18 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -11482,8 +11769,18 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                          nameTextView[a].setRightDrawable2(getScamDrawable(user.scam ? 0 : 1));
                      } else if (user.verified) {
                          nameTextView[a].setRightDrawable2(getVerifiedCrossfadeDrawable(a));
@@ -16540,7 +16890,7 @@ index 40634647..865b0a33 100644
                      }
                      if (/*!getMessagesController().premiumFeaturesBlocked() && */user != null && !MessagesController.isSupportUser(user) && DialogObject.getEmojiStatusDocumentId(user.emoji_status) != 0) {
                          rightIconIsStatus = true;
-@@ -11775,6 +12061,13 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -11775,6 +12072,13 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                      } else if (chat.verified) {
                          nameTextView[a].setRightDrawable2(getVerifiedCrossfadeDrawable(a));
                          nameTextViewRightDrawableContentDescription = LocaleController.getString(R.string.AccDescrVerified);
@@ -16554,7 +16904,7 @@ index 40634647..865b0a33 100644
                      } else {
                          nameTextView[a].setRightDrawable2(null);
                          nameTextViewRightDrawableContentDescription = null;
-@@ -11805,6 +12098,10 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -11805,6 +12109,10 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                          nameTextView[a].setRightDrawable2(getVerifiedCrossfadeDrawable(a));
                      } else if (getMessagesController().isDialogMuted(-chatId, topicId)) {
                          nameTextView[a].setRightDrawable2(getThemedDrawable(Theme.key_drawable_muteIconDrawable));
@@ -16565,7 +16915,7 @@ index 40634647..865b0a33 100644
                      } else {
                          nameTextView[a].setRightDrawable2(null);
                      }
-@@ -11961,7 +12258,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -11961,7 +12269,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
              showStatusButton.setBackgroundColor(ColorUtils.blendARGB(Theme.multAlpha(Theme.adaptHSV(actionBarBackgroundColor, +0.18f, -0.1f), 0.5f), 0x23ffffff, currentExpandAnimatorValue));
          }
          if (actionBar != null) {
@@ -16574,7 +16924,7 @@ index 40634647..865b0a33 100644
              actionBar.setItemsBackgroundColor(ColorUtils.blendARGB(peerColor != null ? Theme.ACTION_BAR_WHITE_SELECTOR_COLOR : peerColor != null ? 0x20ffffff : getThemedColor(Theme.key_avatar_actionBarSelectorBlue), getThemedColor(Theme.key_actionBarActionModeDefaultSelector), mediaHeaderAnimationProgress), false);
          }
          if (verifiedDrawable[1] != null) {
-@@ -11970,18 +12267,18 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -11970,18 +12278,18 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
              verifiedDrawable[1].setColorFilter(AndroidUtilities.getOffsetColor(color1, color2, mediaHeaderAnimationProgress, 1.0f), PorterDuff.Mode.MULTIPLY);
          }
          if (verifiedCheckDrawable[1] != null) {
@@ -16596,7 +16946,22 @@ index 40634647..865b0a33 100644
          }
          if (musicView != null) {
              musicView.setColor(peerColor);
-@@ -13127,13 +13424,13 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -12419,6 +12727,14 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+                 }
+             }
+         }
++        // Строчки плагинов идут последними, после всего своего: чужой код не
++        // должен раздвигать привычные пункты меню. Так же сделано в чате.
++        final java.util.List<org.telegram.margelet.MargeletHooks.Button> pluginItems =
++                org.telegram.margelet.MargeletHooks.menu(org.telegram.margelet.MargeletHooks.PROFILE);
++        for (int i = 0; i < pluginItems.size(); i++) {
++            otherItem.addSubItem(margelet_plugin_menu + i,
++                    R.drawable.msg_settings_old, pluginItems.get(i).title);
++        }
+         if (avatarsViewPagerIndicatorView != null) {
+             if (avatarsViewPagerIndicatorView.isIndicatorFullyVisible()) {
+                 if (editItemVisible) {
+@@ -13127,13 +13443,13 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
              View view;
              switch (viewType) {
                  case VIEW_TYPE_HEADER: {
@@ -16612,7 +16977,7 @@ index 40634647..865b0a33 100644
                          @Override
                          protected int processColor(int color) {
                              return dontApplyPeerColor(color, false);
-@@ -13143,14 +13440,14 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -13143,14 +13459,14 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                      view = textDetailCell;
                      break;
                  case VIEW_TYPE_LINKED_COMMUNITY:
@@ -16629,7 +16994,7 @@ index 40634647..865b0a33 100644
                          @Override
                          protected void didPressUrl(String url, Browser.Progress progress) {
                              openUrl(url, progress);
-@@ -13174,7 +13471,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -13174,7 +13490,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                      break;
                  }
                  case VIEW_TYPE_TEXT: {
@@ -16638,7 +17003,7 @@ index 40634647..865b0a33 100644
                          @Override
                          protected int processColor(int color) {
                              return dontApplyPeerColor(color, false);
-@@ -13183,12 +13480,12 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -13183,12 +13499,12 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                      break;
                  }
                  case VIEW_TYPE_DIVIDER: {
@@ -16653,7 +17018,7 @@ index 40634647..865b0a33 100644
                          @Override
                          protected int processColor(int color) {
                              return dontApplyPeerColor(color, false);
-@@ -13197,23 +13494,23 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -13197,23 +13513,23 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                      break;
                  }
                  case VIEW_TYPE_NOTIFICATIONS_CHECK_SIMPLE: {
@@ -16682,7 +17047,7 @@ index 40634647..865b0a33 100644
                      break;
                  }
                  case VIEW_TYPE_EMPTY:
-@@ -13289,15 +13586,15 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -13289,15 +13605,15 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                      break;
                  }
                  case VIEW_TYPE_ADDTOGROUP_INFO: {
@@ -16701,7 +17066,7 @@ index 40634647..865b0a33 100644
                          @Override
                          protected int processColor(int color) {
                              return dontApplyPeerColor(color, false);
-@@ -13307,7 +13604,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -13307,7 +13623,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                      break;
                  case VIEW_TYPE_VERSION:
                  default: {
@@ -16710,7 +17075,7 @@ index 40634647..865b0a33 100644
                      cell.getTextView().setGravity(Gravity.CENTER_HORIZONTAL);
                      cell.getTextView().setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteGrayText3));
                      cell.getTextView().setMovementMethod(null);
-@@ -13317,7 +13614,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -13317,7 +13633,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                      break;
                  }
                  case VIEW_TYPE_SUGGESTION: {
@@ -16719,7 +17084,7 @@ index 40634647..865b0a33 100644
                          @Override
                          protected void onYesClick(int type) {
                              AndroidUtilities.runOnUIThread(() -> {
-@@ -13346,7 +13643,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -13346,7 +13662,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                  }
                  case VIEW_TYPE_PREMIUM_TEXT_CELL:
                  case VIEW_TYPE_STARS_TEXT_CELL:
@@ -16728,7 +17093,7 @@ index 40634647..865b0a33 100644
                      view.setBackgroundColor(getThemedColor(Theme.key_windowBackgroundWhite));
                      break;
                  case VIEW_TYPE_CHANNEL:
-@@ -13359,7 +13656,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -13359,7 +13675,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                      break;
                  case VIEW_TYPE_BOT_APP:
                      FrameLayout frameLayout = new FrameLayout(mContext);
@@ -16737,7 +17102,7 @@ index 40634647..865b0a33 100644
                      button.setRound();
                      button.setText(LocaleController.getString(R.string.ProfileBotOpenApp), false);
                      button.setOnClickListener(v -> {
-@@ -13456,7 +13753,28 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -13456,7 +13772,28 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                      TextDetailCell detailCell = (TextDetailCell) holder.itemView;
                      boolean containsQr = false;
                      boolean containsGift = false;
@@ -16767,7 +17132,7 @@ index 40634647..865b0a33 100644
                          TLRPC.UserFull userFull = getMessagesController().getUserFull(userId);
                          if (userFull != null && userFull.birthday != null) {
                              final boolean today = BirthdayController.isToday(userFull);
-@@ -13491,7 +13809,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -13491,7 +13828,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                              text = PhoneFormat.getInstance().format("+" + vcardPhone);
                              phoneNumber = vcardPhone;
                          } else if (user != null && !TextUtils.isEmpty(user.phone)) {
@@ -16776,7 +17141,7 @@ index 40634647..865b0a33 100644
                              phoneNumber = user.phone;
                          } else {
                              text = LocaleController.getString(R.string.PhoneHidden);
-@@ -13585,7 +13903,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -13585,7 +13922,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                          TLRPC.User user = UserConfig.getInstance(currentAccount).getCurrentUser();
                          String value;
                          if (user != null && user.phone != null && user.phone.length() != 0) {
@@ -16785,7 +17150,7 @@ index 40634647..865b0a33 100644
                          } else {
                              value = LocaleController.getString(R.string.NumberUnknown);
                          }
-@@ -13610,13 +13928,13 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -13610,13 +13947,13 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                              if (username == null || TextUtils.isEmpty(username)) {
                                  text = LocaleController.getString(R.string.UsernameEmpty);
                              } else {
@@ -16801,7 +17166,7 @@ index 40634647..865b0a33 100644
                              } else {
                                  text = LocaleController.getString(R.string.UsernameEmpty);
                              }
-@@ -13624,7 +13942,13 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -13624,7 +13961,13 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                          detailCell.setTextAndValue(text, value, true);
                          detailCell.setContentDescriptionValueFirst(true);
                      }
@@ -16816,7 +17181,7 @@ index 40634647..865b0a33 100644
                          Drawable drawable = ContextCompat.getDrawable(detailCell.getContext(), R.drawable.msg_input_gift);
                          drawable.setColorFilter(new PorterDuffColorFilter(dontApplyPeerColor(getThemedColor(Theme.key_switch2TrackChecked), false), PorterDuff.Mode.MULTIPLY));
                          if (UserObject.areGiftsDisabled(userInfo)) {
-@@ -13839,6 +14163,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -13839,6 +14182,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                          textCell.setTextAndIcon(LocaleController.getString(R.string.PrivacySettings), R.drawable.msg2_secret, true);
                      } else if (position == dataRow) {
                          textCell.setTextAndIcon(LocaleController.getString(R.string.DataSettings), R.drawable.msg2_data, true);
@@ -16825,7 +17190,7 @@ index 40634647..865b0a33 100644
                      } else if (position == chatRow) {
                          textCell.setTextAndIcon(LocaleController.getString(R.string.ChatSettings), R.drawable.msg2_discussion, true);
                      } else if (position == filtersRow) {
-@@ -14286,7 +14612,9 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -14286,7 +14631,9 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                          position == clearLogsRow || position == switchBackendRow || position == setAvatarRow ||
                          position == addToGroupButtonRow || position == premiumRow || position == premiumGiftingRow ||
                          position == businessRow || position == liteModeRow || position == birthdayRow || position == channelRow ||
@@ -16836,7 +17201,7 @@ index 40634647..865b0a33 100644
              }
              if (holder.itemView instanceof UserCell) {
                  UserCell userCell = (UserCell) holder.itemView;
-@@ -14314,7 +14642,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -14314,7 +14661,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
              if (position == infoHeaderRow || position == membersHeaderRow || position == settingsSectionRow2 ||
                      position == numberSectionRow || position == helpHeaderRow || position == debugHeaderRow || position == botPermissionsHeader) {
                  return VIEW_TYPE_HEADER;
@@ -16846,7 +17211,7 @@ index 40634647..865b0a33 100644
                  return VIEW_TYPE_TEXT_DETAIL;
              } else if (position == usernameRow || position == setUsernameRow) {
                  return VIEW_TYPE_TEXT_DETAIL_MULTILINE;
-@@ -14332,7 +14661,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -14332,7 +14680,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                      position == clearLogsRow || position == switchBackendRow || position == setAvatarRow || position == addToGroupButtonRow ||
                      position == addToContactsRow || position == liteModeRow || position == premiumGiftingRow || position == businessRow ||
                      position == botStarsBalanceRow || position == botTonBalanceRow || position == channelBalanceRow || position == botPermissionLocation ||
@@ -16856,7 +17221,7 @@ index 40634647..865b0a33 100644
              ) {
                  return VIEW_TYPE_TEXT;
              } else if (position == notificationsDividerRow) {
-@@ -14346,7 +14676,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -14346,7 +14695,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                      position == helpSectionCell || position == setAvatarSectionRow || position == passwordSuggestionSectionRow ||
                      position == phoneSuggestionSectionRow || position == premiumSectionsRow || position == reportDividerRow ||
                      position == channelDividerRow || position == graceSuggestionSectionRow || position == balanceDividerRow ||
@@ -16866,7 +17231,7 @@ index 40634647..865b0a33 100644
              ) {
                  return VIEW_TYPE_SHADOW;
              } else if (position >= membersStartRow && position < membersEndRow) {
-@@ -15277,7 +15608,11 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -15277,7 +15627,11 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                          ((UserCell) child).update(0);
                      }
                  }
@@ -16879,7 +17244,7 @@ index 40634647..865b0a33 100644
              }
              if (!isPulledDown) {
                  if (onlineTextView[1] != null) {
-@@ -15291,7 +15626,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -15291,7 +15645,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                      }
                  }
                  if (lockIconDrawable != null) {
@@ -16888,7 +17253,7 @@ index 40634647..865b0a33 100644
                  }
                  if (scamDrawable != null) {
                      scamDrawable.setColor(getThemedColor(Theme.key_avatar_subtitleInProfileBlue));
-@@ -15300,7 +15635,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -15300,7 +15654,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                      nameTextView[1].setTextColor(getThemedColor(Theme.key_profile_title));
                  }
                  if (actionBar != null) {
@@ -16898,7 +17263,7 @@ index 40634647..865b0a33 100644
                  }
  //                if (sharedMediaLayout != null) {
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/SettingsActivity.java b/TMessagesProj/src/main/java/org/telegram/ui/SettingsActivity.java
-index cbfb369a..b9de3d85 100644
+index cbfb369a9..b9de3d850 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/SettingsActivity.java
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/SettingsActivity.java
 @@ -536,11 +536,11 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
@@ -16938,7 +17303,7 @@ index cbfb369a..b9de3d85 100644
              case 11:
                  presentSettingFragment(new PremiumPreviewFragment("settings"));
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/Stars/StarsController.java b/TMessagesProj/src/main/java/org/telegram/ui/Stars/StarsController.java
-index ba347e0b..5459db62 100644
+index ba347e0bd..5459db624 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/Stars/StarsController.java
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/Stars/StarsController.java
 @@ -2271,6 +2271,8 @@ public class StarsController {
@@ -16963,7 +17328,7 @@ index ba347e0b..5459db62 100644
             if (res instanceof TL_stars.StarGifts) {
                 whenDone.run((TL_stars.StarGifts) res);
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/Stories/DialogStoriesCell.java b/TMessagesProj/src/main/java/org/telegram/ui/Stories/DialogStoriesCell.java
-index ac5d4b7e..ca94a6b1 100644
+index ac5d4b7ed..ca94a6b16 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/Stories/DialogStoriesCell.java
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/Stories/DialogStoriesCell.java
 @@ -335,7 +335,11 @@ public class DialogStoriesCell extends FrameLayout implements NotificationCenter
@@ -16980,7 +17345,7 @@ index ac5d4b7e..ca94a6b1 100644
          telegramLogoView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
          telegramLogoView.setFocusableInTouchMode(true);
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/Stories/PeerStoriesView.java b/TMessagesProj/src/main/java/org/telegram/ui/Stories/PeerStoriesView.java
-index ef12b3e3..af6326a8 100644
+index ef12b3e35..af6326a8b 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/Stories/PeerStoriesView.java
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/Stories/PeerStoriesView.java
 @@ -4420,7 +4420,7 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
@@ -21624,7 +21989,7 @@ HcmV?d00001
 
 diff --git a/TMessagesProj/src/main/res/drawable/icon_2_background_sa.xml b/TMessagesProj/src/main/res/drawable/icon_2_background_sa.xml
 new file mode 100644
-index 00000000..01662513
+index 000000000..016625137
 --- /dev/null
 +++ b/TMessagesProj/src/main/res/drawable/icon_2_background_sa.xml
 @@ -0,0 +1,5 @@
@@ -21634,7 +21999,7 @@ index 00000000..01662513
 +    <solid android:color="#1D2B24" />
 +</shape>
 diff --git a/TMessagesProj/src/main/res/drawable/icon_3_background_sa.xml b/TMessagesProj/src/main/res/drawable/icon_3_background_sa.xml
-index 314f0a65..f4552d9f 100644
+index 314f0a65f..f4552d9fc 100644
 --- a/TMessagesProj/src/main/res/drawable/icon_3_background_sa.xml
 +++ b/TMessagesProj/src/main/res/drawable/icon_3_background_sa.xml
 @@ -1,35 +1,5 @@
@@ -21679,7 +22044,7 @@ index 314f0a65..f4552d9f 100644
 +    <solid android:color="#B7A8E0" />
 +</shape>
 diff --git a/TMessagesProj/src/main/res/drawable/icon_4_background_sa.xml b/TMessagesProj/src/main/res/drawable/icon_4_background_sa.xml
-index 13363608..c6e44cf9 100644
+index 133636088..c6e44cf96 100644
 --- a/TMessagesProj/src/main/res/drawable/icon_4_background_sa.xml
 +++ b/TMessagesProj/src/main/res/drawable/icon_4_background_sa.xml
 @@ -1,9 +1,5 @@
@@ -21698,7 +22063,7 @@ index 13363608..c6e44cf9 100644
 +    <solid android:color="#E7C88C" />
 +</shape>
 diff --git a/TMessagesProj/src/main/res/drawable/icon_5_background_sa.xml b/TMessagesProj/src/main/res/drawable/icon_5_background_sa.xml
-index 353fba3a..988cd9b6 100644
+index 353fba3a7..988cd9b62 100644
 --- a/TMessagesProj/src/main/res/drawable/icon_5_background_sa.xml
 +++ b/TMessagesProj/src/main/res/drawable/icon_5_background_sa.xml
 @@ -1,9 +1,5 @@
@@ -21717,7 +22082,7 @@ index 353fba3a..988cd9b6 100644
 +    <solid android:color="#7FC4D6" />
 +</shape>
 diff --git a/TMessagesProj/src/main/res/drawable/icon_6_background_sa.xml b/TMessagesProj/src/main/res/drawable/icon_6_background_sa.xml
-index d5756c75..142485ec 100644
+index d5756c752..142485ecd 100644
 --- a/TMessagesProj/src/main/res/drawable/icon_6_background_sa.xml
 +++ b/TMessagesProj/src/main/res/drawable/icon_6_background_sa.xml
 @@ -1,8 +1,5 @@
@@ -21735,7 +22100,7 @@ index d5756c75..142485ec 100644
 +    <solid android:color="#E09A9A" />
 +</shape>
 diff --git a/TMessagesProj/src/main/res/drawable/icon_background_sa.xml b/TMessagesProj/src/main/res/drawable/icon_background_sa.xml
-index d3a1ae4c..49936b15 100644
+index d3a1ae4cc..49936b155 100644
 --- a/TMessagesProj/src/main/res/drawable/icon_background_sa.xml
 +++ b/TMessagesProj/src/main/res/drawable/icon_background_sa.xml
 @@ -1,8 +1,5 @@
@@ -21754,7 +22119,7 @@ index d3a1ae4c..49936b15 100644
 +</shape>
 diff --git a/TMessagesProj/src/main/res/drawable/margelet_background.xml b/TMessagesProj/src/main/res/drawable/margelet_background.xml
 new file mode 100644
-index 00000000..49936b15
+index 000000000..49936b155
 --- /dev/null
 +++ b/TMessagesProj/src/main/res/drawable/margelet_background.xml
 @@ -0,0 +1,5 @@
@@ -21765,7 +22130,7 @@ index 00000000..49936b15
 +</shape>
 diff --git a/TMessagesProj/src/main/res/drawable/margelet_badge.xml b/TMessagesProj/src/main/res/drawable/margelet_badge.xml
 new file mode 100644
-index 00000000..36c3fce4
+index 000000000..36c3fce41
 --- /dev/null
 +++ b/TMessagesProj/src/main/res/drawable/margelet_badge.xml
 @@ -0,0 +1,25 @@
@@ -21796,7 +22161,7 @@ index 00000000..36c3fce4
 +</vector>
 diff --git a/TMessagesProj/src/main/res/drawable/margelet_badge_lavender.xml b/TMessagesProj/src/main/res/drawable/margelet_badge_lavender.xml
 new file mode 100644
-index 00000000..34f053ae
+index 000000000..34f053aef
 --- /dev/null
 +++ b/TMessagesProj/src/main/res/drawable/margelet_badge_lavender.xml
 @@ -0,0 +1,25 @@
@@ -21827,7 +22192,7 @@ index 00000000..34f053ae
 +</vector>
 diff --git a/TMessagesProj/src/main/res/drawable/margelet_badge_plane.xml b/TMessagesProj/src/main/res/drawable/margelet_badge_plane.xml
 new file mode 100644
-index 00000000..70312cc3
+index 000000000..70312cc31
 --- /dev/null
 +++ b/TMessagesProj/src/main/res/drawable/margelet_badge_plane.xml
 @@ -0,0 +1,24 @@
@@ -21857,7 +22222,7 @@ index 00000000..70312cc3
 +</vector>
 diff --git a/TMessagesProj/src/main/res/drawable/margelet_badge_yellow.xml b/TMessagesProj/src/main/res/drawable/margelet_badge_yellow.xml
 new file mode 100644
-index 00000000..872c818c
+index 000000000..872c818c9
 --- /dev/null
 +++ b/TMessagesProj/src/main/res/drawable/margelet_badge_yellow.xml
 @@ -0,0 +1,25 @@
@@ -21888,7 +22253,7 @@ index 00000000..872c818c
 +</vector>
 diff --git a/TMessagesProj/src/main/res/drawable/margelet_plane.xml b/TMessagesProj/src/main/res/drawable/margelet_plane.xml
 new file mode 100644
-index 00000000..04c782f3
+index 000000000..04c782f3e
 --- /dev/null
 +++ b/TMessagesProj/src/main/res/drawable/margelet_plane.xml
 @@ -0,0 +1,10 @@
@@ -21903,7 +22268,7 @@ index 00000000..04c782f3
 +      android:pathData="M54,29.88 L27.55,67.46 L52.05,59.11 L54,64.12 L55.95,59.11 L80.45,67.46 Z" />
 +</vector>
 diff --git a/TMessagesProj/src/main/res/mipmap-anydpi-v26/ic_launcher.xml b/TMessagesProj/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
-index 5a996b47..1e4830c5 100644
+index 5a996b470..1e4830c57 100644
 --- a/TMessagesProj/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
 +++ b/TMessagesProj/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
 @@ -1,6 +1,6 @@
@@ -21919,7 +22284,7 @@ index 5a996b47..1e4830c5 100644
 +    <monochrome android:drawable="@drawable/margelet_plane" />
 +</adaptive-icon>
 diff --git a/TMessagesProj/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml b/TMessagesProj/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
-index 527bf8f9..1e4830c5 100644
+index 527bf8f90..1e4830c57 100644
 --- a/TMessagesProj/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
 +++ b/TMessagesProj/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
 @@ -1,6 +1,6 @@
@@ -25209,7 +25574,7 @@ literal 0
 HcmV?d00001
 
 diff --git a/TMessagesProj/src/main/res/values-ar/strings.xml b/TMessagesProj/src/main/res/values-ar/strings.xml
-index 8b870043..1a774895 100644
+index 8b8700432..1a7748953 100644
 --- a/TMessagesProj/src/main/res/values-ar/strings.xml
 +++ b/TMessagesProj/src/main/res/values-ar/strings.xml
 @@ -1,7 +1,7 @@
@@ -25223,7 +25588,7 @@ index 8b870043..1a774895 100644
      <string name="English">الإنجليزية</string>
      <string name="LanguageNameInEnglish">Arabic</string>
 diff --git a/TMessagesProj/src/main/res/values-de/strings.xml b/TMessagesProj/src/main/res/values-de/strings.xml
-index 9054784a..7deb4784 100644
+index 9054784ad..7deb47846 100644
 --- a/TMessagesProj/src/main/res/values-de/strings.xml
 +++ b/TMessagesProj/src/main/res/values-de/strings.xml
 @@ -1,7 +1,7 @@
@@ -25237,7 +25602,7 @@ index 9054784a..7deb4784 100644
      <string name="English">Englisch</string>
      <string name="LanguageNameInEnglish">German</string>
 diff --git a/TMessagesProj/src/main/res/values-es/strings.xml b/TMessagesProj/src/main/res/values-es/strings.xml
-index 4779808e..59886589 100644
+index 4779808ea..59886589e 100644
 --- a/TMessagesProj/src/main/res/values-es/strings.xml
 +++ b/TMessagesProj/src/main/res/values-es/strings.xml
 @@ -1,7 +1,7 @@
@@ -25251,7 +25616,7 @@ index 4779808e..59886589 100644
      <string name="English">Inglés</string>
      <string name="LanguageNameInEnglish">Spanish</string>
 diff --git a/TMessagesProj/src/main/res/values-it/strings.xml b/TMessagesProj/src/main/res/values-it/strings.xml
-index 3e7688d9..29817508 100644
+index 3e7688d9d..298175081 100644
 --- a/TMessagesProj/src/main/res/values-it/strings.xml
 +++ b/TMessagesProj/src/main/res/values-it/strings.xml
 @@ -1,7 +1,7 @@
@@ -25265,7 +25630,7 @@ index 3e7688d9..29817508 100644
      <string name="English">Inglese</string>
      <string name="LanguageNameInEnglish">Italian</string>
 diff --git a/TMessagesProj/src/main/res/values-ko/strings.xml b/TMessagesProj/src/main/res/values-ko/strings.xml
-index 6f75e2ef..154f648b 100644
+index 6f75e2efd..154f648bd 100644
 --- a/TMessagesProj/src/main/res/values-ko/strings.xml
 +++ b/TMessagesProj/src/main/res/values-ko/strings.xml
 @@ -1,7 +1,7 @@
@@ -25279,7 +25644,7 @@ index 6f75e2ef..154f648b 100644
      <string name="English">영어</string>
      <string name="LanguageNameInEnglish">한국어</string>
 diff --git a/TMessagesProj/src/main/res/values-nl/strings.xml b/TMessagesProj/src/main/res/values-nl/strings.xml
-index f3df87e8..e666ab3f 100644
+index f3df87e85..e666ab3ff 100644
 --- a/TMessagesProj/src/main/res/values-nl/strings.xml
 +++ b/TMessagesProj/src/main/res/values-nl/strings.xml
 @@ -1,7 +1,7 @@
@@ -25293,7 +25658,7 @@ index f3df87e8..e666ab3f 100644
      <string name="English">Engels</string>
      <string name="LanguageNameInEnglish">Dutch</string>
 diff --git a/TMessagesProj/src/main/res/values-pt-rBR/strings.xml b/TMessagesProj/src/main/res/values-pt-rBR/strings.xml
-index 03d0ba33..17f98fa6 100644
+index 03d0ba337..17f98fa6e 100644
 --- a/TMessagesProj/src/main/res/values-pt-rBR/strings.xml
 +++ b/TMessagesProj/src/main/res/values-pt-rBR/strings.xml
 @@ -1,7 +1,7 @@
@@ -25307,7 +25672,7 @@ index 03d0ba33..17f98fa6 100644
      <string name="English">Inglês</string>
      <string name="LanguageNameInEnglish">Portuguese (Brazil)</string>
 diff --git a/TMessagesProj/src/main/res/values-ru/strings.xml b/TMessagesProj/src/main/res/values-ru/strings.xml
-index 24c56292..9842e179 100644
+index 24c562920..9842e1798 100644
 --- a/TMessagesProj/src/main/res/values-ru/strings.xml
 +++ b/TMessagesProj/src/main/res/values-ru/strings.xml
 @@ -1,7 +1,7 @@
@@ -25574,7 +25939,7 @@ index 24c56292..9842e179 100644
  </resources>
 \ No newline at end of file
 diff --git a/TMessagesProj/src/main/res/values-uk/strings.xml b/TMessagesProj/src/main/res/values-uk/strings.xml
-index d4683443..57d10109 100644
+index d46834430..57d101095 100644
 --- a/TMessagesProj/src/main/res/values-uk/strings.xml
 +++ b/TMessagesProj/src/main/res/values-uk/strings.xml
 @@ -1,7 +1,7 @@
@@ -25589,7 +25954,7 @@ index d4683443..57d10109 100644
      <string name="LanguageNameInEnglish">Ukrainian</string>
 diff --git a/TMessagesProj/src/main/res/values-zh/strings.xml b/TMessagesProj/src/main/res/values-zh/strings.xml
 new file mode 100644
-index 00000000..14af78bb
+index 000000000..14af78bba
 --- /dev/null
 +++ b/TMessagesProj/src/main/res/values-zh/strings.xml
 @@ -0,0 +1,250 @@
@@ -25844,7 +26209,7 @@ index 00000000..14af78bb
 +    <string name="MargeletDonatePageAbout">在浏览器里打开：那边是现成的表单，不用手动粘贴数字。</string>
 +</resources>
 diff --git a/TMessagesProj/src/main/res/values/ids.xml b/TMessagesProj/src/main/res/values/ids.xml
-index cc49d135..a8a51c3a 100644
+index cc49d1353..a8a51c3a0 100644
 --- a/TMessagesProj/src/main/res/values/ids.xml
 +++ b/TMessagesProj/src/main/res/values/ids.xml
 @@ -1,5 +1,11 @@
@@ -25860,7 +26225,7 @@ index cc49d135..a8a51c3a 100644
      <item name="menu_regular" type="id"/>
      <item name="menu_bold" type="id"/>
 diff --git a/TMessagesProj/src/main/res/values/strings.xml b/TMessagesProj/src/main/res/values/strings.xml
-index ffa4d566..fb0a1948 100644
+index ffa4d5663..fb0a19484 100644
 --- a/TMessagesProj/src/main/res/values/strings.xml
 +++ b/TMessagesProj/src/main/res/values/strings.xml
 @@ -1,7 +1,7 @@
@@ -26126,7 +26491,7 @@ index ffa4d566..fb0a1948 100644
 +    <string name="MargeletDonatePageAbout">Opens in the browser: the form is already there, nothing to paste by hand.</string>
  </resources>
 diff --git a/TMessagesProj_App/build.gradle b/TMessagesProj_App/build.gradle
-index 2aa197cb..8fd9c9ec 100644
+index 2aa197cb3..8fd9c9eca 100644
 --- a/TMessagesProj_App/build.gradle
 +++ b/TMessagesProj_App/build.gradle
 @@ -67,10 +67,19 @@ android {
@@ -26173,7 +26538,7 @@ index 2aa197cb..8fd9c9ec 100644
              sourceSets.debug {
                  manifest.srcFile '../TMessagesProj/config/debug/AndroidManifest_SDK23.xml'
 diff --git a/TMessagesProj_AppStandalone/build.gradle b/TMessagesProj_AppStandalone/build.gradle
-index 96f4d779..dd54b90d 100644
+index 96f4d779c..dd54b90d8 100644
 --- a/TMessagesProj_AppStandalone/build.gradle
 +++ b/TMessagesProj_AppStandalone/build.gradle
 @@ -1,4 +1,7 @@
@@ -26300,10 +26665,10 @@ HcmV?d00001
 
 diff --git a/TMessagesProj_AppStandalone/src/main/java/org/telegram/margelet/MargeletPython.java b/TMessagesProj_AppStandalone/src/main/java/org/telegram/margelet/MargeletPython.java
 new file mode 100644
-index 00000000..d5d411e7
+index 000000000..c77580f47
 --- /dev/null
 +++ b/TMessagesProj_AppStandalone/src/main/java/org/telegram/margelet/MargeletPython.java
-@@ -0,0 +1,92 @@
+@@ -0,0 +1,118 @@
 +package org.telegram.margelet;
 +
 +import android.content.Context;
@@ -26366,10 +26731,36 @@ index 00000000..d5d411e7
 +        host.callAttr("received", text, dialogId, messageId, out);
 +    }
 +
-+    /** Нажали кнопку плагина в меню чата. */
-+    public static void buttonClicked(String pluginId, String key, Object fragment) {
++    /** Нажали строчку плагина в одном из меню. */
++    public static void menuClicked(String pluginId, String key, String where, Object fragment, Object target) {
 +        final PyObject host = Python.getInstance().getModule("margelet_host");
-+        host.callAttr("button_clicked", pluginId, key, fragment);
++        host.callAttr("menu_clicked", pluginId, key, where, fragment, target);
++    }
++
++    /**
++     * Запрос к серверу, ответ сервера, обновление с сервера.
++     *
++     * Все три устроены одинаково: питон либо молчит, либо отдаёт замену.
++     * Молчание — это None, и оно должно доехать до джавы именно как null:
++     * «плагин не тронул» и «плагин вернул пустоту» — разные вещи, и склеить
++     * их значит однажды выкинуть чужой запрос вместо того, чтобы пропустить.
++     */
++    public static Object requesting(Object request) {
++        final PyObject host = Python.getInstance().getModule("margelet_host");
++        final PyObject answer = host.callAttr("requesting", request);
++        return answer == null ? null : answer.toJava(Object.class);
++    }
++
++    public static Object answering(Object request, Object response, Object error) {
++        final PyObject host = Python.getInstance().getModule("margelet_host");
++        final PyObject answer = host.callAttr("answering", request, response, error);
++        return answer == null ? null : answer.toJava(Object.class);
++    }
++
++    public static Object updating(Object update) {
++        final PyObject host = Python.getInstance().getModule("margelet_host");
++        final PyObject answer = host.callAttr("updating", update);
++        return answer == null ? null : answer.toJava(Object.class);
 +    }
 +
 +    /** Человек поменял настройку плагина на его экране настроек. */
@@ -26397,7 +26788,7 @@ index 00000000..d5d411e7
 +    }
 +}
 diff --git a/TMessagesProj_AppStandalone/src/main/java/org/telegram/messenger/ApplicationLoaderImpl.java b/TMessagesProj_AppStandalone/src/main/java/org/telegram/messenger/ApplicationLoaderImpl.java
-index ce63acf6..d703d373 100644
+index ce63acf68..d703d3736 100644
 --- a/TMessagesProj_AppStandalone/src/main/java/org/telegram/messenger/ApplicationLoaderImpl.java
 +++ b/TMessagesProj_AppStandalone/src/main/java/org/telegram/messenger/ApplicationLoaderImpl.java
 @@ -108,9 +108,13 @@ public class ApplicationLoaderImpl extends ApplicationLoader {
@@ -26417,7 +26808,7 @@ index ce63acf6..d703d373 100644
      @Override
 diff --git a/TMessagesProj_AppStandalone/src/main/python/margelet_example.py b/TMessagesProj_AppStandalone/src/main/python/margelet_example.py
 new file mode 100644
-index 00000000..14308d17
+index 000000000..14308d17a
 --- /dev/null
 +++ b/TMessagesProj_AppStandalone/src/main/python/margelet_example.py
 @@ -0,0 +1,135 @@
@@ -26558,10 +26949,10 @@ index 00000000..14308d17
 +    margelet.log("настройка", key, "теперь", value)
 diff --git a/TMessagesProj_AppStandalone/src/main/python/margelet_host.py b/TMessagesProj_AppStandalone/src/main/python/margelet_host.py
 new file mode 100644
-index 00000000..6406ccbd
+index 000000000..d78b9a374
 --- /dev/null
 +++ b/TMessagesProj_AppStandalone/src/main/python/margelet_host.py
-@@ -0,0 +1,656 @@
+@@ -0,0 +1,785 @@
 +# -*- coding: utf-8 -*-
 +"""Прослойка между приложением и плагинами Margelet.
 +
@@ -26595,6 +26986,11 @@ index 00000000..6406ccbd
 +# Такой же строки нет в MargeletHooks.CANCEL по случайности: она там же и
 +# записана, и обычным текстом её не набрать.
 +_CANCEL = "\u0000margelet-cancel"
++
++# Места, куда плагин может поставить свою строчку. Те же слова, что и в
++# MargeletHooks: список один на два языка, и расходиться им нельзя.
++_CHAT = "chat"
++_PLACES = (_CHAT, "profile", "message", "drawer")
 +
 +
 +class _Task(dynamic_proxy(Runnable)):
@@ -26662,6 +27058,9 @@ index 00000000..6406ccbd
 +        self._on_settings = []
 +        self._on_deleted = []
 +        self._on_pin = []
++        self._on_request = []
++        self._on_answer = []
++        self._on_update = []
 +        self._buttons = {}
 +        self._actions = {}
 +        self._cancel_send = False
@@ -26954,10 +27353,71 @@ index 00000000..6406ccbd
 +        _Hooks.wantMessage()
 +
 +    def button(self, title, call, key=None):
-+        """Своя строчка в меню чата (три точки). Нажали — зовём call(fragment)."""
++        """Своя строчка в меню чата (три точки). Нажали — зовём call(fragment).
++
++        Короткая запись для margelet.menu("chat", ...): меню чата было первым
++        и остаётся самым частым.
++        """
++        return self.menu(_CHAT, title, call, key)
++
++    def menu(self, where, title, call, key=None):
++        """Своя строчка в меню приложения.
++
++        where — где стоять:
++          "chat"     три точки в шапке переписки; call(экран)
++          "profile"  три точки на экране человека, группы или канала;
++                     call(экран, номер) — номер того, чей это профиль
++          "message"  долгое нажатие на сообщение; call(экран, сообщение)
++          "drawer"   боковое меню, которое выезжает слева; call(экран)
++
++        Что придёт вторым доводом — зависит от места, и по-другому не выйдет:
++        в профиле предмет есть, в боковом меню его нет. Обработчик пишется под
++        своё место, а не под все сразу.
++        """
++        where = str(where)
++        if where not in _PLACES:
++            self.error("не знаю такого меню:", where,
++                       "— бывают", ", ".join(sorted(_PLACES)))
++            return
 +        key = str(key or title)
-+        self._buttons[key] = call
-+        _Hooks.addButton(self.id, key, str(title))
++        self._buttons[where + "\u0000" + key] = (call, where)
++        _Hooks.addMenuItem(self.id, key, str(title), where)
++
++    def on_request(self, call):
++        """Позвать перед каждым запросом к серверу: call(запрос).
++
++        Запрос — тот самый объект TL, что уйдёт на сервер. Что вернуть:
++          False   — не отправлять его вовсе;
++          объект  — отправить его вместо;
++          ничего  — оставить как есть.
++
++        Через эту дверь идёт ВСЁ, что клиент говорит серверу, — десятки
++        запросов в минуту, и обработчик думает прямо на потоке сети. Значит:
++        сначала посмотреть, тот ли это запрос, и только потом что-то делать.
++        Долгую работу уносить в margelet.background.
++        """
++        self._on_request.append(call)
++        _Hooks.wantRequest()
++
++    def on_answer(self, call):
++        """Позвать на ответ сервера: call(запрос, ответ, ошибка).
++
++        Ошибка — None, если её не было. Возвращать можно то же, что и в
++        on_request: объект вместо ответа, False — считать, что ответа нет,
++        ничего — оставить как есть.
++        """
++        self._on_answer.append(call)
++        _Hooks.wantAnswer()
++
++    def on_update(self, call):
++        """Позвать на каждое обновление с сервера: call(обновление).
++
++        Это то, из чего приложение узнаёт вообще обо всём: новые сообщения,
++        правки, прочтения, кто печатает. Поток плотный, и правила те же, что
++        у on_request.
++        """
++        self._on_update.append(call)
++        _Hooks.wantUpdate()
 +
 +    def on_deleted(self, call):
 +        """Позвать, когда сообщения удалили: call(номера, чат).
@@ -27110,6 +27570,57 @@ index 00000000..6406ccbd
 +    return result
 +
 +
++def _through(handlers_of, thing):
++    """Прогнать предмет через обработчики всех плагинов.
++
++    Один порядок на все три двери сети: каждый следующий видит то, что вернул
++    предыдущий; False — не пропускать; упавший обработчик пропускаем, потому
++    что сломанный плагин не должен отрезать приложение от сервера.
++    """
++    result = thing
++    for margelet in list(_margelets.values()):
++        for call in list(handlers_of(margelet)):
++            try:
++                answer = call(result)
++            except Exception:
++                _Host.log(margelet.name, traceback.format_exc(), True)
++                continue
++            if answer is False:
++                return False
++            if answer is not None:
++                result = answer
++    # Не тронули — отвечаем молчанием: джава по нему и понимает, что вмешательства
++    # не было, и не тратится на обратное превращение объекта.
++    return None if result is thing else result
++
++
++def requesting(request):
++    """Запрос к серверу, пока он ещё не ушёл."""
++    return _through(lambda m: m._on_request, request)
++
++
++def answering(request, response, error):
++    """Ответ сервера, пока его ещё не увидело приложение."""
++    result = response
++    for margelet in list(_margelets.values()):
++        for call in list(margelet._on_answer):
++            try:
++                answer = call(request, result, error)
++            except Exception:
++                _Host.log(margelet.name, traceback.format_exc(), True)
++                continue
++            if answer is False:
++                return False
++            if answer is not None:
++                result = answer
++    return None if result is response else result
++
++
++def updating(update):
++    """Обновление с сервера, пока его ещё не разобрало приложение."""
++    return _through(lambda m: m._on_update, update)
++
++
 +def received(text, dialog_id, message_id, out):
 +    """Пришло сообщение."""
 +    for margelet in list(_margelets.values()):
@@ -27143,16 +27654,25 @@ index 00000000..6406ccbd
 +    return True
 +
 +
-+def button_clicked(plugin_id, key, fragment):
-+    """Нажали строчку плагина в меню чата."""
++def menu_clicked(plugin_id, key, where, fragment, target):
++    """Нажали строчку плагина в одном из меню.
++
++    Доводов у обработчика столько, сколько есть смысла: в меню чата и в
++    боковом меню предмета нет, и подсовывать туда None значило бы заставить
++    каждого автора писать лишний довод ради пустоты.
++    """
 +    margelet = _margelets.get(plugin_id)
 +    if margelet is None:
 +        return
-+    call = margelet._buttons.get(key)
-+    if call is None:
++    found = margelet._buttons.get(str(where) + "\u0000" + key)
++    if found is None:
 +        return
++    call, place = found
 +    try:
-+        call(fragment)
++        if place in ("profile", "message"):
++            call(fragment, target)
++        else:
++            call(fragment)
 +    except Exception:
 +        _Host.log(margelet.name, traceback.format_exc(), True)
 +
@@ -27219,7 +27739,7 @@ index 00000000..6406ccbd
 +        sys.stderr.flush()
 +        sys.stdout, sys.stderr = out, err
 diff --git a/TMessagesProj_AppStandalone/src/main/res/mipmap-anydpi-v26/ic_launcher_sa.xml b/TMessagesProj_AppStandalone/src/main/res/mipmap-anydpi-v26/ic_launcher_sa.xml
-index d3526773..f883467d 100644
+index d35267739..f883467d1 100644
 --- a/TMessagesProj_AppStandalone/src/main/res/mipmap-anydpi-v26/ic_launcher_sa.xml
 +++ b/TMessagesProj_AppStandalone/src/main/res/mipmap-anydpi-v26/ic_launcher_sa.xml
 @@ -1,6 +1,6 @@
@@ -27234,7 +27754,7 @@ index d3526773..f883467d 100644
 +    <monochrome android:drawable="@drawable/margelet_plane" />
 +</adaptive-icon>
 diff --git a/TMessagesProj_AppStandalone/src/main/res/mipmap-anydpi-v26/icon_2_launcher_sa.xml b/TMessagesProj_AppStandalone/src/main/res/mipmap-anydpi-v26/icon_2_launcher_sa.xml
-index e7996ea5..20b0b54f 100644
+index e7996ea53..20b0b54f2 100644
 --- a/TMessagesProj_AppStandalone/src/main/res/mipmap-anydpi-v26/icon_2_launcher_sa.xml
 +++ b/TMessagesProj_AppStandalone/src/main/res/mipmap-anydpi-v26/icon_2_launcher_sa.xml
 @@ -1,5 +1,6 @@
@@ -27249,7 +27769,7 @@ index e7996ea5..20b0b54f 100644
 +    <monochrome android:drawable="@drawable/margelet_plane" />
 +</adaptive-icon>
 diff --git a/TMessagesProj_AppStandalone/src/main/res/mipmap-anydpi-v26/icon_3_launcher_sa.xml b/TMessagesProj_AppStandalone/src/main/res/mipmap-anydpi-v26/icon_3_launcher_sa.xml
-index 2c880e78..b0c2047c 100644
+index 2c880e784..b0c2047c1 100644
 --- a/TMessagesProj_AppStandalone/src/main/res/mipmap-anydpi-v26/icon_3_launcher_sa.xml
 +++ b/TMessagesProj_AppStandalone/src/main/res/mipmap-anydpi-v26/icon_3_launcher_sa.xml
 @@ -1,5 +1,6 @@
@@ -27263,7 +27783,7 @@ index 2c880e78..b0c2047c 100644
 +    <monochrome android:drawable="@drawable/margelet_plane" />
 +</adaptive-icon>
 diff --git a/TMessagesProj_AppStandalone/src/main/res/mipmap-anydpi-v26/icon_4_launcher_sa.xml b/TMessagesProj_AppStandalone/src/main/res/mipmap-anydpi-v26/icon_4_launcher_sa.xml
-index 4974cb43..00418ca8 100644
+index 4974cb43c..00418ca87 100644
 --- a/TMessagesProj_AppStandalone/src/main/res/mipmap-anydpi-v26/icon_4_launcher_sa.xml
 +++ b/TMessagesProj_AppStandalone/src/main/res/mipmap-anydpi-v26/icon_4_launcher_sa.xml
 @@ -1,5 +1,6 @@
@@ -27277,7 +27797,7 @@ index 4974cb43..00418ca8 100644
 +    <monochrome android:drawable="@drawable/margelet_plane" />
 +</adaptive-icon>
 diff --git a/TMessagesProj_AppStandalone/src/main/res/mipmap-anydpi-v26/icon_5_launcher_sa.xml b/TMessagesProj_AppStandalone/src/main/res/mipmap-anydpi-v26/icon_5_launcher_sa.xml
-index d1031fb6..367dd445 100644
+index d1031fb67..367dd445f 100644
 --- a/TMessagesProj_AppStandalone/src/main/res/mipmap-anydpi-v26/icon_5_launcher_sa.xml
 +++ b/TMessagesProj_AppStandalone/src/main/res/mipmap-anydpi-v26/icon_5_launcher_sa.xml
 @@ -1,5 +1,6 @@
@@ -27291,7 +27811,7 @@ index d1031fb6..367dd445 100644
 +    <monochrome android:drawable="@drawable/margelet_plane" />
 +</adaptive-icon>
 diff --git a/TMessagesProj_AppStandalone/src/main/res/mipmap-anydpi-v26/icon_6_launcher_sa.xml b/TMessagesProj_AppStandalone/src/main/res/mipmap-anydpi-v26/icon_6_launcher_sa.xml
-index 9ef459fa..d838fab8 100644
+index 9ef459fa3..d838fab8b 100644
 --- a/TMessagesProj_AppStandalone/src/main/res/mipmap-anydpi-v26/icon_6_launcher_sa.xml
 +++ b/TMessagesProj_AppStandalone/src/main/res/mipmap-anydpi-v26/icon_6_launcher_sa.xml
 @@ -1,5 +1,6 @@
@@ -37310,7 +37830,7 @@ zN)pg+&f4WGF&7W#6@ENukaqcu$exQ%^(5`NnRJoQR6h3>`4m;!{|7raMZx3NDbD}^
 N002ovPDHLkV1mZ^h^7Dl
 
 diff --git a/build.gradle b/build.gradle
-index 528fd746..8b64b0f8 100644
+index 528fd746d..8b64b0f82 100644
 --- a/build.gradle
 +++ b/build.gradle
 @@ -11,6 +11,10 @@ buildscript {
@@ -37326,7 +37846,7 @@ index 528fd746..8b64b0f8 100644
  repositories {
 diff --git a/build10.log b/build10.log
 new file mode 100644
-index 00000000..38ab361d
+index 000000000..38ab361d3
 --- /dev/null
 +++ b/build10.log
 @@ -0,0 +1,312 @@
@@ -37644,7 +38164,7 @@ index 00000000..38ab361d
 +105 actionable tasks: 22 executed, 83 up-to-date
 diff --git a/build11.log b/build11.log
 new file mode 100644
-index 00000000..b55a6c42
+index 000000000..b55a6c423
 --- /dev/null
 +++ b/build11.log
 @@ -0,0 +1,307 @@
@@ -37957,7 +38477,7 @@ index 00000000..b55a6c42
 +105 actionable tasks: 21 executed, 84 up-to-date
 diff --git a/build2.log b/build2.log
 new file mode 100644
-index 00000000..70bd5505
+index 000000000..70bd55056
 --- /dev/null
 +++ b/build2.log
 @@ -0,0 +1,236 @@
@@ -38199,7 +38719,7 @@ index 00000000..70bd5505
 +105 actionable tasks: 7 executed, 98 up-to-date
 diff --git a/build3.log b/build3.log
 new file mode 100644
-index 00000000..e17962bb
+index 000000000..e17962bba
 --- /dev/null
 +++ b/build3.log
 @@ -0,0 +1,303 @@
@@ -38508,7 +39028,7 @@ index 00000000..e17962bb
 +105 actionable tasks: 22 executed, 83 up-to-date
 diff --git a/build4.log b/build4.log
 new file mode 100644
-index 00000000..07ef6436
+index 000000000..07ef64363
 --- /dev/null
 +++ b/build4.log
 @@ -0,0 +1,303 @@
@@ -38817,7 +39337,7 @@ index 00000000..07ef6436
 +105 actionable tasks: 21 executed, 84 up-to-date
 diff --git a/build5.log b/build5.log
 new file mode 100644
-index 00000000..21770745
+index 000000000..217707451
 --- /dev/null
 +++ b/build5.log
 @@ -0,0 +1,303 @@
@@ -39126,7 +39646,7 @@ index 00000000..21770745
 +105 actionable tasks: 21 executed, 84 up-to-date
 diff --git a/build6.log b/build6.log
 new file mode 100644
-index 00000000..2c217022
+index 000000000..2c2170227
 --- /dev/null
 +++ b/build6.log
 @@ -0,0 +1,303 @@
@@ -39435,7 +39955,7 @@ index 00000000..2c217022
 +105 actionable tasks: 21 executed, 84 up-to-date
 diff --git a/build7.log b/build7.log
 new file mode 100644
-index 00000000..55ff04a5
+index 000000000..55ff04a53
 --- /dev/null
 +++ b/build7.log
 @@ -0,0 +1,303 @@
@@ -39744,7 +40264,7 @@ index 00000000..55ff04a5
 +105 actionable tasks: 21 executed, 84 up-to-date
 diff --git a/build8.log b/build8.log
 new file mode 100644
-index 00000000..a179d345
+index 000000000..a179d3458
 --- /dev/null
 +++ b/build8.log
 @@ -0,0 +1,303 @@
@@ -40053,7 +40573,7 @@ index 00000000..a179d345
 +105 actionable tasks: 22 executed, 83 up-to-date
 diff --git a/build9.log b/build9.log
 new file mode 100644
-index 00000000..91d80621
+index 000000000..91d806215
 --- /dev/null
 +++ b/build9.log
 @@ -0,0 +1,307 @@
@@ -40365,7 +40885,7 @@ index 00000000..91d80621
 +BUILD SUCCESSFUL in 7m 25s
 +105 actionable tasks: 21 executed, 84 up-to-date
 diff --git a/gradle.properties b/gradle.properties
-index 83408dc5..aa060fb8 100644
+index 83408dc59..aa060fb8b 100644
 --- a/gradle.properties
 +++ b/gradle.properties
 @@ -13,9 +13,9 @@
@@ -40381,7 +40901,7 @@ index 83408dc5..aa060fb8 100644
  RELEASE_KEY_PASSWORD=android
  RELEASE_KEY_ALIAS=androidkey
 diff --git a/settings.gradle b/settings.gradle
-index 2ac4c6de..9217e884 100644
+index 2ac4c6de3..9217e8849 100644
 --- a/settings.gradle
 +++ b/settings.gradle
 @@ -4,3 +4,8 @@ include ':TMessagesProj_AppHuawei'

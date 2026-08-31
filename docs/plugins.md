@@ -112,7 +112,11 @@ A plugin does not poll the app — the app calls the plugin.
 | `margelet.on_message(call)` | a message arrived |
 | `margelet.on_deleted(call)` | messages were deleted |
 | `margelet.on_pin(call)` | a chat is being pinned or unpinned; can be cancelled |
+| `margelet.on_request(call)` | a request to the server, before it goes; can be cancelled or replaced |
+| `margelet.on_answer(call)` | the server's answer, before the app sees it |
+| `margelet.on_update(call)` | an update from the server, before it is processed |
 | `margelet.button(title, call)` | your own line in the chat menu (the three dots) |
+| `margelet.menu(where, title, call)` | your own line in the chat, profile, message or side menu |
 | `margelet.on_settings(call)` | a setting of this plugin was changed |
 | `margelet.pick_file(call, types=)` | ask the person for a file |
 
@@ -271,6 +275,89 @@ If one plugin's callback throws, the others still get called: each is called
 separately and the broken one gets its traceback in the console.
 
 `print()` goes to the console as well — it is intercepted.
+
+### Your own line in the other menus
+
+`margelet.button` is the short form for the chat menu. There are four places in
+all, and one door leads to them:
+
+```python
+def on_start():
+    margelet.menu("chat", "Count", count)
+    margelet.menu("profile", "Whose profile is this", whose)
+    margelet.menu("message", "What message is this", what)
+    margelet.menu("drawer", "Count", count)
+
+def count(screen):
+    margelet.toast("pressed in a chat or in the side menu")
+
+def whose(screen, peer):
+    margelet.toast("this is " + str(peer))
+
+def what(screen, message):
+    margelet.toast("message " + str(message.getId()))
+```
+
+| where | what it is | what the callback gets |
+|---|---|---|
+| `"chat"` | the three dots at the top of a conversation | the screen |
+| `"profile"` | the three dots on a person, group or channel screen | the screen, and whose profile it is |
+| `"message"` | a long press on a message | the screen, and the message itself |
+| `"drawer"` | the side menu that slides out from the left | the screen |
+
+A callback takes as many arguments as there is sense in: a profile has a subject,
+the side menu does not. You write the callback for its own place — and in return
+you never have to accept an emptiness.
+
+In all four places the plugins' lines come last, after all the usual ones.
+
+### Talking to the server
+
+Three doors into what the app exchanges with the server. This is the sharpest
+thing here, so the price comes first.
+
+```python
+def on_start():
+    margelet.on_request(went)
+    margelet.on_answer(came)
+    margelet.on_update(happened)
+
+def went(request):
+    margelet.log("request", request.getClass().getSimpleName())
+
+def came(request, response, error):
+    margelet.log("answer", response.getClass().getSimpleName())
+
+def happened(update):
+    margelet.log("update", update.getClass().getSimpleName())
+```
+
+All three read the answer the same way:
+
+| what you return | what happens |
+|---|---|
+| nothing | let it through as is |
+| `False` | do not let it through at all |
+| an object | let that through instead |
+
+**The callback thinks on the network thread.** Not the one that draws the
+screen — but while it thinks, the app is silent towards the server. Everything
+the client says to the server goes through `on_request`, and everything the
+server says to the client goes through `on_update`: new messages, edits, read
+marks, who is typing. That is dozens of things a minute in a quiet chat and
+hundreds in a busy one.
+
+Hence the order of work: first look at whether this is the thing you want, and
+only then do something. Move long work into `margelet.background`. If a callback
+thinks for longer than fifty milliseconds, the engine says so in the console by
+itself — you cannot feel your own delay from the inside, but people notice it.
+
+A cancelled request does not vanish silently: whoever sent it gets a
+`MARGELET_PLUGIN_CANCELLED` error. Otherwise a screen waiting for an answer
+would wait forever.
+
+You may send your own request from inside these callbacks — it goes past the
+plugins instead of coming back round to you.
 
 ### Deleted messages
 

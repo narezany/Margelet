@@ -32,6 +32,11 @@ _Android = jclass("org.telegram.messenger.AndroidUtilities")
 # записана, и обычным текстом её не набрать.
 _CANCEL = "\u0000margelet-cancel"
 
+# Места, куда плагин может поставить свою строчку. Те же слова, что и в
+# MargeletHooks: список один на два языка, и расходиться им нельзя.
+_CHAT = "chat"
+_PLACES = (_CHAT, "profile", "message", "drawer")
+
 
 class _Task(dynamic_proxy(Runnable)):
     """Питоновская работа, которую можно отдать андроиду.
@@ -98,6 +103,9 @@ class Margelet:
         self._on_settings = []
         self._on_deleted = []
         self._on_pin = []
+        self._on_request = []
+        self._on_answer = []
+        self._on_update = []
         self._buttons = {}
         self._actions = {}
         self._cancel_send = False
@@ -390,10 +398,71 @@ class Margelet:
         _Hooks.wantMessage()
 
     def button(self, title, call, key=None):
-        """Своя строчка в меню чата (три точки). Нажали — зовём call(fragment)."""
+        """Своя строчка в меню чата (три точки). Нажали — зовём call(fragment).
+
+        Короткая запись для margelet.menu("chat", ...): меню чата было первым
+        и остаётся самым частым.
+        """
+        return self.menu(_CHAT, title, call, key)
+
+    def menu(self, where, title, call, key=None):
+        """Своя строчка в меню приложения.
+
+        where — где стоять:
+          "chat"     три точки в шапке переписки; call(экран)
+          "profile"  три точки на экране человека, группы или канала;
+                     call(экран, номер) — номер того, чей это профиль
+          "message"  долгое нажатие на сообщение; call(экран, сообщение)
+          "drawer"   боковое меню, которое выезжает слева; call(экран)
+
+        Что придёт вторым доводом — зависит от места, и по-другому не выйдет:
+        в профиле предмет есть, в боковом меню его нет. Обработчик пишется под
+        своё место, а не под все сразу.
+        """
+        where = str(where)
+        if where not in _PLACES:
+            self.error("не знаю такого меню:", where,
+                       "— бывают", ", ".join(sorted(_PLACES)))
+            return
         key = str(key or title)
-        self._buttons[key] = call
-        _Hooks.addButton(self.id, key, str(title))
+        self._buttons[where + "\u0000" + key] = (call, where)
+        _Hooks.addMenuItem(self.id, key, str(title), where)
+
+    def on_request(self, call):
+        """Позвать перед каждым запросом к серверу: call(запрос).
+
+        Запрос — тот самый объект TL, что уйдёт на сервер. Что вернуть:
+          False   — не отправлять его вовсе;
+          объект  — отправить его вместо;
+          ничего  — оставить как есть.
+
+        Через эту дверь идёт ВСЁ, что клиент говорит серверу, — десятки
+        запросов в минуту, и обработчик думает прямо на потоке сети. Значит:
+        сначала посмотреть, тот ли это запрос, и только потом что-то делать.
+        Долгую работу уносить в margelet.background.
+        """
+        self._on_request.append(call)
+        _Hooks.wantRequest()
+
+    def on_answer(self, call):
+        """Позвать на ответ сервера: call(запрос, ответ, ошибка).
+
+        Ошибка — None, если её не было. Возвращать можно то же, что и в
+        on_request: объект вместо ответа, False — считать, что ответа нет,
+        ничего — оставить как есть.
+        """
+        self._on_answer.append(call)
+        _Hooks.wantAnswer()
+
+    def on_update(self, call):
+        """Позвать на каждое обновление с сервера: call(обновление).
+
+        Это то, из чего приложение узнаёт вообще обо всём: новые сообщения,
+        правки, прочтения, кто печатает. Поток плотный, и правила те же, что
+        у on_request.
+        """
+        self._on_update.append(call)
+        _Hooks.wantUpdate()
 
     def on_deleted(self, call):
         """Позвать, когда сообщения удалили: call(номера, чат).
@@ -546,6 +615,57 @@ def sending(text, dialog_id):
     return result
 
 
+def _through(handlers_of, thing):
+    """Прогнать предмет через обработчики всех плагинов.
+
+    Один порядок на все три двери сети: каждый следующий видит то, что вернул
+    предыдущий; False — не пропускать; упавший обработчик пропускаем, потому
+    что сломанный плагин не должен отрезать приложение от сервера.
+    """
+    result = thing
+    for margelet in list(_margelets.values()):
+        for call in list(handlers_of(margelet)):
+            try:
+                answer = call(result)
+            except Exception:
+                _Host.log(margelet.name, traceback.format_exc(), True)
+                continue
+            if answer is False:
+                return False
+            if answer is not None:
+                result = answer
+    # Не тронули — отвечаем молчанием: джава по нему и понимает, что вмешательства
+    # не было, и не тратится на обратное превращение объекта.
+    return None if result is thing else result
+
+
+def requesting(request):
+    """Запрос к серверу, пока он ещё не ушёл."""
+    return _through(lambda m: m._on_request, request)
+
+
+def answering(request, response, error):
+    """Ответ сервера, пока его ещё не увидело приложение."""
+    result = response
+    for margelet in list(_margelets.values()):
+        for call in list(margelet._on_answer):
+            try:
+                answer = call(request, result, error)
+            except Exception:
+                _Host.log(margelet.name, traceback.format_exc(), True)
+                continue
+            if answer is False:
+                return False
+            if answer is not None:
+                result = answer
+    return None if result is response else result
+
+
+def updating(update):
+    """Обновление с сервера, пока его ещё не разобрало приложение."""
+    return _through(lambda m: m._on_update, update)
+
+
 def received(text, dialog_id, message_id, out):
     """Пришло сообщение."""
     for margelet in list(_margelets.values()):
@@ -579,16 +699,25 @@ def pinning(chat, pin):
     return True
 
 
-def button_clicked(plugin_id, key, fragment):
-    """Нажали строчку плагина в меню чата."""
+def menu_clicked(plugin_id, key, where, fragment, target):
+    """Нажали строчку плагина в одном из меню.
+
+    Доводов у обработчика столько, сколько есть смысла: в меню чата и в
+    боковом меню предмета нет, и подсовывать туда None значило бы заставить
+    каждого автора писать лишний довод ради пустоты.
+    """
     margelet = _margelets.get(plugin_id)
     if margelet is None:
         return
-    call = margelet._buttons.get(key)
-    if call is None:
+    found = margelet._buttons.get(str(where) + "\u0000" + key)
+    if found is None:
         return
+    call, place = found
     try:
-        call(fragment)
+        if place in ("profile", "message"):
+            call(fragment, target)
+        else:
+            call(fragment)
     except Exception:
         _Host.log(margelet.name, traceback.format_exc(), True)
 
