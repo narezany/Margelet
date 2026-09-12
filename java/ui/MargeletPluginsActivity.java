@@ -145,12 +145,20 @@ public class MargeletPluginsActivity extends BaseFragment {
                 storeView = new UniversalRecyclerView(MargeletPluginsActivity.this,
                         MargeletPluginsActivity.this::fillStore,
                         MargeletPluginsActivity.this::clickStore, null);
+                storeView.setSections();
                 return storeView;
             }
             mineView = new UniversalRecyclerView(MargeletPluginsActivity.this,
                     MargeletPluginsActivity.this::fillMine,
                     MargeletPluginsActivity.this::clickMine,
                     MargeletPluginsActivity.this::longClickMine);
+            // Скруглённые карточки — как на всех прочих экранах форка.
+            // Здесь их не было по единственной причине: этот экран не
+            // UniversalFragment, а свой листатель из двух списков, и строчку
+            // setSections каждый экран зовёт себе сам. На экранах настроек её
+            // написали, а здесь забыли — оттого плагины годами выглядели
+            // квадратными среди скруглённого.
+            mineView.setSections();
             return mineView;
         }
 

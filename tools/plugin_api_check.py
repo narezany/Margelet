@@ -85,6 +85,11 @@ def поднять_движок():
     java_lang.Runnable = object
     sys.modules["java"] = поддельный
     sys.modules["java.lang"] = java_lang
+    # Слой совместимости лежит рядом с движком и ищется питоном так же, как
+    # в приложении: по sys.path.
+    рядом = os.path.dirname(ХОСТ)
+    if рядом not in sys.path:
+        sys.path.insert(0, рядом)
 
     источник = open(ХОСТ, encoding="utf-8").read()
     модуль = types.ModuleType("margelet_host")
@@ -183,6 +188,62 @@ def проверить():
     равно(джава.память.get((манифест["id"], "counted")), "1", "входящее не посчитано")
 
     равно(джава.ошибки, [], "движок ругался в консоль")
+
+    проверить_слой_экстеры(движок, margelet)
+
+
+def проверить_слой_экстеры(движок, margelet):
+    """Плагин, написанный под exteraGram, на нашем слое совместимости.
+
+    Пишется здесь, а не берётся чужой: чужой тянет за собой пол-телеграма,
+    а проверяем мы перевод, а не тот плагин.
+    """
+    import base_plugin
+    from base_plugin import (BasePlugin, HookResult, HookStrategy,
+                             MenuItemData, MenuItemType)
+    from ui.settings import Header, Switch, Input
+
+    # Подпись примера выключаем: иначе до чужого обработчика доедет уже
+    # подписанный текст, и проверка будет проверять не то, что думает.
+    джава.память[(margelet.id, "sign")] = "0"
+
+    было_строчек = len(джава.звали("addMenuItem"))
+    видел = {}
+
+    class Чужой(BasePlugin):
+        def create_settings(self):
+            return [Header(text="Заголовок"),
+                    Switch(key="огонь", text="Переключатель", default=True),
+                    Input(key="слово", text="Поле", default="привет")]
+
+        def on_plugin_load(self):
+            self.add_menu_item(MenuItemData(
+                menu_type=MenuItemType.PROFILE_ACTION_MENU,
+                text="Из экстеры", on_click=lambda что: видел.update(что)))
+            self.add_on_send_message_hook()
+
+        def on_send_message_hook(self, account, params):
+            if params.message == "тест":
+                params.message = "переписано"
+                return HookResult(strategy=HookStrategy.MODIFY, params=params)
+            if params.message == "нельзя":
+                return HookResult(strategy=HookStrategy.CANCEL)
+            return HookResult(strategy=HookStrategy.DEFAULT)
+
+    base_plugin.старт(margelet)
+
+    строчки = [д for д in джава.звали("addMenuItem")][было_строчек:]
+    равно([д[3] for д in строчки], ["profile"], "строчка чужого плагина не встала")
+
+    движок.menu_clicked(margelet.id, "Из экстеры", "profile", "экран", 555)
+    равно(видел.get("peer"), 555, "чужому обработчику не доехал номер профиля")
+    равно(видел.get("fragment"), "экран", "чужому обработчику не доехал экран")
+
+    равно(движок.sending("тест", 1), "переписано", "MODIFY не доехал")
+    равно(движок.sending("нельзя", 1), движок._CANCEL, "CANCEL не доехал")
+    равно(движок.sending("обычное", 1), "обычное", "DEFAULT тронул текст")
+
+    равно(джава.ошибки, [], "слой совместимости ругался в консоль")
 
 
 if __name__ == "__main__":

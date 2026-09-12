@@ -40,7 +40,7 @@ public class MargeletConfig {
      * 0.99, а не 1.0, нарочно: настоящая единица должна остаться свободной
      * под настоящий выпуск, а пререлиз обязан быть строго меньше её.
      */
-    public static final String APP_VERSION = "0.99.29";
+    public static final String APP_VERSION = "0.99.30";
 
     /**
      * Как выпуск называется для человека: «Пререлиз 1.0.23».
@@ -375,6 +375,38 @@ public class MargeletConfig {
 
     public static void setTagsEnabled(boolean enabled) {
         prefs().edit().putBoolean("tags_enabled", enabled).apply();
+    }
+
+    // --- встроенный прокси ---
+
+    public static boolean proxyEnabled() {
+        return prefs().getBoolean("proxy_enabled", false);
+    }
+
+    public static void setProxyEnabled(boolean enabled) {
+        prefs().edit().putBoolean("proxy_enabled", enabled).apply();
+    }
+
+    /**
+     * Секрет прокси. Хранится, а не считается заново при каждом запуске:
+     * клиент предъявляет его при соединении, и разойдись они — связи не
+     * будет, а человек увидит просто «нет сети».
+     */
+    public static String proxySecret() {
+        return prefs().getString("proxy_secret", null);
+    }
+
+    public static void setProxySecret(String secret) {
+        prefs().edit().putString("proxy_secret", secret).apply();
+    }
+
+    /** Просил ли человек больше не предлагать прокси. */
+    public static boolean proxyAsked() {
+        return prefs().getBoolean("proxy_asked", false);
+    }
+
+    public static void setProxyAsked(boolean asked) {
+        prefs().edit().putBoolean("proxy_asked", asked).apply();
     }
 
     /**

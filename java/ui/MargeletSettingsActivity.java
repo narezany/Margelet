@@ -47,6 +47,7 @@ public class MargeletSettingsActivity extends UniversalFragment {
     private static final int ID_PLUGINS = 15;
     private static final int ID_FEEDBACK = 18;
     private static final int ID_MY_PROFILE = 19;
+    private static final int ID_PROXY = 20;
 
     /** Объёмный значок в шапке. Пользы ноль, и в этом вся мысль. */
     private FrameLayout header;
@@ -113,6 +114,12 @@ public class MargeletSettingsActivity extends UniversalFragment {
                 R.drawable.settings_devices, LocaleController.getString(R.string.MargeletPlugins),
                 LocaleController.getString(R.string.MargeletPluginsInfo)));
         items.add(UItem.asShadow(null));
+        // Прокси стоит здесь, а не в глубине настроек, нарочно: он нужен ровно
+        // тому, у кого телеграм не открывается, и искать его такому человеку
+        // негде и некогда.
+        items.add(UItem.asCheck(ID_PROXY, LocaleController.getString(R.string.MargeletProxy))
+                .setChecked(MargeletConfig.proxyEnabled()));
+        items.add(UItem.asShadow(LocaleController.getString(R.string.MargeletProxyAbout)));
         items.add(UItem.asButton(ID_STICKERS, LocaleController.getString(R.string.MargeletStickers),
                 LocaleController.getString(R.string.MargeletStickersAdd)));
         items.add(UItem.asShadow(LocaleController.getString(R.string.MargeletStickersAbout)));
@@ -168,7 +175,14 @@ public class MargeletSettingsActivity extends UniversalFragment {
 
     @Override
     protected void onClick(UItem item, View view, int position, float x, float y) {
-        if (item.id == ID_STICKERS) {
+        if (item.id == ID_PROXY) {
+            final boolean on = !MargeletConfig.proxyEnabled();
+            org.telegram.margelet.MargeletProxy.enable(on);
+            // Спрашиваем настройку заново, а не верим своему «on»: включение
+            // может и не удаться, и тогда галочка обязана это показать.
+            ((org.telegram.ui.Cells.TextCheckCell) view)
+                    .setChecked(MargeletConfig.proxyEnabled());
+        } else if (item.id == ID_STICKERS) {
             Browser.openUrl(getContext(), MargeletConfig.STICKERS_URL);
         } else if (item.id == ID_PLUGINS) {
             presentFragment(new MargeletPluginsActivity());

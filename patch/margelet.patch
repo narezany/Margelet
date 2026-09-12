@@ -1,11 +1,11 @@
 diff --git a/TMessagesProj/build.gradle b/TMessagesProj/build.gradle
-index 7cc3a8e35..908050014 100644
+index 84b822602..642f0a2bd 100644
 --- a/TMessagesProj/build.gradle
 +++ b/TMessagesProj/build.gradle
 @@ -62,6 +62,14 @@ dependencies {
      implementation 'com.stripe:stripe-android:2.0.2'
      implementation 'com.google.mlkit:language-id:17.0.6'
-     implementation 'com.android.billingclient:billing:7.1.1'
+     implementation 'com.android.billingclient:billing:8.0.0'
 +    // Движок хуков: встраивание в методы прямо в работающем приложении, без
 +    // рута. Нужен для поддержки плагинов, написанных под Xposed.
 +    //
@@ -31,8 +31,8 @@ index 7cc3a8e35..908050014 100644
 +
          externalNativeBuild {
              cmake {
-                 version '3.10.2'
-@@ -148,7 +164,10 @@ android {
+                 version '3.22.1'
+@@ -149,7 +165,10 @@ android {
              shrinkResources false
              multiDexEnabled true
              proguardFiles getDefaultProguardFile('proguard-android.txt'), '../TMessagesProj/proguard-rules.pro', '../TMessagesProj/proguard-rules-beta.pro'
@@ -45,10 +45,10 @@ index 7cc3a8e35..908050014 100644
              buildConfigField "String", "APP_CENTER_HASH", "\"\""
              buildConfigField "String", "BETA_URL", "\"" + getProps("BETA_PRIVATE_URL") + "\""
 diff --git a/TMessagesProj/proguard-rules.pro b/TMessagesProj/proguard-rules.pro
-index aeab02b29..3591f9c35 100644
+index aeab02b29..9baebfacc 100644
 --- a/TMessagesProj/proguard-rules.pro
 +++ b/TMessagesProj/proguard-rules.pro
-@@ -111,6 +111,37 @@
+@@ -111,6 +111,46 @@
  -keep class ru.noties.jlatexmath.** { *; }
  -dontwarn org.scilab.forge.jlatexmath.**
  
@@ -60,6 +60,15 @@ index aeab02b29..3591f9c35 100644
 +# Питон зовёт эти методы по имени: сокращатель о таких вызовах не знает и
 +# переименовал бы их, а узнали бы мы об этом только в собранной сборке.
 +-keep class org.telegram.margelet.MargeletHooks { *; }
++# Прокси и обфускация: на них ссылаются только из своего же кода, но класс
++# обфускации проверяется отдельной программой на столе, и переименованные
++# методы разошлись бы с ней молча.
++-keep class org.telegram.margelet.MargeletProxy { *; }
++-keep class org.telegram.margelet.MargeletObfuscation { *; }
++-keep class org.telegram.margelet.MargeletObfuscation$* { *; }
++-keep class org.telegram.margelet.MargeletSocket { *; }
++-keep class org.telegram.margelet.MargeletExtera { *; }
++-keep class org.telegram.margelet.MargeletExtera$* { *; }
 +-keep class org.telegram.margelet.MargeletHooks$Button { *; }
 +# Плагин реализует этот интерфейс из питона, то есть по имени. В этой сборке
 +# он уцелел и без правила — проверено в собранном APK, — но держаться на
@@ -1647,10 +1656,10 @@ index 000000000..a6f9b07d2
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/margelet/MargeletConfig.java b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletConfig.java
 new file mode 100644
-index 000000000..3c5b2f0cb
+index 000000000..727ca6110
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletConfig.java
-@@ -0,0 +1,465 @@
+@@ -0,0 +1,497 @@
 +package org.telegram.margelet;
 +
 +import android.content.Context;
@@ -1693,7 +1702,7 @@ index 000000000..3c5b2f0cb
 +     * 0.99, а не 1.0, нарочно: настоящая единица должна остаться свободной
 +     * под настоящий выпуск, а пререлиз обязан быть строго меньше её.
 +     */
-+    public static final String APP_VERSION = "0.99.29";
++    public static final String APP_VERSION = "0.99.30";
 +
 +    /**
 +     * Как выпуск называется для человека: «Пререлиз 1.0.23».
@@ -2028,6 +2037,38 @@ index 000000000..3c5b2f0cb
 +
 +    public static void setTagsEnabled(boolean enabled) {
 +        prefs().edit().putBoolean("tags_enabled", enabled).apply();
++    }
++
++    // --- встроенный прокси ---
++
++    public static boolean proxyEnabled() {
++        return prefs().getBoolean("proxy_enabled", false);
++    }
++
++    public static void setProxyEnabled(boolean enabled) {
++        prefs().edit().putBoolean("proxy_enabled", enabled).apply();
++    }
++
++    /**
++     * Секрет прокси. Хранится, а не считается заново при каждом запуске:
++     * клиент предъявляет его при соединении, и разойдись они — связи не
++     * будет, а человек увидит просто «нет сети».
++     */
++    public static String proxySecret() {
++        return prefs().getString("proxy_secret", null);
++    }
++
++    public static void setProxySecret(String secret) {
++        prefs().edit().putString("proxy_secret", secret).apply();
++    }
++
++    /** Просил ли человек больше не предлагать прокси. */
++    public static boolean proxyAsked() {
++        return prefs().getBoolean("proxy_asked", false);
++    }
++
++    public static void setProxyAsked(boolean asked) {
++        prefs().edit().putBoolean("proxy_asked", asked).apply();
 +    }
 +
 +    /**
@@ -2407,6 +2448,276 @@ index 000000000..491885753
 +            // Через двухдоводный addToClipboard: он не чистит текст, а
 +            // одинарный нарочно вычищает наши метки — здесь они и есть смысл.
 +            AndroidUtilities.addToClipboard(asText, asHtml);
++        }
++    }
++}
+diff --git a/TMessagesProj/src/main/java/org/telegram/margelet/MargeletExtera.java b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletExtera.java
+new file mode 100644
+index 000000000..5a990c7da
+--- /dev/null
++++ b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletExtera.java
+@@ -0,0 +1,264 @@
++package org.telegram.margelet;
++
++import android.content.Context;
++
++import org.telegram.messenger.FileLog;
++import org.telegram.messenger.LocaleController;
++import org.telegram.messenger.R;
++import org.telegram.ui.ActionBar.AlertDialog;
++
++import java.io.ByteArrayInputStream;
++import java.io.ByteArrayOutputStream;
++import java.io.File;
++import java.io.FileInputStream;
++import java.nio.charset.StandardCharsets;
++import java.util.ArrayList;
++import java.util.Arrays;
++import java.util.HashSet;
++import java.util.List;
++import java.util.Set;
++import java.util.regex.Matcher;
++import java.util.regex.Pattern;
++import java.util.zip.ZipEntry;
++import java.util.zip.ZipOutputStream;
++
++/**
++ * Плагин exteraGram, переложенный в наш формат.
++ *
++ * Переложить получается потому, что питон у них и у нас — один и тот же питон
++ * в одном и том же телеграме. Их плагин зовёт не какое-то своё волшебство, а
++ * обычные классы приложения через модули-обёртки: base_plugin, client_utils,
++ * ui.alert и прочие. Эти модули лежат у нас рядом с margelet_host, и потому
++ * их файл едет почти как есть: меняется упаковка и дописывается хвост,
++ * который поднимает их класс.
++ *
++ * Чего здесь нарочно нет — тихого «сконвертировано». Если в плагине есть то,
++ * чего у нас не будет, человек читает об этом ДО установки, а не выясняет по
++ * молчащему плагину.
++ */
++public class MargeletExtera {
++
++    /** Больше этого файл плагином уже не бывает, а читать в память — бывает. */
++    private static final int LIMIT = 4 * 1024 * 1024;
++
++    /** Модули, которые у нас лежат рядом и работают. */
++    private static final Set<String> KNOWN = new HashSet<>(Arrays.asList(
++            "base_plugin", "client_utils", "android_utils", "hook_utils",
++            "file_utils", "ui", "ui.settings", "ui.alert", "ui.bulletin",
++            "extera_utils", "extera_utils.classes", "java", "margelet"));
++
++    /** То, что у нас не заработает, и почему. Показываем до установки. */
++    private static final String[][] BROKEN = {
++            {"java_subclass", "наследование java-классов"},
++            {"send_document", "отправка файлов из плагина"},
++            {"send_photo", "отправка картинок из плагина"},
++            {"CHAT_ATTACH_MENU", "меню скрепки"},
++            {"__requirements__", "установка пакетов пипом"},
++    };
++
++    public static final class Parsed {
++        public final String id;
++        public final String name;
++        public final String version;
++        public final String author;
++        public final String description;
++        /** Чего не будет: готовые строчки для человека. */
++        public final List<String> missing;
++
++        Parsed(String id, String name, String version, String author,
++               String description, List<String> missing) {
++            this.id = id;
++            this.name = name;
++            this.version = version;
++            this.author = author;
++            this.description = description;
++            this.missing = missing;
++        }
++    }
++
++    private static String meta(String source, String key) {
++        final Matcher m = Pattern.compile(
++                "^" + key + "\\s*=\\s*[\"']([^\"']*)[\"']",
++                Pattern.MULTILINE).matcher(source);
++        return m.find() ? m.group(1) : null;
++    }
++
++    /**
++     * Разобрать файл. Возвращает null, если это не плагин экстеры: у них
++     * обязательны __id__ и __name__, и по ним же отличают свой файл.
++     */
++    public static Parsed parse(String source) {
++        final String id = meta(source, "__id__");
++        final String name = meta(source, "__name__");
++        if (id == null || name == null) {
++            return null;
++        }
++        final List<String> missing = new ArrayList<>();
++
++        // Чужие модули. Свои, лежащие рядом, знаем в лицо; org.telegram и
++        // android — это сама java, она доступна как есть; всё прочее питон
++        // либо найдёт у себя, либо не найдёт, и тогда лучше сказать заранее.
++        final Matcher imports = Pattern.compile(
++                "^\\s*(?:from|import)\\s+([A-Za-z_][\\w.]*)", Pattern.MULTILINE)
++                .matcher(source);
++        final Set<String> said = new HashSet<>();
++        while (imports.find()) {
++            final String module = imports.group(1);
++            final String root = module.contains(".")
++                    ? module.substring(0, module.indexOf('.')) : module;
++            if (KNOWN.contains(module) || KNOWN.contains(root)
++                    || "org".equals(root) || "android".equals(root)
++                    || "androidx".equals(root) || "kotlin".equals(root)) {
++                continue;
++            }
++            if (isStandard(root) || !said.add(root)) {
++                continue;
++            }
++            missing.add(LocaleController.formatString(
++                    R.string.MargeletExteraUnknownModule, root));
++        }
++
++        for (String[] pair : BROKEN) {
++            if (source.contains(pair[0])) {
++                missing.add(pair[1]);
++            }
++        }
++
++        return new Parsed(id, name,
++                first(meta(source, "__version__"), "1.0"),
++                first(meta(source, "__author__"), ""),
++                first(meta(source, "__description__"), ""),
++                missing);
++    }
++
++    private static String first(String value, String fallback) {
++        return value == null || value.isEmpty() ? fallback : value;
++    }
++
++    /** Обычная библиотека питона: такие модули есть и у нас. */
++    private static boolean isStandard(String root) {
++        return Arrays.asList("os", "sys", "re", "json", "time", "math",
++                "random", "base64", "hashlib", "traceback", "datetime",
++                "threading", "typing", "collections", "itertools", "functools",
++                "struct", "zipfile", "io", "urllib", "html", "string",
++                "dataclasses", "enum", "abc", "copy", "shutil", "tempfile",
++                "textwrap", "uuid", "binascii", "unicodedata")
++                .contains(root);
++    }
++
++    /** Собрать .marp: манифест, тот же код и хвост, который его поднимает. */
++    public static byte[] pack(Parsed plugin, String source) throws Exception {
++        final ByteArrayOutputStream out = new ByteArrayOutputStream();
++        final ZipOutputStream zip = new ZipOutputStream(out);
++
++        final StringBuilder manifest = new StringBuilder();
++        manifest.append("{\n");
++        manifest.append("  \"id\": \"extera.").append(escape(plugin.id)).append("\",\n");
++        manifest.append("  \"name\": \"").append(escape(plugin.name)).append("\",\n");
++        manifest.append("  \"version\": \"").append(escape(plugin.version)).append("\",\n");
++        manifest.append("  \"author\": \"").append(escape(plugin.author)).append("\",\n");
++        manifest.append("  \"description\": \"").append(escape(plugin.description)).append("\"\n");
++        manifest.append("}\n");
++
++        zip.putNextEntry(new ZipEntry("manifest.json"));
++        zip.write(manifest.toString().getBytes(StandardCharsets.UTF_8));
++        zip.closeEntry();
++
++        zip.putNextEntry(new ZipEntry("main.py"));
++        zip.write(source.getBytes(StandardCharsets.UTF_8));
++        zip.write(TAIL.getBytes(StandardCharsets.UTF_8));
++        zip.closeEntry();
++
++        zip.close();
++        return out.toByteArray();
++    }
++
++    /**
++     * Хвост, который дописывается к коду плагина.
++     *
++     * Их плагин ничего не запускает сам: он только объявляет класс, а поднимает
++     * его их приложение. У нас точка входа — on_start, поэтому она и пишется,
++     * прямо в исходнике и с объяснением: человек, открывший плагин, должен
++     * видеть, откуда взялись эти строки.
++     */
++    private static final String TAIL =
++            "\n\n"
++            + "# --- дописано при переводе из exteraGram ---\n"
++            + "# Их плагин только объявляет класс; поднимает его приложение.\n"
++            + "# У Margy точка входа — on_start, поэтому она здесь и стоит.\n"
++            + "def on_start():\n"
++            + "    import base_plugin\n"
++            + "    base_plugin.старт(margelet)\n";
++
++    private static String escape(String value) {
++        if (value == null) {
++            return "";
++        }
++        return value.replace("\\", "\\\\").replace("\"", "\\\"")
++                .replace("\n", " ").replace("\r", " ").replace("\t", " ");
++    }
++
++    /**
++     * Нажали на файл .plugin в переписке. Открывать его системе нечем, а мы
++     * знаем, что это такое, — поэтому предлагаем перевести.
++     */
++    public static boolean offerConvert(Context context, File file) {
++        try {
++            if (file.length() > LIMIT) {
++                return false;
++            }
++            final byte[] bytes = new byte[(int) file.length()];
++            try (FileInputStream in = new FileInputStream(file)) {
++                int read = 0;
++                while (read < bytes.length) {
++                    final int step = in.read(bytes, read, bytes.length - read);
++                    if (step <= 0) {
++                        break;
++                    }
++                    read += step;
++                }
++            }
++            final String source = new String(bytes, StandardCharsets.UTF_8);
++            final Parsed plugin = parse(source);
++            if (plugin == null) {
++                return false;
++            }
++            ask(context, plugin, source);
++            return true;
++        } catch (Throwable t) {
++            FileLog.e(t);
++            return false;
++        }
++    }
++
++    private static void ask(Context context, Parsed plugin, String source) {
++        final StringBuilder text = new StringBuilder();
++        text.append(LocaleController.formatString(
++                R.string.MargeletExteraAbout, plugin.name));
++        if (!plugin.missing.isEmpty()) {
++            text.append("\n\n");
++            text.append(LocaleController.getString(R.string.MargeletExteraMissing));
++            for (String line : plugin.missing) {
++                text.append("\n• ").append(line);
++            }
++        }
++
++        new AlertDialog.Builder(context)
++                .setTitle(LocaleController.getString(R.string.MargeletExteraTitle))
++                .setMessage(text.toString())
++                .setPositiveButton(
++                        LocaleController.getString(R.string.MargeletExteraConvert),
++                        (dialog, which) -> convert(context, plugin, source))
++                .setNegativeButton(LocaleController.getString(R.string.Cancel), null)
++                .show();
++    }
++
++    private static void convert(Context context, Parsed plugin, String source) {
++        try {
++            MargeletPlugins.askInstall(context,
++                    new ByteArrayInputStream(pack(plugin, source)), null);
++        } catch (Throwable t) {
++            FileLog.e(t);
 +        }
 +    }
 +}
@@ -6347,6 +6658,230 @@ index 000000000..f3d81a4d7
 +        }
 +    }
 +}
+diff --git a/TMessagesProj/src/main/java/org/telegram/margelet/MargeletObfuscation.java b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletObfuscation.java
+new file mode 100644
+index 000000000..fcf90dcb4
+--- /dev/null
++++ b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletObfuscation.java
+@@ -0,0 +1,218 @@
++package org.telegram.margelet;
++
++import java.security.MessageDigest;
++import java.security.SecureRandom;
++
++import javax.crypto.Cipher;
++import javax.crypto.spec.IvParameterSpec;
++import javax.crypto.spec.SecretKeySpec;
++
++/**
++ * Обфускация MTProto — та её половина, что нужна прокси.
++ *
++ * Разобрано не по памяти, а по исходнику самого клиента: TMessagesProj/jni/
++ * tgnet/Connection.cpp, место, где он собирает первые 64 байта соединения.
++ * Оттуда же взято и то, чего по документации не узнать: НОМЕР ДАТА-ЦЕНТРА
++ * КЛИЕНТ ПИШЕТ В ЗАГОЛОВОК ТОЛЬКО ТОГДА, КОГДА ИДЁТ ЧЕРЕЗ MTProto-ПРОКСИ
++ * С СЕКРЕТОМ (`if (useSecret != 0)`). При обычном соединении и через SOCKS
++ * на этом месте случайный мусор.
++ *
++ * Из-за одной этой строки прокси обязан быть именно MTProto-прокси: иначе
++ * узнать, в какой дата-центр направлять соединение, попросту неоткуда.
++ *
++ * Класс нарочно не знает ни про андроид, ни про сеть: так его можно
++ * выполнить на столе и проверить, что расчёт сходится с клиентским.
++ */
++public class MargeletObfuscation {
++
++    /** Длина начального пакета: 64 байта, из них последние 8 зашифрованы. */
++    public static final int HEAD = 64;
++
++    /** Метки протокола в байтах 56..60 расшифрованного заголовка. */
++    private static final int TAG_ABRIDGED = 0xefefefef;
++    private static final int TAG_INTERMEDIATE = 0xeeeeeeee;
++    private static final int TAG_PADDED = 0xdddddddd;
++
++    /** Поток AES-CTR: один на направление, состояние между вызовами живёт. */
++    public static final class Stream {
++        private final Cipher cipher;
++
++        Stream(byte[] key, byte[] iv) {
++            try {
++                cipher = Cipher.getInstance("AES/CTR/NoPadding");
++                cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(key, "AES"),
++                        new IvParameterSpec(iv));
++            } catch (Exception e) {
++                throw new IllegalStateException("нет AES/CTR", e);
++            }
++        }
++
++        /**
++         * Шифрование и расшифровка в CTR — одно и то же действие, поэтому
++         * метод один. Состояние счётчика продолжается от вызова к вызову:
++         * поток нельзя обрабатывать кусками независимо.
++         */
++        public byte[] run(byte[] data, int offset, int length) {
++            return cipher.update(data, offset, length);
++        }
++
++        public byte[] run(byte[] data) {
++            return run(data, 0, data.length);
++        }
++    }
++
++    /** Что удалось прочитать из начального пакета клиента. */
++    public static final class Head {
++        /** Поток, которым клиент шифрует то, что шлёт нам. */
++        public final Stream incoming;
++        /** Поток, которым мы шифруем то, что шлём клиенту. */
++        public final Stream outgoing;
++        /** Номер дата-центра. Отрицательный — медийное соединение. */
++        public final int datacenter;
++        /** Метка протокола: abridged, intermediate или padded. */
++        public final int tag;
++
++        Head(Stream incoming, Stream outgoing, int datacenter, int tag) {
++            this.incoming = incoming;
++            this.outgoing = outgoing;
++            this.datacenter = datacenter;
++            this.tag = tag;
++        }
++
++        public boolean valid() {
++            return tag == TAG_ABRIDGED || tag == TAG_INTERMEDIATE || tag == TAG_PADDED;
++        }
++
++        public int plainDatacenter() {
++            final int number = Math.abs(datacenter);
++            // Тестовые дата-центры клиент нумерует с десяти тысяч.
++            return number >= 10000 ? number - 10000 : number;
++        }
++
++        public boolean media() {
++            return datacenter < 0;
++        }
++    }
++
++    /**
++     * Ключ так, как его считает клиент: SHA256 от тридцати двух байт вместе
++     * с секретом, а вектор — следующие шестнадцать байт БЕЗ хеша. Второе
++     * легко упустить: в исходнике вектор берут из той же переменной уже
++     * после того, как в её начало положили хеш.
++     */
++    private static byte[][] derive(byte[] material, byte[] secret) {
++        final byte[] key = new byte[32];
++        final byte[] iv = new byte[16];
++        System.arraycopy(material, 0, key, 0, 32);
++        System.arraycopy(material, 32, iv, 0, 16);
++        if (secret != null && secret.length > 0) {
++            try {
++                final MessageDigest sha = MessageDigest.getInstance("SHA-256");
++                sha.update(key);
++                sha.update(secret, 0, Math.min(16, secret.length));
++                System.arraycopy(sha.digest(), 0, key, 0, 32);
++            } catch (Exception e) {
++                throw new IllegalStateException("нет SHA-256", e);
++            }
++        }
++        return new byte[][]{key, iv};
++    }
++
++    /** Прочитать начальный пакет клиента, пришедший к нам как к прокси. */
++    public static Head read(byte[] head, byte[] secret) {
++        if (head == null || head.length < HEAD) {
++            return null;
++        }
++        // То, чем клиент шифрует нам, — для нас расшифровка.
++        final byte[] straight = new byte[48];
++        System.arraycopy(head, 8, straight, 0, 48);
++        final byte[][] in = derive(straight, secret);
++
++        // И наоборот: тот же кусок задом наперёд.
++        final byte[] reversed = new byte[48];
++        for (int i = 0; i < 48; i++) {
++            reversed[i] = head[55 - i];
++        }
++        final byte[][] out = derive(reversed, secret);
++
++        final Stream incoming = new Stream(in[0], in[1]);
++        final Stream outgoing = new Stream(out[0], out[1]);
++
++        final byte[] plain = incoming.run(head, 0, HEAD);
++        final int tag = int32(plain, 56);
++        final int datacenter = (short) ((plain[60] & 0xff) | ((plain[61] & 0xff) << 8));
++        return new Head(incoming, outgoing, datacenter, tag);
++    }
++
++    /**
++     * Собрать начальный пакет для дата-центра — то же самое, что делает
++     * клиент, только без секрета: дата-центру секрет не предъявляют.
++     *
++     * @return пакет, который надо отправить, и два потока: первым мы шифруем
++     *         то, что шлём, вторым расшифровываем то, что приходит.
++     */
++    public static Object[] create(int tag) {
++        final SecureRandom random = new SecureRandom();
++        final byte[] head = new byte[HEAD];
++        while (true) {
++            random.nextBytes(head);
++            if ((head[0] & 0xff) == 0xef) {
++                continue;
++            }
++            final int first = int32(head, 0);
++            final int second = int32(head, 4);
++            if (first == 0x44414548 || first == 0x54534f50 || first == 0x20544547
++                    || first == 0x4954504f || first == 0xeeeeeeee || first == 0xdddddddd
++                    || first == 0x02010316 || second == 0) {
++                continue;
++            }
++            break;
++        }
++        final byte mark = (byte) (tag == TAG_INTERMEDIATE ? 0xee
++                : tag == TAG_PADDED ? 0xdd : 0xef);
++        head[56] = head[57] = head[58] = head[59] = mark;
++
++        final byte[] straight = new byte[48];
++        System.arraycopy(head, 8, straight, 0, 48);
++        final byte[][] out = derive(straight, null);
++
++        final byte[] reversed = new byte[48];
++        for (int i = 0; i < 48; i++) {
++            reversed[i] = head[55 - i];
++        }
++        final byte[][] in = derive(reversed, null);
++
++        final Stream outgoing = new Stream(out[0], out[1]);
++        final Stream incoming = new Stream(in[0], in[1]);
++
++        // Клиент шифрует весь заголовок, а отправляет открытым всё, кроме
++        // последних восьми байт. Повторяем в точности.
++        final byte[] encrypted = outgoing.run(head, 0, HEAD);
++        final byte[] packet = new byte[HEAD];
++        System.arraycopy(head, 0, packet, 0, 56);
++        System.arraycopy(encrypted, 56, packet, 56, 8);
++
++        return new Object[]{packet, outgoing, incoming};
++    }
++
++    private static int int32(byte[] data, int at) {
++        return (data[at] & 0xff) | ((data[at + 1] & 0xff) << 8)
++                | ((data[at + 2] & 0xff) << 16) | ((data[at + 3] & 0xff) << 24);
++    }
++
++    /** Секрет прокси: шестнадцать случайных байт, как у всех остальных. */
++    public static byte[] newSecret() {
++        final byte[] secret = new byte[16];
++        new SecureRandom().nextBytes(secret);
++        return secret;
++    }
++
++    public static String hex(byte[] data) {
++        final StringBuilder out = new StringBuilder(data.length * 2);
++        for (byte b : data) {
++            out.append(Character.forDigit((b >> 4) & 0xf, 16));
++            out.append(Character.forDigit(b & 0xf, 16));
++        }
++        return out.toString();
++    }
++}
 diff --git a/TMessagesProj/src/main/java/org/telegram/margelet/MargeletPlane3D.java b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletPlane3D.java
 new file mode 100644
 index 000000000..545fca3f8
@@ -7778,6 +8313,323 @@ index 000000000..09f681649
 +        return out.toString();
 +    }
 +}
+diff --git a/TMessagesProj/src/main/java/org/telegram/margelet/MargeletProxy.java b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletProxy.java
+new file mode 100644
+index 000000000..1fee9859b
+--- /dev/null
++++ b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletProxy.java
+@@ -0,0 +1,311 @@
++package org.telegram.margelet;
++
++import org.telegram.messenger.FileLog;
++import org.telegram.tgnet.ConnectionsManager;
++
++import java.io.IOException;
++import java.io.InputStream;
++import java.io.OutputStream;
++import java.net.InetAddress;
++import java.net.InetSocketAddress;
++import java.net.ServerSocket;
++import java.net.Socket;
++
++/**
++ * Встроенный прокси: MTProto снаружи, websocket внутри.
++ *
++ * Зачем. Там, где телеграм закрыт, обычное соединение до дата-центра не
++ * доходит, а то же самое внутри websocket-а к их же домену — доходит. Чужих
++ * серверов в схеме нет: трафик идёт в те же дата-центры телеграма, и ключи
++ * от переписки по-прежнему только у собеседников. Мы лишь меняем обёртку.
++ *
++ * Почему именно MTProto-прокси, а не socks, хотя socks был бы вдвое проще:
++ * номер дата-центра клиент кладёт в заголовок ТОЛЬКО при работе через
++ * MTProto-прокси с секретом (см. MargeletObfuscation). Через socks узнать,
++ * куда направлять соединение, было бы неоткуда.
++ *
++ * Прокси слушает только 127.0.0.1 — снаружи к нему не подключиться.
++ */
++public class MargeletProxy {
++
++    /** Дата-центры телеграма в вебе зовутся планетами. */
++    private static final String[] PLANETS = {
++            "pluto", "venus", "aurora", "vesta", "flora"
++    };
++
++    private static ServerSocket server;
++    private static Thread accepting;
++    private static volatile int port;
++    private static volatile boolean working;
++
++    public static synchronized boolean running() {
++        return working;
++    }
++
++    public static synchronized int port() {
++        return port;
++    }
++
++    /** Секрет прокси. Живёт между запусками: иначе настройка протухала бы. */
++    public static synchronized byte[] secret() {
++        final String saved = MargeletConfig.proxySecret();
++        if (saved != null && saved.length() == 32) {
++            final byte[] bytes = new byte[16];
++            for (int i = 0; i < 16; i++) {
++                bytes[i] = (byte) Integer.parseInt(saved.substring(i * 2, i * 2 + 2), 16);
++            }
++            return bytes;
++        }
++        final byte[] fresh = MargeletObfuscation.newSecret();
++        MargeletConfig.setProxySecret(MargeletObfuscation.hex(fresh));
++        return fresh;
++    }
++
++    public static synchronized boolean start() {
++        if (working) {
++            return true;
++        }
++        try {
++            // Порт свободный, а не заранее выбранный: занятый порт — это
++            // молча не поднявшийся прокси, а мы обещали человеку связь.
++            server = new ServerSocket(0, 16, InetAddress.getByName("127.0.0.1"));
++            port = server.getLocalPort();
++            working = true;
++            accepting = new Thread(MargeletProxy::accept, "margelet-proxy");
++            accepting.setDaemon(true);
++            accepting.start();
++            MargeletPluginHost.log("прокси", "поднят на 127.0.0.1:" + port, false);
++            return true;
++        } catch (Throwable t) {
++            FileLog.e(t);
++            working = false;
++            return false;
++        }
++    }
++
++    public static synchronized void stop() {
++        working = false;
++        try {
++            if (server != null) {
++                server.close();
++            }
++        } catch (IOException ignored) {
++        }
++        server = null;
++        port = 0;
++    }
++
++    /**
++     * Включить или выключить. Включение поднимает релей и прописывает его в
++     * те же настройки соединения, которыми телеграм пользуется для любого
++     * прокси, — своего пути в обход у нас нет и не надо.
++     */
++    public static void enable(boolean on) {
++        if (on) {
++            if (!start()) {
++                MargeletConfig.setProxyEnabled(false);
++                return;
++            }
++            MargeletConfig.setProxyEnabled(true);
++            ConnectionsManager.setProxySettings(true, "127.0.0.1", port(), "", "",
++                    MargeletObfuscation.hex(secret()));
++        } else {
++            MargeletConfig.setProxyEnabled(false);
++            ConnectionsManager.setProxySettings(false, "", 0, "", "", "");
++            stop();
++        }
++    }
++
++    /**
++     * Предложить прокси тому, у кого телеграм не подключается.
++     *
++     * Условий три, и все три обязательны. Первое: связь ДЕЙСТВИТЕЛЬНО не
++     * поднимается — предлагать обход тому, у кого всё работает, значит пугать
++     * на ровном месте. Второе: телефон говорит, что мы в России, — страна
++     * берётся у сим-карты и у сети, а не по языку: язык у человека может быть
++     * любой. Третье: он ещё не просил больше не спрашивать.
++     *
++     * Зовётся с задержкой, а не сразу: сразу после запуска телеграм всегда
++     * «подключается», и окно выскочило бы у каждого.
++     */
++    public static void offerIfStuck(android.app.Activity activity, int account) {
++        if (activity == null || working || MargeletConfig.proxyEnabled()
++                || MargeletConfig.proxyAsked() || !inRussia(activity)) {
++            return;
++        }
++        org.telegram.messenger.AndroidUtilities.runOnUIThread(() -> {
++            final int state = ConnectionsManager.getInstance(account).getConnectionState();
++            if (state != ConnectionsManager.ConnectionStateConnecting
++                    && state != ConnectionsManager.ConnectionStateWaitingForNetwork) {
++                return;
++            }
++            if (MargeletConfig.proxyAsked() || MargeletConfig.proxyEnabled()) {
++                return;
++            }
++            ask(activity);
++        }, 12000);
++    }
++
++    private static void ask(android.app.Activity activity) {
++        final android.widget.CheckBox never = new android.widget.CheckBox(activity);
++        never.setText(org.telegram.messenger.LocaleController.getString(
++                org.telegram.messenger.R.string.MargeletProxyDontAsk));
++        never.setTextColor(org.telegram.ui.ActionBar.Theme.getColor(
++                org.telegram.ui.ActionBar.Theme.key_dialogTextBlack));
++        final int side = org.telegram.messenger.AndroidUtilities.dp(22);
++        never.setPadding(side, 0, side, 0);
++
++        new org.telegram.ui.ActionBar.AlertDialog.Builder(activity)
++                .setTitle(org.telegram.messenger.LocaleController.getString(
++                        org.telegram.messenger.R.string.MargeletProxyOfferTitle))
++                .setMessage(org.telegram.messenger.LocaleController.getString(
++                        org.telegram.messenger.R.string.MargeletProxyOffer))
++                .setView(never)
++                .setPositiveButton(org.telegram.messenger.LocaleController.getString(
++                        org.telegram.messenger.R.string.MargeletProxyTurnOn), (dialog, which) -> {
++                    MargeletConfig.setProxyAsked(never.isChecked());
++                    enable(true);
++                })
++                .setNegativeButton(org.telegram.messenger.LocaleController.getString(
++                        org.telegram.messenger.R.string.Cancel), (dialog, which) ->
++                        MargeletConfig.setProxyAsked(never.isChecked()))
++                .show();
++    }
++
++    /**
++     * Страна по сим-карте и по сети. Именно так, а не по языку приложения:
++     * язык человек ставит какой хочет, а сим-карта врать не станет.
++     */
++    private static boolean inRussia(android.content.Context context) {
++        try {
++            final android.telephony.TelephonyManager phone =
++                    (android.telephony.TelephonyManager)
++                            context.getSystemService(android.content.Context.TELEPHONY_SERVICE);
++            if (phone == null) {
++                return false;
++            }
++            return "ru".equalsIgnoreCase(phone.getSimCountryIso())
++                    || "ru".equalsIgnoreCase(phone.getNetworkCountryIso());
++        } catch (Throwable ignored) {
++            return false;
++        }
++    }
++
++    private static void accept() {
++        while (working) {
++            final Socket client;
++            try {
++                client = server.accept();
++            } catch (IOException e) {
++                if (working) {
++                    FileLog.e(e);
++                }
++                return;
++            }
++            final Thread worker = new Thread(() -> serve(client), "margelet-proxy-link");
++            worker.setDaemon(true);
++            worker.start();
++        }
++    }
++
++    private static void serve(Socket client) {
++        MargeletSocket upstream = null;
++        try {
++            client.setTcpNoDelay(true);
++            final InputStream from = client.getInputStream();
++            final OutputStream to = client.getOutputStream();
++
++            final byte[] head = new byte[MargeletObfuscation.HEAD];
++            readFully(from, head);
++
++            final MargeletObfuscation.Head opened =
++                    MargeletObfuscation.read(head, secret());
++            if (opened == null || !opened.valid()) {
++                // Либо не наш клиент, либо чужой секрет. Молчать здесь нельзя:
++                // человек увидит «нет связи» и не узнает почему.
++                MargeletPluginHost.log("прокси", "чужое соединение отклонено", true);
++                client.close();
++                return;
++            }
++
++            final int datacenter = opened.plainDatacenter();
++            if (datacenter < 1 || datacenter > PLANETS.length) {
++                MargeletPluginHost.log("прокси",
++                        "неизвестный дата-центр: " + datacenter, true);
++                client.close();
++                return;
++            }
++            final boolean test = Math.abs(opened.datacenter) >= 10000;
++            final String host = PLANETS[datacenter - 1] + ".web.telegram.org";
++            final String path = test ? "/apiws_test" : "/apiws";
++
++            upstream = MargeletSocket.open(host, path, 15000);
++
++            // Своё начало разговора с дата-центром: там секрета нет, поэтому
++            // заголовок собирается заново, а не пересылается клиентский.
++            final Object[] made = MargeletObfuscation.create(opened.tag);
++            upstream.send((byte[]) made[0], 0, MargeletObfuscation.HEAD);
++            final MargeletObfuscation.Stream toServer = (MargeletObfuscation.Stream) made[1];
++            final MargeletObfuscation.Stream fromServer = (MargeletObfuscation.Stream) made[2];
++
++            final MargeletSocket upward = upstream;
++            final Thread back = new Thread(() -> {
++                try {
++                    while (true) {
++                        final byte[] chunk = upward.receive();
++                        if (chunk == null) {
++                            break;
++                        }
++                        // Снимаем обёртку дата-центра и надеваем клиентскую:
++                        // у них разные ключи, сквозного потока здесь нет.
++                        final byte[] plain = fromServer.run(chunk);
++                        to.write(opened.outgoing.run(plain));
++                        to.flush();
++                    }
++                } catch (Throwable ignored) {
++                } finally {
++                    close(client);
++                    upward.close();
++                }
++            }, "margelet-proxy-back");
++            back.setDaemon(true);
++            back.start();
++
++            final byte[] buffer = new byte[16 * 1024];
++            while (true) {
++                final int read = from.read(buffer);
++                if (read < 0) {
++                    break;
++                }
++                final byte[] plain = opened.incoming.run(buffer, 0, read);
++                final byte[] sealed = toServer.run(plain);
++                upstream.send(sealed, 0, sealed.length);
++            }
++        } catch (Throwable t) {
++            FileLog.e(t);
++        } finally {
++            close(client);
++            if (upstream != null) {
++                upstream.close();
++            }
++        }
++    }
++
++    private static void readFully(InputStream from, byte[] into) throws IOException {
++        int done = 0;
++        while (done < into.length) {
++            final int step = from.read(into, done, into.length - done);
++            if (step < 0) {
++                throw new IOException("клиент закрылся на заголовке");
++            }
++            done += step;
++        }
++    }
++
++    private static void close(Socket socket) {
++        try {
++            socket.close();
++        } catch (IOException ignored) {
++        }
++    }
++}
 diff --git a/TMessagesProj/src/main/java/org/telegram/margelet/MargeletRemote.java b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletRemote.java
 new file mode 100644
 index 000000000..865d80f77
@@ -8634,6 +9486,253 @@ index 000000000..8a3b8ef81
 +            for (int i = 0; i < group.getChildCount(); i++) {
 +                invalidate(group.getChildAt(i));
 +            }
++        }
++    }
++}
+diff --git a/TMessagesProj/src/main/java/org/telegram/margelet/MargeletSocket.java b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletSocket.java
+new file mode 100644
+index 000000000..6f330020b
+--- /dev/null
++++ b/TMessagesProj/src/main/java/org/telegram/margelet/MargeletSocket.java
+@@ -0,0 +1,241 @@
++package org.telegram.margelet;
++
++import java.io.ByteArrayOutputStream;
++import java.io.IOException;
++import java.io.InputStream;
++import java.io.OutputStream;
++import java.net.Socket;
++import java.nio.charset.StandardCharsets;
++import java.security.MessageDigest;
++import java.security.SecureRandom;
++import java.util.Base64;
++
++import javax.net.ssl.SSLSocketFactory;
++
++/**
++ * Websocket ровно в том объёме, в каком он нужен прокси.
++ *
++ * Своя реализация, а не библиотека, по двум причинам. Первая: тащить в
++ * телеграм ещё одну зависимость ради двух видов кадров — дорого. Вторая и
++ * главная: здесь надо не «отправить сообщение», а гнать поток байт как есть,
++ * и обёртки высокого уровня для этого неудобны.
++ *
++ * Сделано только то, что нужно: рукопожатие, двоичные кадры, ответ на «пинг»
++ * и закрытие. Кадров от сервера с маской не бывает, и мы их не ждём.
++ */
++public class MargeletSocket {
++
++    /** По этому числу сервер считает ответ на рукопожатие. Из RFC 6455. */
++    private static final String MAGIC = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
++
++    private final Socket socket;
++    private final InputStream in;
++    private final OutputStream out;
++    private final SecureRandom random = new SecureRandom();
++
++    private MargeletSocket(Socket socket) throws IOException {
++        this.socket = socket;
++        this.in = socket.getInputStream();
++        this.out = socket.getOutputStream();
++    }
++
++    /** Открыть защищённый websocket. Бросает, если сервер не согласился. */
++    public static MargeletSocket open(String host, String path, int timeoutMs) throws IOException {
++        final Socket raw = SSLSocketFactory.getDefault().createSocket();
++        raw.connect(new java.net.InetSocketAddress(host, 443), timeoutMs);
++        raw.setSoTimeout(timeoutMs);
++        final MargeletSocket socket = new MargeletSocket(raw);
++        socket.handshake(host, path);
++        raw.setSoTimeout(0);
++        return socket;
++    }
++
++    private void handshake(String host, String path) throws IOException {
++        final byte[] nonce = new byte[16];
++        random.nextBytes(nonce);
++        final String key = Base64.getEncoder().encodeToString(nonce);
++
++        final String request =
++                "GET " + path + " HTTP/1.1\r\n"
++                + "Host: " + host + "\r\n"
++                + "Upgrade: websocket\r\n"
++                + "Connection: Upgrade\r\n"
++                + "Sec-WebSocket-Key: " + key + "\r\n"
++                + "Sec-WebSocket-Version: 13\r\n"
++                // Телеграм отдаёт поток MTProto только под этим именем.
++                + "Sec-WebSocket-Protocol: binary\r\n"
++                + "Origin: https://" + host + "\r\n"
++                + "\r\n";
++        out.write(request.getBytes(StandardCharsets.US_ASCII));
++        out.flush();
++
++        final String answer = readHeaders();
++        if (!answer.startsWith("HTTP/1.1 101")) {
++            throw new IOException("сервер не поднял websocket: "
++                    + answer.split("\r\n")[0]);
++        }
++        final String expected = accept(key);
++        if (!answer.toLowerCase().contains("sec-websocket-accept: "
++                + expected.toLowerCase())) {
++            throw new IOException("сервер ответил чужим ключом");
++        }
++    }
++
++    /** Ответ на ключ так, как его считает сервер по RFC 6455. */
++    public static String accept(String key) {
++        try {
++            final MessageDigest sha = MessageDigest.getInstance("SHA-1");
++            sha.update((key + MAGIC).getBytes(StandardCharsets.US_ASCII));
++            return Base64.getEncoder().encodeToString(sha.digest());
++        } catch (Exception e) {
++            throw new IllegalStateException("нет SHA-1", e);
++        }
++    }
++
++    private String readHeaders() throws IOException {
++        final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
++        int last = 0;
++        while (buffer.size() < 8192) {
++            final int one = in.read();
++            if (one < 0) {
++                throw new IOException("соединение закрылось на рукопожатии");
++            }
++            buffer.write(one);
++            if (one == '\n' && last == '\n') {
++                break;
++            }
++            if (one != '\r') {
++                last = one;
++            }
++        }
++        return new String(buffer.toByteArray(), StandardCharsets.US_ASCII);
++    }
++
++    /** Отправить двоичный кадр. Кадры от клиента всегда с маской. */
++    public synchronized void send(byte[] data, int offset, int length) throws IOException {
++        out.write(frame(data, offset, length, random));
++        out.flush();
++    }
++
++    /**
++     * Собрать кадр. Вынесено отдельно и без сети — чтобы можно было
++     * проверить сборку и разбор друг об друга, не поднимая сервера.
++     */
++    public static byte[] frame(byte[] data, int offset, int length, SecureRandom random) {
++        final ByteArrayOutputStream out = new ByteArrayOutputStream(length + 14);
++        out.write(0x82);                       // последний кадр, двоичный
++        final byte[] mask = new byte[4];
++        random.nextBytes(mask);
++        if (length < 126) {
++            out.write(0x80 | length);
++        } else if (length < 65536) {
++            out.write(0x80 | 126);
++            out.write((length >> 8) & 0xff);
++            out.write(length & 0xff);
++        } else {
++            out.write(0x80 | 127);
++            for (int shift = 56; shift >= 0; shift -= 8) {
++                out.write((int) (((long) length >> shift) & 0xff));
++            }
++        }
++        out.write(mask, 0, 4);
++        for (int i = 0; i < length; i++) {
++            out.write((data[offset + i] ^ mask[i % 4]) & 0xff);
++        }
++        return out.toByteArray();
++    }
++
++    /**
++     * Прочитать один кадр с данными. Служебные кадры обрабатываются здесь же
++     * и наружу не отдаются: «пинг» получает ответ, «закрыть» — исключение.
++     *
++     * @return содержимое кадра или null, если поток кончился.
++     */
++    public byte[] receive() throws IOException {
++        while (true) {
++            final int first = in.read();
++            if (first < 0) {
++                return null;
++            }
++            final int opcode = first & 0x0f;
++            final int second = in.read();
++            if (second < 0) {
++                return null;
++            }
++            // Маски от сервера не бывает; если пришла — считаем поток битым.
++            final boolean masked = (second & 0x80) != 0;
++            long length = second & 0x7f;
++            if (length == 126) {
++                length = (read() << 8) | read();
++            } else if (length == 127) {
++                length = 0;
++                for (int i = 0; i < 8; i++) {
++                    length = (length << 8) | read();
++                }
++            }
++            final byte[] mask = new byte[4];
++            if (masked) {
++                readFully(mask, 4);
++            }
++            final byte[] payload = new byte[(int) length];
++            readFully(payload, payload.length);
++            if (masked) {
++                for (int i = 0; i < payload.length; i++) {
++                    payload[i] ^= mask[i % 4];
++                }
++            }
++
++            if (opcode == 0x8) {
++                throw new IOException("сервер закрыл websocket");
++            }
++            if (opcode == 0x9) {
++                sendControl(0xA, payload);     // «пинг» — отвечаем «понг»
++                continue;
++            }
++            if (opcode == 0xA) {
++                continue;
++            }
++            return payload;
++        }
++    }
++
++    private synchronized void sendControl(int opcode, byte[] payload) throws IOException {
++        final byte[] mask = new byte[4];
++        random.nextBytes(mask);
++        final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
++        buffer.write(0x80 | opcode);
++        buffer.write(0x80 | payload.length);
++        buffer.write(mask, 0, 4);
++        for (int i = 0; i < payload.length; i++) {
++            buffer.write((payload[i] ^ mask[i % 4]) & 0xff);
++        }
++        out.write(buffer.toByteArray());
++        out.flush();
++    }
++
++    private int read() throws IOException {
++        final int one = in.read();
++        if (one < 0) {
++            throw new IOException("поток кончился посреди кадра");
++        }
++        return one;
++    }
++
++    private void readFully(byte[] into, int length) throws IOException {
++        int done = 0;
++        while (done < length) {
++            final int step = in.read(into, done, length - done);
++            if (step < 0) {
++                throw new IOException("поток кончился посреди кадра");
++            }
++            done += step;
++        }
++    }
++
++    public void close() {
++        try {
++            socket.close();
++        } catch (IOException ignored) {
 +        }
 +    }
 +}
@@ -10142,7 +11241,7 @@ index 000000000..c77ddf9b0
 +    }
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/messenger/AndroidUtilities.java b/TMessagesProj/src/main/java/org/telegram/messenger/AndroidUtilities.java
-index b8239d972..02133992e 100644
+index 5a26f49b9..ee6b6d4c2 100644
 --- a/TMessagesProj/src/main/java/org/telegram/messenger/AndroidUtilities.java
 +++ b/TMessagesProj/src/main/java/org/telegram/messenger/AndroidUtilities.java
 @@ -261,6 +261,12 @@ public class AndroidUtilities {
@@ -10183,7 +11282,7 @@ index b8239d972..02133992e 100644
          try {
              android.content.ClipboardManager clipboard = (android.content.ClipboardManager) ApplicationLoader.applicationContext.getSystemService(Context.CLIPBOARD_SERVICE);
  
-@@ -4270,6 +4287,15 @@ public class AndroidUtilities {
+@@ -4270,6 +4287,23 @@ public class AndroidUtilities {
  
      public static boolean openForView(File f, String fileName, String mimeType, final Activity activity, Theme.ResourcesProvider resourcesProvider, boolean restrict) {
          if (f != null && f.exists()) {
@@ -10196,27 +11295,55 @@ index b8239d972..02133992e 100644
 +                    && org.telegram.margelet.MargeletPlugins.offerInstall(activity, f)) {
 +                return true;
 +            }
++            // Плагин exteraGram. Системе он тоже никто, а мы знаем, что это
++            // такое, — значит вместо «нет приложения для этого файла»
++            // предлагаем принять его к себе.
++            if (!restrict && activity != null && fileName != null
++                    && fileName.toLowerCase().endsWith(".plugin")
++                    && org.telegram.margelet.MargeletExtera.offerConvert(activity, f)) {
++                return true;
++            }
              String realMimeType = null;
              Intent intent = new Intent(Intent.ACTION_VIEW);
              intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 diff --git a/TMessagesProj/src/main/java/org/telegram/messenger/ApplicationLoader.java b/TMessagesProj/src/main/java/org/telegram/messenger/ApplicationLoader.java
-index fc43c648c..89c033499 100644
+index dc63e5e28..0a19792e9 100644
 --- a/TMessagesProj/src/main/java/org/telegram/messenger/ApplicationLoader.java
 +++ b/TMessagesProj/src/main/java/org/telegram/messenger/ApplicationLoader.java
-@@ -289,6 +289,13 @@ public class ApplicationLoader extends Application {
- 
-         super.onCreate();
+@@ -292,6 +292,15 @@ public class ApplicationLoader extends Application {
+         // AndroidUtilities must be initialized before FileLog
+         final String helloWorld = AndroidUtilities.getHelloWorld();
  
 +        // Свой шрифт ставим до того, как появится первый экран: подменять
-+        // его позже значит оставить уже нарисованное со старым.
++        // его позже значит оставить уже нарисованное со старым. Стоит ПОСЛЕ
++        // строки выше: она поднимает AndroidUtilities, без которого шрифты
++        // не на что ставить.
 +        try {
 +            org.telegram.margelet.MargeletFonts.applyGlobally();
 +        } catch (Throwable ignored) {
 +        }
 +
          if (BuildVars.LOGS_ENABLED) {
+             FileLog.d(helloWorld);
              FileLog.d("app start time = " + (startTime = SystemClock.elapsedRealtime()));
-             try {
+@@ -353,6 +362,17 @@ public class ApplicationLoader extends Application {
+ 
+         LauncherIconController.tryFixLauncherIconIfNeeded();
+         ProxyRotationController.init();
++
++        // Встроенный прокси поднимаем при каждом запуске заново: порт у него
++        // свободный, а не заранее выбранный, и от запуска к запуску меняется.
++        // Записать его один раз в настройки и понадеяться нельзя — на
++        // следующем запуске телеграм стучался бы в никуда.
++        try {
++            if (org.telegram.margelet.MargeletConfig.proxyEnabled()) {
++                org.telegram.margelet.MargeletProxy.enable(true);
++            }
++        } catch (Throwable ignored) {
++        }
+     }
+ 
+     public static void startPushService() {
 diff --git a/TMessagesProj/src/main/java/org/telegram/messenger/LocaleController.java b/TMessagesProj/src/main/java/org/telegram/messenger/LocaleController.java
 index df646cf4d..20b166957 100644
 --- a/TMessagesProj/src/main/java/org/telegram/messenger/LocaleController.java
@@ -10329,7 +11456,7 @@ index 95495c32b..5d00f2d91 100644
  
          // trim again in case some whitespace inside tags
 diff --git a/TMessagesProj/src/main/java/org/telegram/messenger/MessageObject.java b/TMessagesProj/src/main/java/org/telegram/messenger/MessageObject.java
-index 778708057..fc1670c31 100644
+index 12c669c43..5ace29435 100644
 --- a/TMessagesProj/src/main/java/org/telegram/messenger/MessageObject.java
 +++ b/TMessagesProj/src/main/java/org/telegram/messenger/MessageObject.java
 @@ -339,6 +339,15 @@ public class MessageObject {
@@ -10788,7 +11915,7 @@ index 465e4b08b..6e2356aab 100644
                  if (textLayout != null) {
                      textLayout.draw(canvas);
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/Cells/ChatMessageCell.java b/TMessagesProj/src/main/java/org/telegram/ui/Cells/ChatMessageCell.java
-index bcc7fe85a..7d86fe497 100644
+index ece0e3925..2546be0ed 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/Cells/ChatMessageCell.java
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/Cells/ChatMessageCell.java
 @@ -2401,7 +2401,12 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
@@ -10888,7 +12015,7 @@ index bcc7fe85a..7d86fe497 100644
                          Spannable buffer = (Spannable) currentCaption;
                          CharacterStyle[] link = buffer.getSpans(off, off, ClickableSpan.class);
                          boolean isMono = false;
-@@ -22189,6 +22251,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
+@@ -22193,6 +22255,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
              Theme.chat_namePaint.setAlpha((int) (oldAlpha * nameAlpha));
              nameLayout.draw(canvas);
              Theme.chat_namePaint.setAlpha(oldAlpha);
@@ -10896,7 +12023,7 @@ index bcc7fe85a..7d86fe497 100644
              canvas.restore();
  
              float end;
-@@ -29193,6 +29256,42 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
+@@ -29197,6 +29260,42 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
          return Theme.isCurrentThemeDark();
      }
  
@@ -11100,7 +12227,7 @@ index 7804a1616..fddfd674e 100644
                      }
                  });
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/ChatActivity.java b/TMessagesProj/src/main/java/org/telegram/ui/ChatActivity.java
-index 6b8cddfe5..ff66fabb3 100644
+index 26d82ff82..d92cb417e 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/ChatActivity.java
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/ChatActivity.java
 @@ -490,6 +490,53 @@ public class ChatActivity extends BaseFragment implements
@@ -11201,7 +12328,7 @@ index 6b8cddfe5..ff66fabb3 100644
              wasManualScroll = true;
              if (view instanceof ChatActionCell && ((ChatActionCell) view).getMessageObject().isDateObject) {
                  if (isInsideContainer) {
-@@ -2666,6 +2736,29 @@ public class ChatActivity extends BaseFragment implements
+@@ -2667,6 +2737,29 @@ public class ChatActivity extends BaseFragment implements
  
      @Override
      public boolean onFragmentCreate() {
@@ -11231,7 +12358,7 @@ index 6b8cddfe5..ff66fabb3 100644
          final long chatId = arguments.getLong("chat_id", 0);
          final long userId = arguments.getLong("user_id", 0);
          final int encId = arguments.getInt("enc_id", 0);
-@@ -3695,6 +3788,11 @@ public class ChatActivity extends BaseFragment implements
+@@ -3696,6 +3789,11 @@ public class ChatActivity extends BaseFragment implements
          actionBar.setActionBarMenuOnItemClick(new ActionBar.ActionBarMenuOnItemClick() {
              @Override
              public void onItemClick(final int id) {
@@ -11243,7 +12370,7 @@ index 6b8cddfe5..ff66fabb3 100644
                  if (id == -1) {
                      if (isInPollAddOptionMode()) {
                          pollAddOptionModeClose();
-@@ -4514,6 +4612,16 @@ public class ChatActivity extends BaseFragment implements
+@@ -4515,6 +4613,16 @@ public class ChatActivity extends BaseFragment implements
              closeTopicItem = headerItem.lazilyAddSubItem(topic_close, R.drawable.msg_topic_close, LocaleController.getString(R.string.CloseTopic));
              closeTopicItem.setVisibility(currentChat != null && ChatObject.canManageTopic(currentAccount, currentChat, forumTopic) && forumTopic != null && !forumTopic.closed ? View.VISIBLE : View.GONE);
          }
@@ -11260,7 +12387,7 @@ index 6b8cddfe5..ff66fabb3 100644
          menu.setVisibility(inMenuMode ? View.GONE : View.VISIBLE);
  
          updateTitle(false);
-@@ -10880,18 +10988,33 @@ public class ChatActivity extends BaseFragment implements
+@@ -10889,18 +10997,33 @@ public class ChatActivity extends BaseFragment implements
      }
  
      private void updatePagedownButtonsPosition() {
@@ -11298,7 +12425,7 @@ index 6b8cddfe5..ff66fabb3 100644
          }
      }
  
-@@ -12018,13 +12141,23 @@ public class ChatActivity extends BaseFragment implements
+@@ -12027,13 +12150,23 @@ public class ChatActivity extends BaseFragment implements
          if (isInsideContainer && parentChatActivity == null) {
              paddingBottom = AndroidUtilities.navigationBarHeight;
          } else {
@@ -11324,7 +12451,7 @@ index 6b8cddfe5..ff66fabb3 100644
          if (topicsTabs != null) {
              topicsTabs.setSideMenuBackgroundMarginTop(0);//Math.max(0, paddingTop - blurredViewTopOffset - dp(5)));
          }
-@@ -13799,7 +13932,12 @@ public class ChatActivity extends BaseFragment implements
+@@ -13808,7 +13941,12 @@ public class ChatActivity extends BaseFragment implements
                      loading = true;
                      waitingForLoad.add(lastLoadIndex);
                      if (messagesByDays.size() != 0) {
@@ -11338,7 +12465,7 @@ index 6b8cddfe5..ff66fabb3 100644
                      } else {
                          getMessagesController().loadMessages(dialog_id, mergeDialogId, false, 50, 0, 0, !cacheEndReached[0], minDate[0], classGuid, 0, 0, chatMode, threadMessageId, replyMaxReadId, lastLoadIndex++, isTopic);
                      }
-@@ -15607,6 +15745,13 @@ public class ChatActivity extends BaseFragment implements
+@@ -15616,6 +15754,13 @@ public class ChatActivity extends BaseFragment implements
              cacheEndReached[a] = false;
              forwardEndReached[a] = true;
          }
@@ -11352,7 +12479,7 @@ index 6b8cddfe5..ff66fabb3 100644
          if (full) {
              first = true;
              firstLoading = true;
-@@ -19376,6 +19521,91 @@ public class ChatActivity extends BaseFragment implements
+@@ -19385,6 +19530,91 @@ public class ChatActivity extends BaseFragment implements
          }
      }
  
@@ -11444,7 +12571,7 @@ index 6b8cddfe5..ff66fabb3 100644
      private void processRowSelect(View view, boolean outside, float touchX, float touchY) {
          MessageObject message = null;
          if (view instanceof ChatMessageCell) {
-@@ -19428,6 +19658,41 @@ public class ChatActivity extends BaseFragment implements
+@@ -19437,6 +19667,41 @@ public class ChatActivity extends BaseFragment implements
          if (avatarContainer == null) {
              return;
          }
@@ -11486,7 +12613,7 @@ index 6b8cddfe5..ff66fabb3 100644
          if (chatMode == MODE_SUGGESTIONS && currentChat != null) {
              if (isSubscriberSuggestions) {
                  avatarContainer.setTitle(ForumUtilities.getMonoForumTitle(currentAccount, currentChat), currentChat.scam, currentChat.fake, currentChat.verified, false, null, animated);
-@@ -19520,7 +19785,7 @@ public class ChatActivity extends BaseFragment implements
+@@ -19529,7 +19794,7 @@ public class ChatActivity extends BaseFragment implements
                  avatarContainer.setTitle(LocaleController.getString(R.string.SavedMessages));
              } else if (!MessagesController.isSupportUser(currentUser) && getContactsController().contactsDict.get(currentUser.id) == null && (getContactsController().contactsDict.size() != 0 || !getContactsController().isLoadingContacts())) {
                  if (!TextUtils.isEmpty(currentUser.phone)) {
@@ -11495,7 +12622,7 @@ index 6b8cddfe5..ff66fabb3 100644
                  } else {
                      avatarContainer.setTitle(AndroidUtilities.removeRTL(AndroidUtilities.removeDiacritics(UserObject.getUserName(currentUser))), currentUser.scam, currentUser.fake, currentUser.verified, getMessagesController().isPremiumUser(currentUser), currentUser.emoji_status, animated);
                  }
-@@ -20524,6 +20789,52 @@ public class ChatActivity extends BaseFragment implements
+@@ -20533,6 +20798,52 @@ public class ChatActivity extends BaseFragment implements
              postponedScrollToLastMessageQueryIndex = 0;
          }
          ArrayList<MessageObject> messArr = (ArrayList<MessageObject>) args[2];
@@ -11548,7 +12675,7 @@ index 6b8cddfe5..ff66fabb3 100644
  
          boolean universalNotify = false;
          HashMap<Integer, MessageObject> oldMessages = null;
-@@ -21408,7 +21719,7 @@ public class ChatActivity extends BaseFragment implements
+@@ -21417,7 +21728,7 @@ public class ChatActivity extends BaseFragment implements
              }
              loadingForward = false;
          } else {
@@ -11557,7 +12684,7 @@ index 6b8cddfe5..ff66fabb3 100644
                  if (isCache) {
                      if (currentEncryptedChat != null || loadIndex == 1 && mergeDialogId != 0 && isEnd) {
                          endReached[loadIndex] = true;
-@@ -21416,11 +21727,12 @@ public class ChatActivity extends BaseFragment implements
+@@ -21425,11 +21736,12 @@ public class ChatActivity extends BaseFragment implements
                      if (load_type != 2) {
                          cacheEndReached[loadIndex] = true;
                      }
@@ -11571,7 +12698,7 @@ index 6b8cddfe5..ff66fabb3 100644
              if (onChatMessagesLoaded != null) {
                  onChatMessagesLoaded.run();
                  onChatMessagesLoaded = null;
-@@ -21950,6 +22262,7 @@ public class ChatActivity extends BaseFragment implements
+@@ -21959,6 +22271,7 @@ public class ChatActivity extends BaseFragment implements
              FileLog.d("ChatActivity didReceiveNewMessages start");
              long did = (Long) args[0];
              ArrayList<MessageObject> arr = (ArrayList<MessageObject>) args[1];
@@ -11579,7 +12706,7 @@ index 6b8cddfe5..ff66fabb3 100644
              if (isInsideContainer) return;
              if (did == dialog_id) {
                  boolean scheduled = (Boolean) args[2];
-@@ -27588,6 +27901,18 @@ public class ChatActivity extends BaseFragment implements
+@@ -27614,6 +27927,18 @@ public class ChatActivity extends BaseFragment implements
          if (includeSpoilers) {
              menu.add(R.id.menu_groupbolditalic, R.id.menu_spoiler, order++, LocaleController.getString(R.string.Spoiler));
          }
@@ -11598,7 +12725,7 @@ index 6b8cddfe5..ff66fabb3 100644
  
          SpannableStringBuilder stringBuilder = new SpannableStringBuilder(LocaleController.getString(R.string.Bold));
          stringBuilder.setSpan(new TypefaceSpan(AndroidUtilities.bold()), 0, stringBuilder.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-@@ -28295,6 +28620,15 @@ public class ChatActivity extends BaseFragment implements
+@@ -28321,6 +28646,15 @@ public class ChatActivity extends BaseFragment implements
          if (currentEncryptedChat != null || chatMode != 0) {
              return;
          }
@@ -11614,7 +12741,7 @@ index 6b8cddfe5..ff66fabb3 100644
          int pinned_msg_id;
          boolean changed = false;
          MessageObject pinnedMessageObject;
-@@ -29727,6 +30061,10 @@ public class ChatActivity extends BaseFragment implements
+@@ -29753,6 +30087,10 @@ public class ChatActivity extends BaseFragment implements
      @Override
      public void onResume() {
          super.onResume();
@@ -11625,7 +12752,7 @@ index 6b8cddfe5..ff66fabb3 100644
          checkShowBlur(false);
          activityResumeTime = System.currentTimeMillis();
          if (openImport && getSendMessagesHelper().getImportingHistory(dialog_id) != null) {
-@@ -33270,6 +33608,12 @@ public class ChatActivity extends BaseFragment implements
+@@ -33296,6 +33634,12 @@ public class ChatActivity extends BaseFragment implements
          if (selectedObject == null || getParentActivity() == null) {
              return;
          }
@@ -11638,7 +12765,7 @@ index 6b8cddfe5..ff66fabb3 100644
          boolean preserveDim = false;
          switch (option) {
              case OPTION_RETRY: {
-@@ -33379,6 +33723,19 @@ public class ChatActivity extends BaseFragment implements
+@@ -33405,6 +33749,19 @@ public class ChatActivity extends BaseFragment implements
                  undoView.showWithAction(0, UndoView.ACTION_MESSAGE_COPIED, null);
                  break;
              }
@@ -11658,7 +12785,7 @@ index 6b8cddfe5..ff66fabb3 100644
              case OPTION_SAVE_TO_GALLERY: {
                  if (Build.VERSION.SDK_INT >= 23 && (Build.VERSION.SDK_INT <= 28 || BuildVars.NO_SCOPED_STORAGE) && getParentActivity().checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                      getParentActivity().requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 4);
-@@ -41614,7 +41971,7 @@ public class ChatActivity extends BaseFragment implements
+@@ -41640,7 +41997,7 @@ public class ChatActivity extends BaseFragment implements
              } else if (BuildVars.isHuaweiStoreApp()) {
                  Browser.openUrl(getContext(), BuildVars.HUAWEI_STORE_URL);
              } else {
@@ -11667,7 +12794,7 @@ index 6b8cddfe5..ff66fabb3 100644
              }
          }
  
-@@ -46097,6 +46454,33 @@ public class ChatActivity extends BaseFragment implements
+@@ -46123,6 +46480,33 @@ public class ChatActivity extends BaseFragment implements
                      }
                  }
  
@@ -11701,7 +12828,7 @@ index 6b8cddfe5..ff66fabb3 100644
                  final boolean canForward = !selectedObject.isSponsored()
                      && !isQuickRepliesOrWelcomeMessagesMode()
                      && chatMode != MODE_SCHEDULED
-@@ -46267,6 +46651,16 @@ public class ChatActivity extends BaseFragment implements
+@@ -46293,6 +46677,16 @@ public class ChatActivity extends BaseFragment implements
              options.add(OPTION_WELCOME_REVERT);
              icons.add(R.drawable.outline_revert_24);
          }
@@ -11798,10 +12925,10 @@ index ac402db58..415b7e378 100644
              parentFragment.showQuoteMessageUpdate();
              return false;
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/Components/ChatAvatarContainer.java b/TMessagesProj/src/main/java/org/telegram/ui/Components/ChatAvatarContainer.java
-index 7066dfae6..fa97eaf41 100644
+index 1238632a0..b3c7d2b3e 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/Components/ChatAvatarContainer.java
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/Components/ChatAvatarContainer.java
-@@ -981,6 +981,8 @@ public class ChatAvatarContainer extends FrameLayout implements FactorAnimator.T
+@@ -987,6 +987,8 @@ public class ChatAvatarContainer extends FrameLayout implements FactorAnimator.T
          } else {
              titleTextView.setRightDrawable(null);
              rightDrawableContentDescription = null;
@@ -11810,7 +12937,7 @@ index 7066dfae6..fa97eaf41 100644
          }
          checkActionBar(animated);
      }
-@@ -1079,6 +1081,9 @@ public class ChatAvatarContainer extends FrameLayout implements FactorAnimator.T
+@@ -1085,6 +1087,9 @@ public class ChatAvatarContainer extends FrameLayout implements FactorAnimator.T
      private boolean showingSavedMessagesHint;
  
      public void updateSubtitle(boolean animated) {
@@ -11820,7 +12947,7 @@ index 7066dfae6..fa97eaf41 100644
          if (parentFragment == null) {
              return;
          }
-@@ -1366,7 +1371,70 @@ public class ChatAvatarContainer extends FrameLayout implements FactorAnimator.T
+@@ -1372,7 +1377,70 @@ public class ChatAvatarContainer extends FrameLayout implements FactorAnimator.T
          return lastSubtitleColorKey;
      }
  
@@ -11891,7 +13018,7 @@ index 7066dfae6..fa97eaf41 100644
          avatarDrawable.setInfo(currentAccount, chat);
          if (avatarImageView != null) {
              avatarImageView.setForUserOrChat(chat, avatarDrawable);
-@@ -1379,6 +1447,13 @@ public class ChatAvatarContainer extends FrameLayout implements FactorAnimator.T
+@@ -1385,6 +1453,13 @@ public class ChatAvatarContainer extends FrameLayout implements FactorAnimator.T
      }
  
      public void setUserAvatar(TLRPC.User user, boolean showSelf) {
@@ -11905,7 +13032,7 @@ index 7066dfae6..fa97eaf41 100644
          avatarDrawable.setInfo(currentAccount, user);
          if (UserObject.isReplyUser(user)) {
              avatarDrawable.setAvatarType(AvatarDrawable.AVATAR_TYPE_REPLIES);
-@@ -1410,6 +1485,12 @@ public class ChatAvatarContainer extends FrameLayout implements FactorAnimator.T
+@@ -1416,6 +1491,12 @@ public class ChatAvatarContainer extends FrameLayout implements FactorAnimator.T
          if (parentFragment == null) {
              return;
          }
@@ -12164,7 +13291,7 @@ index 78c3b9e1b..b820c3ebe 100644
          tmpRect.set(
              Math.round(inputBubbleOffsetLeft),
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/DialogsActivity.java b/TMessagesProj/src/main/java/org/telegram/ui/DialogsActivity.java
-index b04f149fd..92c651933 100644
+index b04f149fd..d743a7a62 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/DialogsActivity.java
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/DialogsActivity.java
 @@ -3517,12 +3517,11 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
@@ -12235,7 +13362,18 @@ index b04f149fd..92c651933 100644
                      viewPages[a].listView.setScrollingTouchSlop(RecyclerView.TOUCH_SLOP_PAGING);
                  }
                  filterTabsView.finishAddingTabs(animatedUpdateItems);
-@@ -13787,6 +13813,19 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
+@@ -7023,6 +7049,10 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
+     @Override
+     public void onResume() {
+         super.onResume();
++        // Если связи нет и человек в России — предложим встроенный прокси.
++        // Само предложение отложено внутри и проверяет условия ещё раз:
++        // сразу после запуска телеграм «подключается» у всех.
++        org.telegram.margelet.MargeletProxy.offerIfStuck(getParentActivity(), currentAccount);
+         if (dialogStoriesCell != null) {
+             dialogStoriesCell.onResume();
+         }
+@@ -13787,6 +13817,19 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
              }
          }
  
@@ -14079,10 +15217,10 @@ index 000000000..fadc6c32b
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/MargeletPluginsActivity.java b/TMessagesProj/src/main/java/org/telegram/ui/MargeletPluginsActivity.java
 new file mode 100644
-index 000000000..32a66d5f7
+index 000000000..e03e0055e
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/MargeletPluginsActivity.java
-@@ -0,0 +1,490 @@
+@@ -0,0 +1,498 @@
 +package org.telegram.ui;
 +
 +import android.content.Context;
@@ -14230,12 +15368,20 @@ index 000000000..32a66d5f7
 +                storeView = new UniversalRecyclerView(MargeletPluginsActivity.this,
 +                        MargeletPluginsActivity.this::fillStore,
 +                        MargeletPluginsActivity.this::clickStore, null);
++                storeView.setSections();
 +                return storeView;
 +            }
 +            mineView = new UniversalRecyclerView(MargeletPluginsActivity.this,
 +                    MargeletPluginsActivity.this::fillMine,
 +                    MargeletPluginsActivity.this::clickMine,
 +                    MargeletPluginsActivity.this::longClickMine);
++            // Скруглённые карточки — как на всех прочих экранах форка.
++            // Здесь их не было по единственной причине: этот экран не
++            // UniversalFragment, а свой листатель из двух списков, и строчку
++            // setSections каждый экран зовёт себе сам. На экранах настроек её
++            // написали, а здесь забыли — оттого плагины годами выглядели
++            // квадратными среди скруглённого.
++            mineView.setSections();
 +            return mineView;
 +        }
 +
@@ -14939,10 +16085,10 @@ index 000000000..397f3a69d
 +}
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/MargeletSettingsActivity.java b/TMessagesProj/src/main/java/org/telegram/ui/MargeletSettingsActivity.java
 new file mode 100644
-index 000000000..9687d4092
+index 000000000..3ced58676
 --- /dev/null
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/MargeletSettingsActivity.java
-@@ -0,0 +1,211 @@
+@@ -0,0 +1,225 @@
 +package org.telegram.ui;
 +
 +import android.view.Gravity;
@@ -14992,6 +16138,7 @@ index 000000000..9687d4092
 +    private static final int ID_PLUGINS = 15;
 +    private static final int ID_FEEDBACK = 18;
 +    private static final int ID_MY_PROFILE = 19;
++    private static final int ID_PROXY = 20;
 +
 +    /** Объёмный значок в шапке. Пользы ноль, и в этом вся мысль. */
 +    private FrameLayout header;
@@ -15058,6 +16205,12 @@ index 000000000..9687d4092
 +                R.drawable.settings_devices, LocaleController.getString(R.string.MargeletPlugins),
 +                LocaleController.getString(R.string.MargeletPluginsInfo)));
 +        items.add(UItem.asShadow(null));
++        // Прокси стоит здесь, а не в глубине настроек, нарочно: он нужен ровно
++        // тому, у кого телеграм не открывается, и искать его такому человеку
++        // негде и некогда.
++        items.add(UItem.asCheck(ID_PROXY, LocaleController.getString(R.string.MargeletProxy))
++                .setChecked(MargeletConfig.proxyEnabled()));
++        items.add(UItem.asShadow(LocaleController.getString(R.string.MargeletProxyAbout)));
 +        items.add(UItem.asButton(ID_STICKERS, LocaleController.getString(R.string.MargeletStickers),
 +                LocaleController.getString(R.string.MargeletStickersAdd)));
 +        items.add(UItem.asShadow(LocaleController.getString(R.string.MargeletStickersAbout)));
@@ -15113,7 +16266,14 @@ index 000000000..9687d4092
 +
 +    @Override
 +    protected void onClick(UItem item, View view, int position, float x, float y) {
-+        if (item.id == ID_STICKERS) {
++        if (item.id == ID_PROXY) {
++            final boolean on = !MargeletConfig.proxyEnabled();
++            org.telegram.margelet.MargeletProxy.enable(on);
++            // Спрашиваем настройку заново, а не верим своему «on»: включение
++            // может и не удаться, и тогда галочка обязана это показать.
++            ((org.telegram.ui.Cells.TextCheckCell) view)
++                    .setChecked(MargeletConfig.proxyEnabled());
++        } else if (item.id == ID_STICKERS) {
 +            Browser.openUrl(getContext(), MargeletConfig.STICKERS_URL);
 +        } else if (item.id == ID_PLUGINS) {
 +            presentFragment(new MargeletPluginsActivity());
@@ -25672,7 +26832,7 @@ index 03d0ba337..17f98fa6e 100644
      <string name="English">Inglês</string>
      <string name="LanguageNameInEnglish">Portuguese (Brazil)</string>
 diff --git a/TMessagesProj/src/main/res/values-ru/strings.xml b/TMessagesProj/src/main/res/values-ru/strings.xml
-index 24c562920..9842e1798 100644
+index 24c562920..2d8225dd3 100644
 --- a/TMessagesProj/src/main/res/values-ru/strings.xml
 +++ b/TMessagesProj/src/main/res/values-ru/strings.xml
 @@ -1,7 +1,7 @@
@@ -25685,7 +26845,7 @@ index 24c562920..9842e1798 100644
      <string name="LanguageName">Русский</string>
      <string name="English">Английский</string>
      <string name="LanguageNameInEnglish">Russian</string>
-@@ -263,4 +263,251 @@
+@@ -263,4 +263,262 @@
      <string name="RemindTodayAt">\'Отправить сегодня в\' HH:mm</string>
      <string name="RemindDayAt">\'Отправить\' d MMM \'в\' HH:mm</string>
      <string name="RemindDayYearAt">\'Напомнить\' d MMM yyyy \'в\' HH:mm</string>
@@ -25894,6 +27054,17 @@ index 24c562920..9842e1798 100644
 +    <string name="MargeletPluginsHint">Нажатие — включить, долгое — о плагине.</string>
 +    <string name="MargeletPluginsOffHint">Пока «Плагины» выключены, ни один не запустится.</string>
 +    <string name="MargeletPluginInstall">Установить из файла</string>
++    <string name="MargeletExteraTitle">Плагин из exteraGram</string>
++    <string name="MargeletExteraAbout">«%1$s» написан под exteraGram. Margy умеет его принять: питон там и тут один и тот же, в одном и том же телеграме, поэтому файл едет почти как есть.</string>
++    <string name="MargeletExteraMissing">Чего здесь не будет:</string>
++    <string name="MargeletExteraUnknownModule">модуль %1$s — у Margy его нет</string>
++    <string name="MargeletExteraConvert">Принять</string>
++    <string name="MargeletProxy">Встроенный прокси</string>
++    <string name="MargeletProxyAbout">Заворачивает соединение в websocket к собственным дата-центрам телеграма. Чужих серверов нет: трафик идёт туда же, куда и раньше, меняется только обёртка.</string>
++    <string name="MargeletProxyOfferTitle">Телеграм не подключается</string>
++    <string name="MargeletProxyOffer">Связь не поднимается, а телефон говорит, что ты в России. У Margy есть встроенный прокси: он заворачивает соединение в websocket к собственным дата-центрам телеграма, без чужих серверов. Включить?</string>
++    <string name="MargeletProxyTurnOn">Включить</string>
++    <string name="MargeletProxyDontAsk">Больше не спрашивать</string>
 +    <string name="MargeletPluginConsole">Консоль</string>
 +    <string name="MargeletPluginConsoleEmpty">Пусто.</string>
 +    <string name="MargeletPluginDocs">Как писать плагины</string>
@@ -25954,10 +27125,10 @@ index d46834430..57d101095 100644
      <string name="LanguageNameInEnglish">Ukrainian</string>
 diff --git a/TMessagesProj/src/main/res/values-zh/strings.xml b/TMessagesProj/src/main/res/values-zh/strings.xml
 new file mode 100644
-index 000000000..14af78bba
+index 000000000..b6d3acce1
 --- /dev/null
 +++ b/TMessagesProj/src/main/res/values-zh/strings.xml
-@@ -0,0 +1,250 @@
+@@ -0,0 +1,261 @@
 +<?xml version="1.0" encoding="utf-8"?>
 +<resources>
 +    <string name="MargeletSettings">分支设置</string>
@@ -26165,6 +27336,17 @@ index 000000000..14af78bba
 +    <string name="MargeletPluginsHint">点一下打开，长按看详情。</string>
 +    <string name="MargeletPluginsOffHint">“插件”关着的时候，一个也不会启动。</string>
 +    <string name="MargeletPluginInstall">从文件安装</string>
++    <string name="MargeletExteraTitle">来自 exteraGram 的插件</string>
++    <string name="MargeletExteraAbout">「%1$s」是为 exteraGram 写的。Margy 可以接收它：两边的 Python 是同一个，跑在同一个 Telegram 里，所以这个文件几乎可以原样搬过来。</string>
++    <string name="MargeletExteraMissing">这里不会有的东西：</string>
++    <string name="MargeletExteraUnknownModule">模块 %1$s — Margy 没有它</string>
++    <string name="MargeletExteraConvert">接收</string>
++    <string name="MargeletProxy">内置代理</string>
++    <string name="MargeletProxyAbout">把连接包进通往 Telegram 自家数据中心的 WebSocket 里。没有第三方服务器：流量还是去原来的地方，变的只是外面那层包装。</string>
++    <string name="MargeletProxyOfferTitle">Telegram 连不上</string>
++    <string name="MargeletProxyOffer">连接一直没建立，而手机说你在俄罗斯。Margy 有一个内置代理：它把连接包进通往 Telegram 自家数据中心的 WebSocket 里，不经过任何第三方服务器。要打开吗？</string>
++    <string name="MargeletProxyTurnOn">打开</string>
++    <string name="MargeletProxyDontAsk">不再询问</string>
 +    <string name="MargeletPluginConsole">控制台</string>
 +    <string name="MargeletPluginConsoleEmpty">空的。</string>
 +    <string name="MargeletPluginDocs">怎么写插件</string>
@@ -26225,7 +27407,7 @@ index cc49d1353..a8a51c3a0 100644
      <item name="menu_regular" type="id"/>
      <item name="menu_bold" type="id"/>
 diff --git a/TMessagesProj/src/main/res/values/strings.xml b/TMessagesProj/src/main/res/values/strings.xml
-index ffa4d5663..fb0a19484 100644
+index ffa4d5663..6d7c511e7 100644
 --- a/TMessagesProj/src/main/res/values/strings.xml
 +++ b/TMessagesProj/src/main/res/values/strings.xml
 @@ -1,7 +1,7 @@
@@ -26238,7 +27420,7 @@ index ffa4d5663..fb0a19484 100644
      <string name="LanguageName">English</string>
      <string name="English">English</string>
      <string name="LanguageNameInEnglish">English</string>
-@@ -11221,4 +11221,251 @@
+@@ -11221,4 +11221,262 @@
      <string name="UnsupportedMessageTitle">Unsupported Message</string>
      <string name="UnsupportedMessageMessage">Update Telegram to view this message</string>
      <string name="UnsupportedUpdate">Update</string>
@@ -26447,6 +27629,17 @@ index ffa4d5663..fb0a19484 100644
 +    <string name="MargeletPluginsHint">Tap to turn on, hold for details.</string>
 +    <string name="MargeletPluginsOffHint">While Plugins are off, none of them will run.</string>
 +    <string name="MargeletPluginInstall">Install from file</string>
++    <string name="MargeletExteraTitle">A plugin from exteraGram</string>
++    <string name="MargeletExteraAbout">«%1$s» is written for exteraGram. Margy can take it in: the Python is the same one, in the same Telegram, so the file goes over almost as it is.</string>
++    <string name="MargeletExteraMissing">What will not work here:</string>
++    <string name="MargeletExteraUnknownModule">module %1$s — Margy does not have it</string>
++    <string name="MargeletExteraConvert">Take it in</string>
++    <string name="MargeletProxy">Built-in proxy</string>
++    <string name="MargeletProxyAbout">Wraps the connection in a WebSocket to Telegram\'s own data centres. No third-party servers: the traffic goes where it went before, only the wrapping changes.</string>
++    <string name="MargeletProxyOfferTitle">Telegram is not connecting</string>
++    <string name="MargeletProxyOffer">The connection is not coming up, and your phone says you are in Russia. Margy has a built-in proxy: it wraps the connection in a WebSocket to Telegram\'s own data centres, without any third-party servers. Turn it on?</string>
++    <string name="MargeletProxyTurnOn">Turn on</string>
++    <string name="MargeletProxyDontAsk">Do not ask again</string>
 +    <string name="MargeletPluginConsole">Console</string>
 +    <string name="MargeletPluginConsoleEmpty">Empty.</string>
 +    <string name="MargeletPluginDocs">How to write plugins</string>
@@ -26491,7 +27684,7 @@ index ffa4d5663..fb0a19484 100644
 +    <string name="MargeletDonatePageAbout">Opens in the browser: the form is already there, nothing to paste by hand.</string>
  </resources>
 diff --git a/TMessagesProj_App/build.gradle b/TMessagesProj_App/build.gradle
-index 2aa197cb3..8fd9c9eca 100644
+index b8a0ed897..722a39a15 100644
 --- a/TMessagesProj_App/build.gradle
 +++ b/TMessagesProj_App/build.gradle
 @@ -67,10 +67,19 @@ android {
@@ -26538,7 +27731,7 @@ index 2aa197cb3..8fd9c9eca 100644
              sourceSets.debug {
                  manifest.srcFile '../TMessagesProj/config/debug/AndroidManifest_SDK23.xml'
 diff --git a/TMessagesProj_AppStandalone/build.gradle b/TMessagesProj_AppStandalone/build.gradle
-index 96f4d779c..83737ef14 100644
+index 96dbbbf02..f0dcbad4a 100644
 --- a/TMessagesProj_AppStandalone/build.gradle
 +++ b/TMessagesProj_AppStandalone/build.gradle
 @@ -1,4 +1,7 @@
@@ -26596,9 +27789,9 @@ index 96f4d779c..83737ef14 100644
 +            version "3.11"
 +        }
          minSdkVersion 21
-         targetSdkVersion 35
+         targetSdkVersion 36
          versionName APP_VERSION_NAME
-@@ -154,4 +167,10 @@ android {
+@@ -155,4 +168,10 @@ android {
      }
  }
  
@@ -26612,62 +27805,98 @@ index 96f4d779c..83737ef14 100644
 +// apply plugin: 'com.google.gms.google-services'
 diff --git a/TMessagesProj_AppStandalone/src/main/assets/margelet_example.marp b/TMessagesProj_AppStandalone/src/main/assets/margelet_example.marp
 new file mode 100644
-index 0000000000000000000000000000000000000000..345c6dc6e00e1b8ce17695b539345df8121e4d44
+index 0000000000000000000000000000000000000000..6af65bc81f752934b6291ac5122ed4741c707e32
 GIT binary patch
-literal 2760
-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
-ALI3~&
+literal 4651
+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
+Sr}+DZ^v^E%Q#~2~?*0pY8_b0O
 
 literal 0
 HcmV?d00001
@@ -26815,147 +28044,503 @@ index ce63acf68..d703d3736 100644
      }
  
      @Override
-diff --git a/TMessagesProj_AppStandalone/src/main/python/margelet_example.py b/TMessagesProj_AppStandalone/src/main/python/margelet_example.py
+diff --git a/TMessagesProj_AppStandalone/src/main/python/android_utils.py b/TMessagesProj_AppStandalone/src/main/python/android_utils.py
 new file mode 100644
-index 000000000..14308d17a
+index 000000000..9d9c29d81
 --- /dev/null
-+++ b/TMessagesProj_AppStandalone/src/main/python/margelet_example.py
-@@ -0,0 +1,135 @@
++++ b/TMessagesProj_AppStandalone/src/main/python/android_utils.py
+@@ -0,0 +1,41 @@
 +# -*- coding: utf-8 -*-
-+"""Пример плагина Margelet.
++"""Слой совместимости: android_utils экстеры."""
++from java import dynamic_proxy, jclass
 +
-+Показывает всё, что плагину дают: свой экран настроек, шесть событий,
-+кнопку в меню чата и подмену чужого метода. Каждая часть выключена по
-+умолчанию — плагин, который сразу лезет в переписку, плохой пример.
++_Hooks = jclass("org.telegram.margelet.MargeletHooks")
++_Android = jclass("org.telegram.messenger.AndroidUtilities")
++_Runnable = jclass("java.lang.Runnable")
++_OnClick = jclass("android.view.View$OnClickListener")
 +
-+Код лежит исходником и читается кем угодно — это условие форума.
++
++class _Работа(dynamic_proxy(_Runnable)):
++    def __init__(self, call):
++        super().__init__()
++        self.call = call
++
++    def run(self):
++        self.call()
++
++
++def run_on_ui_thread(call, delay=0):
++    if delay:
++        _Android.runOnUIThread(_Работа(call), int(delay))
++    else:
++        _Android.runOnUIThread(_Работа(call))
++
++
++def log(*части):
++    print(" ".join(str(ч) for ч in части))
++
++
++class OnClickListener(dynamic_proxy(_OnClick)):
++    def __init__(self, call):
++        super().__init__()
++        self.call = call
++
++    def onClick(self, view):
++        self.call(view)
++
++
++def get_application_context():
++    return jclass("org.telegram.messenger.ApplicationLoader").applicationContext
+diff --git a/TMessagesProj_AppStandalone/src/main/python/base_plugin.py b/TMessagesProj_AppStandalone/src/main/python/base_plugin.py
+new file mode 100644
+index 000000000..b597faff5
+--- /dev/null
++++ b/TMessagesProj_AppStandalone/src/main/python/base_plugin.py
+@@ -0,0 +1,278 @@
++# -*- coding: utf-8 -*-
++"""Слой совместимости: плагины, написанные под exteraGram, в Margy.
++
++Их плагин — это класс, унаследованный от BasePlugin, и набор обёрток вокруг
++той же самой java, что доступна и нам: у них и у нас питон живёт в одном и том
++же приложении телеграма через Chaquopy. Поэтому переводить плагин целиком не
++надо — достаточно положить рядом модули с их именами, которые делают то же
++самое через margelet.
++
++Что здесь честно эмулируется, а что нет — написано у каждой части. Там, где
++сделать нельзя, стоит внятная ошибка, а не тихое «ничего не произошло»:
++плагин, который молча не работает, хуже плагина, который сразу сказал почему.
 +"""
 +
-+
-+def on_start():
-+    margelet.settings(
-+        margelet.header("Что делать"),
-+        margelet.switch("greet", "Здороваться при открытии чата",
-+                        about="Короткая надпись поверх экрана, когда открываешь переписку."),
-+        margelet.switch("sign", "Подписывать отправляемое",
-+                        about="Дописывает подпись в конец каждого сообщения, которое ты шлёшь."),
-+        margelet.text("signature", "Подпись", default="🌿"),
-+        margelet.switch("count", "Считать входящие"),
-+        margelet.switch("watch_deleted", "Замечать удалённые",
-+                        about="Пишет в консоль, сколько сообщений исчезло. Сам текст не сохраняется."),
-+        margelet.switch("keep_pins", "Не закреплять каналы",
-+                        about="Отменяет закрепление канала. Обычные переписки закрепляются как всегда."),
-+        margelet.switch("hook", "Показать подмену метода",
-+                        about="Подменяет один безобидный метод приложения и пишет в консоль, что он ответил. "
-+                              "Нужны включённые хуки в настройках плагинов."),
-+        margelet.note("Всё это остаётся на телефоне и никуда не уходит."),
-+        margelet.action("Сбросить счёт", forget, danger=True),
-+    )
-+
-+    margelet.on_chat_opened(opened)
-+    margelet.on_send(sign)
-+    margelet.on_message(count)
-+    margelet.on_deleted(vanished)
-+    margelet.on_pin(pinning)
-+    margelet.on_settings(changed)
-+    margelet.button("Сколько насчитал", report)
-+
-+    if margelet.flag("hook"):
-+        watch_muted()
-+
-+    margelet.log("привет из плагина", margelet.name)
++_мост = None          # объект margelet того плагина, который сейчас поднимают
++_классы = []          # все BasePlugin-наследники, объявленные в файле плагина
++_живые = []           # их поднятые образцы
 +
 +
-+def opened(chat):
-+    """Открыли переписку. Сам экран чата приходит сюда как есть."""
-+    if margelet.flag("greet"):
-+        margelet.toast("привет!")
++class AppEvent:
++    START = "start"
++    STOP = "stop"
++    PAUSE = "pause"
++    RESUME = "resume"
 +
 +
-+def sign(text, dialog_id):
-+    """Перед отправкой. Вернуть строку — уйдёт она, вернуть False — не уйдёт.
++class HookStrategy:
++    DEFAULT = 0
++    CANCEL = 1
++    MODIFY = 2
++    MODIFY_FINAL = 3
 +
-+    Приложение ждёт этого ответа, поэтому здесь нельзя долго думать: пока
-+    думаем, человек смотрит на неотправленное сообщение.
++
++class HookResult:
++    def __init__(self, strategy=HookStrategy.DEFAULT, params=None):
++        self.strategy = strategy
++        self.params = params
++
++
++class MenuItemType:
++    """Их места меню — наши же, просто под другими именами.
++
++    Ровно четыре, потому что ровно столько умеет margelet.menu. Их пятое
++    место, CHAT_ATTACH_MENU, у нас не открыто, и притворяться нечем.
 +    """
-+    if not margelet.flag("sign"):
-+        return None
-+    signature = margelet.get("signature", "")
-+    if not signature or text.endswith(signature):
-+        return None
-+    return text + " " + signature
++    CHAT_ACTION_MENU = "chat"
++    PROFILE_ACTION_MENU = "profile"
++    MESSAGE_CONTEXT_MENU = "message"
++    DRAWER_MENU = "drawer"
 +
 +
-+def count(text, dialog_id, message_id, mine):
-+    """Пришло сообщение. Своё отправленное приходит сюда же — на то и mine."""
-+    if mine or not margelet.flag("count"):
-+        return
-+    margelet.set("counted", int(margelet.get("counted", "0")) + 1)
++class MenuItemData:
++    def __init__(self, menu_type, text, on_click=None, icon=None, subtext=None,
++                 priority=0, condition=None):
++        self.menu_type = menu_type
++        self.text = text
++        self.on_click = on_click
++        self.icon = icon
++        self.subtext = subtext
++        self.priority = priority
++        self.condition = condition
 +
 +
-+def vanished(ids, chat):
-+    """Сообщения удалили. Ответ ни на что не влияет: их уже нет.
++class Параметры:
++    """То, что их обработчик отправки ждёт под именем params.
 +
-+    Текста здесь нет и быть не может — сообщение к этому времени пропало.
-+    Кому нужен текст удалённого, тот должен был запомнить его раньше, в
-+    on_message; пример нарочно этого не делает.
++    У них это объект запроса к серверу с полем message. У нас на этом месте
++    просто текст и номер переписки, поэтому объект собираем сами — иначе их
++    код, читающий params.message, не заработал бы вовсе.
 +    """
-+    if margelet.flag("watch_deleted"):
-+        margelet.log("исчезло сообщений:", len(ids), "в", chat)
++
++    def __init__(self, message, peer):
++        self.message = message
++        self.peer = peer
 +
 +
-+def pinning(chat, pin):
-+    """Чат закрепляют. Вернуть False — не закреплять.
++class BasePlugin:
++    def __init_subclass__(cls, **прочее):
++        super().__init_subclass__(**прочее)
++        _классы.append(cls)
 +
-+    Приложение ждёт ответа, как и на отправке: долгую работу отсюда надо
-+    уносить в margelet.background.
-+    """
-+    if not margelet.flag("keep_pins"):
++    # --- то, что переопределяет сам плагин ---
++
++    def on_plugin_load(self):
++        pass
++
++    def on_plugin_unload(self):
++        pass
++
++    def on_app_event(self, event_type):
++        pass
++
++    def create_settings(self):
++        return []
++
++    # --- то, чем плагин пользуется ---
++
++    @property
++    def id(self):
++        return _мост.id
++
++    def get_setting(self, key, default=None):
++        значение = _мост.get(key, None)
++        if значение is None:
++            return default
++        # У них переключатель хранится как да/нет, у нас всё строкой.
++        if isinstance(default, bool):
++            return значение == "1"
++        if isinstance(default, int) and not isinstance(default, bool):
++            try:
++                return int(значение)
++            except ValueError:
++                return default
++        return значение
++
++    def set_setting(self, key, value, reload_settings=False):
++        if isinstance(value, bool):
++            value = "1" if value else "0"
++        _мост.set(key, value)
++
++    def log(self, *части):
++        _мост.log(*части)
++
++    def add_menu_item(self, data):
++        место = getattr(data, "menu_type", None)
++        if место not in ("chat", "profile", "message", "drawer"):
++            _мост.error("не знаю такого меню:", место)
++            return
++
++        обработчик = data.on_click
++
++        def нажали(экран, предмет=None):
++            if обработчик is None:
++                return
++            # У них обработчик берёт один довод — словарь с тем, на чём
++            # открыли меню. Собираем его из того, что даёт margelet.
++            обработчик({
++                "fragment": экран,
++                "peer": предмет if место == "profile" else None,
++                "message": предмет if место == "message" else None,
++            })
++
++        if место in ("profile", "message"):
++            _мост.menu(место, data.text, нажали)
++        else:
++            _мост.menu(место, data.text, lambda экран: нажали(экран))
++
++    def add_on_send_message_hook(self, priority=0):
++        if not hasattr(self, "on_send_message_hook"):
++            _мост.error("плагин попросил дверь отправки, но обработчика "
++                        "on_send_message_hook у него нет")
++            return
++
++        def отправляют(текст, куда):
++            ответ = self.on_send_message_hook(
++                _аккаунт(), Параметры(текст, куда))
++            if ответ is None:
++                return None
++            стратегия = getattr(ответ, "strategy", HookStrategy.DEFAULT)
++            if стратегия == HookStrategy.CANCEL:
++                return False
++            if стратегия in (HookStrategy.MODIFY, HookStrategy.MODIFY_FINAL):
++                параметры = getattr(ответ, "params", None)
++                return getattr(параметры, "message", None)
++            return None
++
++        _мост.on_send(отправляют)
++
++    def add_hook(self, name, match_substring=False, priority=0):
++        """Перехват чужих запросов и обновлений по имени класса TL.
++
++        У них имя — это строка вроде «messages.sendMessage». У нас двери
++        общие, поэтому подписываемся на все и отбираем по имени сами.
++        """
++        имя = str(name)
++
++        def подходит(предмет):
++            try:
++                своё = предмет.getClass().getSimpleName()
++            except Exception:
++                return False
++            return имя in своё if match_substring else своё.endswith(
++                имя.split(".")[-1])
++
++        if hasattr(self, "pre_request_hook"):
++            def запрос(предмет):
++                if not подходит(предмет):
++                    return None
++                return _ответ(self.pre_request_hook(_аккаунт(), предмет), предмет)
++            _мост.on_request(запрос)
++
++        if hasattr(self, "post_request_hook"):
++            def ответ(запрос_, ответ_, ошибка):
++                if not подходит(запрос_):
++                    return None
++                return _ответ(self.post_request_hook(
++                    _аккаунт(), запрос_, ответ_, ошибка), ответ_)
++            _мост.on_answer(ответ)
++
++        if hasattr(self, "on_update_hook") or hasattr(self, "on_updates_hook"):
++            обработчик = getattr(self, "on_update_hook", None) \
++                or getattr(self, "on_updates_hook")
++
++            def обновление(предмет):
++                if not подходит(предмет):
++                    return None
++                return _ответ(обработчик(_аккаунт(), предмет), предмет)
++            _мост.on_update(обновление)
++
++
++def _аккаунт():
++    try:
++        from client_utils import get_selected_account
++        return get_selected_account()
++    except Exception:
++        return 0
++
++
++def _ответ(результат, исходное):
++    """Их HookResult — в то, что понимает margelet."""
++    if результат is None:
 +        return None
-+    if pin and chat < 0:
-+        margelet.toast("каналы не закрепляем")
++    стратегия = getattr(результат, "strategy", HookStrategy.DEFAULT)
++    if стратегия == HookStrategy.CANCEL:
 +        return False
++    if стратегия in (HookStrategy.MODIFY, HookStrategy.MODIFY_FINAL):
++        подмена = getattr(результат, "params", None)
++        return подмена if подмена is not None else None
 +    return None
 +
 +
-+def watch_muted():
-+    """Подменить чужой метод и посмотреть, что он ответил.
++def старт(margelet):
++    """Поднять плагин экстеры. Зовётся из хвоста, который дописал конвертер."""
++    global _мост
++    _мост = margelet
 +
-+    Спрашиваем hooks_work() до того, как рассчитывать на подмену: хуки
-+    выключены по умолчанию и поднимаются не на каждом андроиде. Плагин, не
-+    умеющий обойтись без хука, — сломанный плагин, а не смелый.
-+    """
-+    if not margelet.hooks_work():
-+        margelet.log("хуков нет:", margelet.hooks_why())
-+        return
-+
-+    ok = margelet.hook(
-+        "org.telegram.messenger.MessagesController",
-+        "isDialogMuted",
-+        args=["long", "long"],
-+        after=muted,
-+    )
-+    margelet.log("подмена метода:", "встала" if ok else "не встала")
++    for класс in list(_классы):
++        try:
++            образец = класс()
++            _живые.append(образец)
++            строки = образец.create_settings()
++            if строки:
++                _настройки(margelet, образец, строки)
++            образец.on_plugin_load()
++        except Exception:
++            import traceback
++            margelet.error(traceback.format_exc())
 +
 +
-+def muted(call):
-+    """После вызова. Ответ можно и подменить — здесь только смотрим."""
-+    margelet.log("тихий диалог?", call.getResult())
++def _настройки(margelet, образец, строки):
++    """Их экран настроек — нашим margelet.settings."""
++    наши = []
++    for строка in строки:
++        вид = type(строка).__name__
++        ключ = getattr(строка, "key", None)
++        название = getattr(строка, "text", None) or getattr(строка, "title", "")
++        про = getattr(строка, "subtext", None)
++        if вид == "Header":
++            наши.append(margelet.header(название))
++        elif вид == "Divider":
++            наши.append(margelet.note(про or ""))
++        elif вид == "Switch":
++            наши.append(margelet.switch(ключ, название,
++                                        default=bool(getattr(строка, "default", False)),
++                                        about=про))
++        elif вид in ("Input", "Text"):
++            наши.append(margelet.text(ключ, название,
++                                      default=str(getattr(строка, "default", "") or ""),
++                                      about=про))
++        elif вид == "Selector":
++            наши.append(margelet.choice(ключ, название,
++                                        list(getattr(строка, "items", []) or [])))
++        else:
++            # Неизвестную строку показываем подписью, а не выбрасываем:
++            # человек должен видеть, что настройка есть, но не переведена.
++            наши.append(margelet.note(str(название)))
++    if наши:
++        margelet.settings(*наши)
+diff --git a/TMessagesProj_AppStandalone/src/main/python/client_utils.py b/TMessagesProj_AppStandalone/src/main/python/client_utils.py
+new file mode 100644
+index 000000000..3e1b26015
+--- /dev/null
++++ b/TMessagesProj_AppStandalone/src/main/python/client_utils.py
+@@ -0,0 +1,85 @@
++# -*- coding: utf-8 -*-
++"""Слой совместимости: то, что у exteraGram зовётся client_utils.
++
++Их client_utils — обёртки вокруг обычных классов телеграма. Те же классы
++доступны и нам: питон в приложении настоящий, java видна как есть. Поэтому
++здесь не эмуляция, а те же самые вызовы под их именами.
++"""
++from java import dynamic_proxy, jclass
++
++_Connections = jclass("org.telegram.tgnet.ConnectionsManager")
++_RequestDelegate = jclass("org.telegram.tgnet.RequestDelegate")
++_UserConfig = jclass("org.telegram.messenger.UserConfig")
++_Launch = jclass("org.telegram.ui.LaunchActivity")
++_Send = jclass("org.telegram.messenger.SendMessagesHelper")
++_Hooks = jclass("org.telegram.margelet.MargeletHooks")
 +
 +
-+def report(chat):
-+    """Нажали строчку плагина в меню чата."""
-+    margelet.toast("насчитал " + margelet.get("counted", "0"))
++def get_selected_account():
++    return _UserConfig.selectedAccount
 +
 +
-+def forget():
-+    """Кнопка на экране настроек."""
-+    margelet.set("counted", "0")
-+    margelet.toast("счёт сброшен")
++def get_last_fragment():
++    return _Launch.getLastFragment()
 +
 +
-+def changed(key, value):
-+    margelet.log("настройка", key, "теперь", value)
++def get_account_instance(account=None):
++    return jclass("org.telegram.messenger.AccountInstance").getInstance(
++        get_selected_account() if account is None else account)
++
++
++def get_messages_controller(account=None):
++    return get_account_instance(account).getMessagesController()
++
++
++def get_user_config(account=None):
++    return _UserConfig.getInstance(
++        get_selected_account() if account is None else account)
++
++
++def send_request(request, callback=None, account=None):
++    """Запрос к серверу. Ответ приходит в callback(ответ, ошибка), как у них."""
++    номер = get_selected_account() if account is None else account
++
++    class Ответ(dynamic_proxy(_RequestDelegate)):
++        def run(self, ответ, ошибка):
++            if callback is not None:
++                callback(ответ, ошибка)
++
++    return _Connections.getInstance(номер).sendRequest(request, Ответ())
++
++
++def run_on_queue(work, delay=0):
++    """Долгая работа в стороне от рисующего потока."""
++    _Hooks.background(_Работа(work))
++
++
++def send_message(params):
++    """Отправить сообщение. Им хватает словаря с message и peer."""
++    текст = params.get("message") if isinstance(params, dict) else getattr(params, "message", None)
++    куда = params.get("peer") if isinstance(params, dict) else getattr(params, "peer", None)
++    if текст is None or куда is None:
++        raise ValueError("нужны message и peer")
++    _Hooks.send(int(куда), str(текст))
++
++
++def send_document(path, peer, caption=None):
++    """Своей двери для файлов у Margy нет — говорим об этом вслух."""
++    raise NotImplementedError(
++        "отправка файлов из плагина в Margy пока не открыта; "
++        "текст отправляется через send_message")
++
++
++def send_photo(path, peer, caption=None):
++    raise NotImplementedError(
++        "отправка картинок из плагина в Margy пока не открыта; "
++        "текст отправляется через send_message")
++
++
++class _Работа(dynamic_proxy(jclass("java.lang.Runnable"))):
++    def __init__(self, call):
++        super().__init__()
++        self.call = call
++
++    def run(self):
++        self.call()
+diff --git a/TMessagesProj_AppStandalone/src/main/python/extera_utils/__init__.py b/TMessagesProj_AppStandalone/src/main/python/extera_utils/__init__.py
+new file mode 100644
+index 000000000..c952fe229
+--- /dev/null
++++ b/TMessagesProj_AppStandalone/src/main/python/extera_utils/__init__.py
+@@ -0,0 +1,2 @@
++# -*- coding: utf-8 -*-
++"""Слой совместимости: пакет extera_utils."""
+diff --git a/TMessagesProj_AppStandalone/src/main/python/extera_utils/classes.py b/TMessagesProj_AppStandalone/src/main/python/extera_utils/classes.py
+new file mode 100644
+index 000000000..f8e94c329
+--- /dev/null
++++ b/TMessagesProj_AppStandalone/src/main/python/extera_utils/classes.py
+@@ -0,0 +1,28 @@
++# -*- coding: utf-8 -*-
++"""Слой совместимости: наследование java-классов из питона.
++
++Здесь честная пустота, и вот почему. Мост питона умеет подставлять свои
++объекты только под ИНТЕРФЕЙСЫ java, а java_subclass у них наследует классы.
++Это ограничение самого моста, а не наша лень: форк уже наступал на него,
++когда пробовал наследовать XC_MethodHook и получал «is not a Java interface».
++
++Поэтому вместо тихой заглушки, после которой плагин упадёт где-то дальше и
++непонятно почему, здесь стоит понятная ошибка прямо в точке использования.
++"""
++
++
++class Base:
++    pass
++
++
++def java_subclass(класс):
++    def обёртка(наш):
++        raise NotImplementedError(
++            "java_subclass в Margy не работает: мост питона наследует только "
++            "интерфейсы java, а не классы. Плагину нужен другой путь — "
++            "margelet.hook подменяет чужой метод, не наследуя класс")
++    return обёртка
++
++
++def joverride(метод):
++    return метод
+diff --git a/TMessagesProj_AppStandalone/src/main/python/file_utils.py b/TMessagesProj_AppStandalone/src/main/python/file_utils.py
+new file mode 100644
+index 000000000..e084c1230
+--- /dev/null
++++ b/TMessagesProj_AppStandalone/src/main/python/file_utils.py
+@@ -0,0 +1,13 @@
++# -*- coding: utf-8 -*-
++"""Слой совместимости: file_utils экстеры."""
++from java import jclass
++
++_Loader = jclass("org.telegram.messenger.ApplicationLoader")
++
++
++def get_cache_dir():
++    return str(_Loader.applicationContext.getCacheDir().getAbsolutePath())
++
++
++def get_files_dir():
++    return str(_Loader.applicationContext.getFilesDir().getAbsolutePath())
+diff --git a/TMessagesProj_AppStandalone/src/main/python/hook_utils.py b/TMessagesProj_AppStandalone/src/main/python/hook_utils.py
+new file mode 100644
+index 000000000..1223849ad
+--- /dev/null
++++ b/TMessagesProj_AppStandalone/src/main/python/hook_utils.py
+@@ -0,0 +1,8 @@
++# -*- coding: utf-8 -*-
++"""Слой совместимости: hook_utils экстеры."""
++from java import jclass
++
++
++def find_class(имя, loader=None):
++    """У них это поиск класса по имени. У нас — тот же jclass."""
++    return jclass(str(имя))
 diff --git a/TMessagesProj_AppStandalone/src/main/python/margelet_host.py b/TMessagesProj_AppStandalone/src/main/python/margelet_host.py
 new file mode 100644
 index 000000000..d78b9a374
@@ -27747,6 +29332,175 @@ index 000000000..d78b9a374
 +        sys.stdout.flush()
 +        sys.stderr.flush()
 +        sys.stdout, sys.stderr = out, err
+diff --git a/TMessagesProj_AppStandalone/src/main/python/ui/__init__.py b/TMessagesProj_AppStandalone/src/main/python/ui/__init__.py
+new file mode 100644
+index 000000000..9ede0fa2c
+--- /dev/null
++++ b/TMessagesProj_AppStandalone/src/main/python/ui/__init__.py
+@@ -0,0 +1,2 @@
++# -*- coding: utf-8 -*-
++"""Слой совместимости: пакет ui экстеры."""
+diff --git a/TMessagesProj_AppStandalone/src/main/python/ui/alert.py b/TMessagesProj_AppStandalone/src/main/python/ui/alert.py
+new file mode 100644
+index 000000000..ab549eb3c
+--- /dev/null
++++ b/TMessagesProj_AppStandalone/src/main/python/ui/alert.py
+@@ -0,0 +1,65 @@
++# -*- coding: utf-8 -*-
++"""Слой совместимости: окна экстеры.
++
++AlertDialogBuilder у них — обёртка над обычным AlertDialog.Builder телеграма.
++Здесь то же самое, только тоньше: поддержаны заголовок, текст и две кнопки,
++потому что на этом держится почти всё, что плагины показывают.
++"""
++from java import dynamic_proxy, jclass
++
++_Builder = jclass("org.telegram.ui.ActionBar.AlertDialog$Builder")
++_OnClick = jclass("android.content.DialogInterface$OnClickListener")
++
++
++class _Нажали(dynamic_proxy(_OnClick)):
++    def __init__(self, call):
++        super().__init__()
++        self.call = call
++
++    def onClick(self, окно, что):
++        if self.call is not None:
++            self.call(окно, что)
++
++
++class AlertDialogBuilder:
++    def __init__(self, context, *прочее):
++        self._строитель = _Builder(context)
++        self._окно = None
++
++    def set_title(self, текст):
++        self._строитель.setTitle(str(текст))
++        return self
++
++    def set_message(self, текст):
++        self._строитель.setMessage(str(текст))
++        return self
++
++    def set_positive_button(self, текст, call=None):
++        self._строитель.setPositiveButton(str(текст), _Нажали(call))
++        return self
++
++    def set_negative_button(self, текст, call=None):
++        self._строитель.setNegativeButton(str(текст), _Нажали(call))
++        return self
++
++    def set_neutral_button(self, текст, call=None):
++        self._строитель.setNeutralButton(str(текст), _Нажали(call))
++        return self
++
++    def set_cancelable(self, можно):
++        self._строитель.setCancelable(bool(можно))
++        return self
++
++    def create(self):
++        self._окно = self._строитель.create()
++        return self._окно
++
++    def show(self):
++        if self._окно is None:
++            self.create()
++        self._окно.show()
++        return self._окно
++
++    def dismiss(self):
++        if self._окно is not None:
++            self._окно.dismiss()
+diff --git a/TMessagesProj_AppStandalone/src/main/python/ui/bulletin.py b/TMessagesProj_AppStandalone/src/main/python/ui/bulletin.py
+new file mode 100644
+index 000000000..89b6a4baf
+--- /dev/null
++++ b/TMessagesProj_AppStandalone/src/main/python/ui/bulletin.py
+@@ -0,0 +1,35 @@
++# -*- coding: utf-8 -*-
++"""Слой совместимости: всплывающие подсказки экстеры.
++
++У них BulletinHelper показывает плашку поверх экрана. Здесь она короче —
++обычная системная надпись: она видна и тогда, когда открытого экрана нет, а
++плашке телеграма нужен живой фрагмент.
++"""
++from java import jclass
++
++from android_utils import get_application_context, run_on_ui_thread
++
++_Toast = jclass("android.widget.Toast")
++
++
++def _сказать(текст):
++    run_on_ui_thread(lambda: _Toast.makeText(
++        get_application_context(), str(текст), _Toast.LENGTH_SHORT).show())
++
++
++class BulletinHelper:
++    @staticmethod
++    def show_info(текст, *прочее):
++        _сказать(текст)
++
++    @staticmethod
++    def show_error(текст, *прочее):
++        _сказать(текст)
++
++    @staticmethod
++    def show_success(текст, *прочее):
++        _сказать(текст)
++
++    @staticmethod
++    def show_with_button(текст, *прочее, **ещё):
++        _сказать(текст)
+diff --git a/TMessagesProj_AppStandalone/src/main/python/ui/settings.py b/TMessagesProj_AppStandalone/src/main/python/ui/settings.py
+new file mode 100644
+index 000000000..6940fa57f
+--- /dev/null
++++ b/TMessagesProj_AppStandalone/src/main/python/ui/settings.py
+@@ -0,0 +1,43 @@
++# -*- coding: utf-8 -*-
++"""Слой совместимости: строки экрана настроек экстеры.
++
++Это просто описания — их читает base_plugin и превращает в margelet.settings.
++Ничего не рисуют сами, как и у них.
++"""
++
++
++class _Строка:
++    def __init__(self, key=None, text="", subtext=None, default=None, **прочее):
++        self.key = key
++        self.text = text
++        self.subtext = subtext
++        self.default = default
++        for имя, значение in прочее.items():
++            setattr(self, имя, значение)
++
++
++class Header(_Строка):
++    def __init__(self, text="", **прочее):
++        super().__init__(text=text, **прочее)
++
++
++class Divider(_Строка):
++    pass
++
++
++class Switch(_Строка):
++    pass
++
++
++class Input(_Строка):
++    pass
++
++
++class Text(_Строка):
++    pass
++
++
++class Selector(_Строка):
++    def __init__(self, key=None, text="", items=None, default=0, **прочее):
++        super().__init__(key=key, text=text, default=default, **прочее)
++        self.items = items or []
 diff --git a/TMessagesProj_AppStandalone/src/main/res/mipmap-anydpi-v26/ic_launcher_sa.xml b/TMessagesProj_AppStandalone/src/main/res/mipmap-anydpi-v26/ic_launcher_sa.xml
 index d35267739..f883467d1 100644
 --- a/TMessagesProj_AppStandalone/src/main/res/mipmap-anydpi-v26/ic_launcher_sa.xml
@@ -37839,13 +39593,13 @@ zN)pg+&f4WGF&7W#6@ENukaqcu$exQ%^(5`NnRJoQR6h3>`4m;!{|7raMZx3NDbD}^
 N002ovPDHLkV1mZ^h^7Dl
 
 diff --git a/build.gradle b/build.gradle
-index 528fd746d..8b64b0f82 100644
+index 8a8a11eef..e41f3c240 100644
 --- a/build.gradle
 +++ b/build.gradle
 @@ -11,6 +11,10 @@ buildscript {
          classpath 'com.huawei.agconnect:agcp:1.9.1.301'
          classpath 'com.google.firebase:firebase-crashlytics-gradle:2.9.0'
-         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.20"
+         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.0"
 +        // Питон для плагинов форка. Плагин — исходник на питоне, а не
 +        // скомпилированный код: так требование «не обфусцировать» выполняется
 +        // самой природой языка, читать плагин может кто угодно.
@@ -37854,31 +39608,18 @@ index 528fd746d..8b64b0f82 100644
  }
  repositories {
 diff --git a/gradle.properties b/gradle.properties
-index 83408dc59..6993d2c84 100644
+index 38299bed6..ca44a3137 100644
 --- a/gradle.properties
 +++ b/gradle.properties
 @@ -13,9 +13,9 @@
  # http://www.gradle.org/docs/current/userguide/multi_project_builds.html#sec:decoupled_projects
  # org.gradle.parallel=true
  #Sat Mar 12 05:53:50 MSK 2016
--APP_VERSION_CODE=7031
-+APP_VERSION_CODE=7065
- APP_VERSION_NAME=12.10.0
+-APP_VERSION_CODE=7038
++APP_VERSION_CODE=7066
+ APP_VERSION_NAME=12.10.1
 -APP_PACKAGE=org.telegram.messenger
 +APP_PACKAGE=cat.narezany.margelet
  IS_PRIVATE=false
  RELEASE_KEY_PASSWORD=android
  RELEASE_KEY_ALIAS=androidkey
-diff --git a/settings.gradle b/settings.gradle
-index 2ac4c6de3..9217e8849 100644
---- a/settings.gradle
-+++ b/settings.gradle
-@@ -4,3 +4,8 @@ include ':TMessagesProj_AppHuawei'
- include ':TMessagesProj_AppHockeyApp'
- include ':TMessagesProj_AppStandalone'
- include ':TMessagesProj_AppTests'
-+
-+// Модуль формул лежит подмодулем и своего include в корне не имел —
-+// сборка падала на «Project with path ':jlatexmath' could not be found».
-+include ':jlatexmath'
-+project(':jlatexmath').projectDir = new File(rootDir, 'TMessagesProj/lib/jlatexmath/jlatexmath')
