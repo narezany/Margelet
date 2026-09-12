@@ -26538,7 +26538,7 @@ index 2aa197cb3..8fd9c9eca 100644
              sourceSets.debug {
                  manifest.srcFile '../TMessagesProj/config/debug/AndroidManifest_SDK23.xml'
 diff --git a/TMessagesProj_AppStandalone/build.gradle b/TMessagesProj_AppStandalone/build.gradle
-index 96f4d779c..dd54b90d8 100644
+index 96f4d779c..83737ef14 100644
 --- a/TMessagesProj_AppStandalone/build.gradle
 +++ b/TMessagesProj_AppStandalone/build.gradle
 @@ -1,4 +1,7 @@
@@ -26549,6 +26549,15 @@ index 96f4d779c..dd54b90d8 100644
  
  repositories {
      mavenCentral()
+@@ -44,7 +47,7 @@ android {
+     }
+ 
+     androidResources {
+-        localeFilters += ["en", "ar", "de", "es", "it", "ko", "nl", "pt-rBR", "ru", "uk"]
++        localeFilters += ["en", "ar", "de", "es", "it", "ko", "nl", "pt-rBR", "ru", "uk", "zh"]
+     }
+ 
+     signingConfigs {
 @@ -79,11 +82,12 @@ android {
              debuggable false
              jniDebuggable false
