@@ -1,7 +1,7 @@
 {
-  "version": "0.99.28",
-  "apk": "https://github.com/narezany/margelet/raw/apk/margelet-0.99.28.apk",
-  "about": "Pre-release 1.0.28. A font of your own now reaches the messages themselves. A paint that was never given a typeface takes it from the native level, not from the Typeface.DEFAULT field, and the message paint is created without a single setTypeface — that is why names changed and messages did not. Settings descriptions are about half as long: what happens stayed, why it works that way is gone. And the fork's own Chinese was compiled and then dropped at packaging — the locale filter had no zh in it.",
-  "about_ru": "Пререлиз 1.0.28. Свой шрифт наконец доходит до самих сообщений. Кисть, которой не назначили шрифт, берёт его с родного уровня, а не из поля Typeface.DEFAULT, — а кисть сообщений заводят без единого setTypeface, оттого имена шрифт меняли, а сообщения нет. Описания в настройках вдвое короче: осталось что будет, ушло почему так устроено. И китайский перевод форка компилировался, а потом отбрасывался при упаковке — в фильтре языков не было zh.",
-  "about_zh": "预发布 1.0.28。你自己的字体终于用到消息本身上了。没有被显式指定字体的画笔，是从原生层取字体的，而不是从 Typeface.DEFAULT 字段；而消息用的画笔创建时一次 setTypeface 都没有——所以名字换了字体，消息却没换。设置里的说明短了一半：留下会发生什么，去掉为什么这么做。另外，分支自己的中文一直在被编译，然后在打包时被丢掉——语言过滤器里没有 zh。"
+  "version": "0.99.29",
+  "apk": "https://github.com/narezany/margelet/raw/apk/margelet-0.99.29.apk",
+  "about": "Pre-release 1.0.29. A plugin can now put a line of its own not only in the chat menu but in the profile menu, in a message's context menu and in the side menu. And it can watch the app talk to the server: a request before it goes, an answer before the app sees it, an update before it is processed — with the right to cancel or replace any of them. While no plugin has asked for this, the app does not look into Python at all, so nothing costs anything.",
+  "about_ru": "Пререлиз 1.0.29. Плагин теперь ставит свою строчку не только в меню чата, но и в меню профиля, в контекстное меню сообщения и в боковое меню. И может видеть, как приложение говорит с сервером: запрос до отправки, ответ до того, как его увидит приложение, обновление до разбора — с правом отменить или подменить любое из них. Пока об этом не попросил ни один плагин, приложение не заглядывает в питон вовсе, и это не стоит ничего.",
+  "about_zh": "预发布 1.0.29。插件现在不只能在聊天菜单里加自己的一行，资料页菜单、消息的长按菜单和侧边菜单里也可以。它还能看见应用和服务器说话：发出前的请求、应用看到之前的回应、被处理之前的更新——并且有权取消或替换其中任何一个。只要没有插件提出这个要求，应用就完全不会去看 Python，也就不花任何代价。"
 }
