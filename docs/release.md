@@ -6,7 +6,15 @@ system to install.
 
 The order matters.
 
-1. Raise the number in the client: `MargeletConfig.APP_VERSION`.
+1. Raise the number in the client: `MargeletConfig.APP_VERSION`, and
+   `APP_VERSION_CODE` in `gradle.properties` next to it. **Both live in the
+   Telegram clone, not in this repository** — so after changing them, copy
+   `MargeletConfig.java` back into `java/margelet/` and regenerate the patch.
+   This is easy to forget and hard to notice: the release goes out correct,
+   because it is built from the clone, while the repository keeps the old
+   number. That is exactly what happened on 0.99.28 — the apk carried 0.99.28
+   and git still said 0.99.27, so the next build from the repository would
+   have gone out with the wrong number.
 2. Build the apk.
 3. Put it on the `apk` branch — both under its own number and as `margelet.apk`.
 4. Only now raise the number in [version.json](../version.json) — **and the

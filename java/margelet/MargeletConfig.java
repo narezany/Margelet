@@ -40,7 +40,7 @@ public class MargeletConfig {
      * 0.99, а не 1.0, нарочно: настоящая единица должна остаться свободной
      * под настоящий выпуск, а пререлиз обязан быть строго меньше её.
      */
-    public static final String APP_VERSION = "0.99.27";
+    public static final String APP_VERSION = "0.99.29";
 
     /**
      * Как выпуск называется для человека: «Пререлиз 1.0.23».
