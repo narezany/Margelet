@@ -359,6 +359,33 @@ would wait forever.
 You may send your own request from inside these callbacks — it goes past the
 plugins instead of coming back round to you.
 
+### A plugin from exteraGram
+
+Tap a `.plugin` file in a chat and Margy offers to take it in.
+
+This works not by translating the code but because there is almost nothing to
+translate. The Python in exteraGram and the Python in Margy are the same
+Chaquopy Python inside the same Telegram, and their `base_plugin`,
+`client_utils`, `ui.alert` and the rest are ordinary Python wrappers around the
+same Java our own plugins can see. So modules with their names sit next to the
+engine, and the plugin file goes over as it is: the packaging changes and a
+tail is appended that starts their class.
+
+The tail is appended to the source itself, with a comment — the plugin stays
+readable, and it is clear where the extra lines came from.
+
+What will not work, said BEFORE the install rather than after:
+
+| what | why |
+|---|---|
+| `java_subclass` | Python's bridge subclasses Java interfaces only, not classes |
+| sending files and pictures from a plugin | Margy has no such door yet |
+| the attach menu | four menus are open here, and that is not one of them |
+| `__requirements__` | we do not install pip packages |
+
+Everything else — their metadata, plugin lifecycle, settings screen, menu
+lines, the send hook and request interception — maps onto our doors one to one.
+
 ### Deleted messages
 
 ```python
